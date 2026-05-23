@@ -1,0 +1,143 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    /* Light theme - tokens OKLCH */
+    --background: oklch(99% 0 0);
+    --foreground: oklch(15% 0.005 250);
+    --card: oklch(100% 0 0);
+    --card-foreground: oklch(15% 0.005 250);
+    --muted: oklch(96% 0.005 250);
+    --muted-foreground: oklch(45% 0.01 250);
+    --border: oklch(91% 0.005 250);
+    --input: oklch(91% 0.005 250);
+    --primary: oklch(55% 0.18 250);
+    --primary-foreground: oklch(99% 0 0);
+    --accent: oklch(65% 0.15 50);
+    --accent-foreground: oklch(99% 0 0);
+    --success: oklch(65% 0.15 145);
+    --warning: oklch(75% 0.15 80);
+    --danger: oklch(60% 0.20 25);
+  }
+
+  .dark {
+    --background: oklch(12% 0.01 250);
+    --foreground: oklch(96% 0.005 250);
+    --card: oklch(16% 0.01 250);
+    --card-foreground: oklch(96% 0.005 250);
+    --muted: oklch(20% 0.01 250);
+    --muted-foreground: oklch(65% 0.01 250);
+    --border: oklch(25% 0.01 250);
+    --input: oklch(25% 0.01 250);
+    --primary: oklch(70% 0.18 250);
+    --primary-foreground: oklch(15% 0.005 250);
+    --accent: oklch(72% 0.15 50);
+    --accent-foreground: oklch(15% 0.005 250);
+    --success: oklch(70% 0.15 145);
+    --warning: oklch(78% 0.15 80);
+    --danger: oklch(65% 0.20 25);
+  }
+
+  * {
+    @apply border-border;
+  }
+
+  html {
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  body {
+    @apply bg-background text-foreground font-sans antialiased;
+    font-feature-settings: "rlig" 1, "calt" 1;
+  }
+
+  /* Smooth theme transitions */
+  body, .card, button, input, select, textarea {
+    transition: background-color 200ms ease, border-color 200ms ease, color 200ms ease;
+  }
+
+  /* Focus visible mejorado */
+  :focus-visible {
+    @apply outline-none ring-2 ring-primary ring-offset-2 ring-offset-background;
+  }
+
+  /* Reduced motion */
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after {
+      animation-duration: 0.01ms !important;
+      transition-duration: 0.01ms !important;
+    }
+  }
+}
+
+@layer components {
+  .card {
+    @apply bg-card text-card-foreground border border-border rounded-xl shadow-sm;
+  }
+
+  .btn-primary {
+    @apply inline-flex items-center justify-center gap-2 px-4 py-2 rounded-lg
+           bg-primary text-primary-foreground font-medium
+           hover:opacity-90 active:scale-95 transition-all
+           disabled:opacity-50 disabled:pointer-events-none;
+  }
+
+  .btn-secondary {
+    @apply inline-flex items-center justify-center gap-2 px-4 py-2 rounded-lg
+           bg-muted text-foreground font-medium border border-border
+           hover:bg-border active:scale-95 transition-all
+           disabled:opacity-50 disabled:pointer-events-none;
+  }
+
+  .btn-ghost {
+    @apply inline-flex items-center justify-center gap-2 px-3 py-2 rounded-lg
+           text-foreground font-medium
+           hover:bg-muted active:scale-95 transition-all;
+  }
+
+  .input {
+    @apply w-full px-3 py-2 rounded-lg bg-card border border-input
+           text-foreground placeholder:text-muted-foreground
+           focus:border-primary focus:ring-1 focus:ring-primary
+           disabled:opacity-50 disabled:cursor-not-allowed
+           transition-colors;
+  }
+
+  .badge {
+    @apply inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-xs font-medium;
+  }
+
+  .badge-success {
+    @apply badge text-success;
+    background-color: color-mix(in oklch, var(--success) 15%, transparent);
+  }
+
+  .badge-warning {
+    @apply badge text-warning;
+    background-color: color-mix(in oklch, var(--warning) 15%, transparent);
+  }
+
+  .badge-danger {
+    @apply badge text-danger;
+    background-color: color-mix(in oklch, var(--danger) 15%, transparent);
+  }
+
+  .sidebar-link {
+    @apply flex items-center gap-3 px-3 py-2 rounded-lg text-sm
+           text-muted-foreground font-medium
+           hover:bg-muted hover:text-foreground
+           transition-colors;
+  }
+
+  .sidebar-link-active {
+    @apply sidebar-link text-primary;
+    background-color: color-mix(in oklch, var(--primary) 10%, transparent);
+  }
+  .sidebar-link-active:hover {
+    background-color: color-mix(in oklch, var(--primary) 15%, transparent);
+    color: var(--primary);
+  }
+}

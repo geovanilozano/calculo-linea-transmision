@@ -1,0 +1,44 @@
+{% extends "base.html" %}
+
+{% block panel_parametros %}
+<div class="space-y-4">
+  <div>
+    <label class="block text-sm font-medium mb-1">Tipo de conductor</label>
+    <select class="input" disabled>
+      <option>{{ PROYECTO.conductor_tipo }}</option>
+    </select>
+  </div>
+  <div>
+    <label class="block text-sm font-medium mb-1">Subconductores por fase</label>
+    <input type="number" class="input" value="{{ PROYECTO.haz_subconductores }}" readonly>
+  </div>
+  <div>
+    <label class="block text-sm font-medium mb-1">Separación del haz (m)</label>
+    <input type="number" step="0.01" class="input" value="{{ PROYECTO.haz_separacion_m }}" readonly>
+  </div>
+  <button class="btn-primary w-full" disabled>
+    <i data-lucide="calculator" class="size-4"></i>
+    Ver características (próximamente)
+  </button>
+</div>
+{% endblock %}
+
+{% block panel_visualizacion %}
+<div class="aspect-video bg-muted rounded-lg grid place-items-center text-muted-foreground">
+  <div class="text-center p-6">
+    <i data-lucide="cable" class="size-12 mx-auto mb-3 opacity-30"></i>
+    <p class="text-sm">Sección transversal del conductor</p>
+    <p class="text-xs">Disponible en Fase 2</p>
+  </div>
+</div>
+{% endblock %}
+
+{% block panel_explicacion %}
+<div class="prose prose-sm max-w-none dark:prose-invert">
+  <h3>{{ modulo_info[2] }}</h3>
+  <p>{{ modulo_info[3] }}</p>
+  <p class="text-sm text-muted-foreground">
+    El contenido completo de este módulo se implementará en la Fase 2 (Cálculos) y Fase 3 (Figuras).
+  </p>
+</div>
+{% endblock %}

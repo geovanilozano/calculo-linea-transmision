@@ -1,0 +1,62 @@
+{% extends "base.html" %}
+
+{% block panel_parametros %}
+<div class="space-y-4">
+  <div>
+    <label class="block text-sm font-medium mb-1">Proyecto</label>
+    <div class="text-foreground font-semibold">{{ PROYECTO.nombre }}</div>
+  </div>
+  <div>
+    <label class="block text-sm font-medium mb-1">Corredor</label>
+    <div class="text-sm text-muted-foreground">{{ PROYECTO.corredor }}</div>
+  </div>
+  <div class="grid grid-cols-2 gap-3 pt-2">
+    <div class="bg-muted rounded-lg p-3">
+      <div class="text-xs text-muted-foreground">Tensión</div>
+      <div class="font-mono font-semibold">{{ PROYECTO.tension_nominal_kv }} kV</div>
+    </div>
+    <div class="bg-muted rounded-lg p-3">
+      <div class="text-xs text-muted-foreground">Longitud</div>
+      <div class="font-mono font-semibold">{{ PROYECTO.longitud_km }} km</div>
+    </div>
+    <div class="bg-muted rounded-lg p-3">
+      <div class="text-xs text-muted-foreground">Potencia</div>
+      <div class="font-mono font-semibold">{{ PROYECTO.potencia_mw }} MW</div>
+    </div>
+    <div class="bg-muted rounded-lg p-3">
+      <div class="text-xs text-muted-foreground">Altitud</div>
+      <div class="font-mono font-semibold">{{ PROYECTO.altitud_msnm }} m</div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block panel_visualizacion %}
+<div class="space-y-4">
+  <div class="aspect-video bg-gradient-to-br from-primary/5 to-accent/5 rounded-lg grid place-items-center">
+    <div class="text-center p-6">
+      <i data-lucide="map" class="size-12 text-primary mx-auto mb-3"></i>
+      <p class="font-semibold">Corredor de diseño</p>
+      <p class="text-sm text-muted-foreground">{{ PROYECTO.corredor }}</p>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block panel_explicacion %}
+<div class="prose prose-sm max-w-none dark:prose-invert">
+  <h3>Bienvenido al tour</h3>
+  <p>
+    Este es un recorrido educativo paso a paso del diseño de una línea aérea de transmisión a 500 kV. Vas a recorrer los 11 módulos en orden, viendo en cada uno:
+  </p>
+  <ul>
+    <li>Qué se calcula y para qué sirve</li>
+    <li>La fórmula matemática</li>
+    <li>Una visualización técnica</li>
+    <li>Los resultados con validación automática</li>
+  </ul>
+  <p class="text-sm text-muted-foreground">
+    Usa el botón "Siguiente" abajo o la barra lateral para navegar.
+  </p>
+</div>
+{% endblock %}

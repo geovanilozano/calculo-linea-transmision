@@ -1,0 +1,19 @@
+{% extends "base.html" %}
+
+{% block title %}404 - No encontrado{% endblock %}
+
+{% block module_content %}
+<div class="min-h-[60vh] grid place-items-center">
+  <div class="text-center max-w-md">
+    <div class="text-7xl font-bold text-primary mb-4">404</div>
+    <h2 class="text-2xl font-semibold mb-2">Módulo no encontrado</h2>
+    <p class="text-muted-foreground mb-6">
+      El módulo solicitado no existe. Vuelve al inicio del tour para continuar.
+    </p>
+    <a href="{{ url_for('modulo', modulo_id=0) }}" class="btn-primary">
+      <i data-lucide="home" class="size-4"></i>
+      Ir al inicio
+    </a>
+  </div>
+</div>
+{% endblock %}

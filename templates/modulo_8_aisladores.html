@@ -1,0 +1,37 @@
+{% extends "base.html" %}
+
+{% block panel_parametros %}
+<div class="space-y-4">
+  <div>
+    <label class="block text-sm font-medium mb-1">Discos por cadena</label>
+    <input type="number" class="input" value="{{ PROYECTO.n_discos_aislador }}" readonly>
+  </div>
+  <p class="text-sm text-muted-foreground">
+    El cálculo completo de aisladores (línea de fuga, BIL, fuerzas) se implementará en la Fase 2.
+  </p>
+  <button class="btn-primary w-full" disabled>
+    <i data-lucide="calculator" class="size-4"></i>
+    Calcular (próximamente)
+  </button>
+</div>
+{% endblock %}
+
+{% block panel_visualizacion %}
+<div class="aspect-video bg-muted rounded-lg grid place-items-center text-muted-foreground">
+  <div class="text-center p-6">
+    <i data-lucide="link" class="size-12 mx-auto mb-3 opacity-30"></i>
+    <p class="text-sm">Cadena de 41 discos + diagrama fuerzas</p>
+    <p class="text-xs">Disponible en Fase 2</p>
+  </div>
+</div>
+{% endblock %}
+
+{% block panel_explicacion %}
+<div class="prose prose-sm max-w-none dark:prose-invert">
+  <h3>{{ modulo_info[2] }}</h3>
+  <p>{{ modulo_info[3] }}</p>
+  <p class="text-sm text-muted-foreground">
+    El contenido completo de este módulo se implementará en la Fase 2 (Cálculos) y Fase 3 (Figuras).
+  </p>
+</div>
+{% endblock %}

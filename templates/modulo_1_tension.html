@@ -1,0 +1,40 @@
+{% extends "base.html" %}
+
+{% block panel_parametros %}
+<div class="space-y-4">
+  <div>
+    <label class="block text-sm font-medium mb-1">Potencia (MW)</label>
+    <input type="number" class="input" value="{{ PROYECTO.potencia_mw }}" readonly>
+  </div>
+  <div>
+    <label class="block text-sm font-medium mb-1">Longitud (km)</label>
+    <input type="number" class="input" value="{{ PROYECTO.longitud_km }}" readonly>
+  </div>
+  <button class="btn-primary w-full" disabled>
+    <i data-lucide="calculator" class="size-4"></i>
+    Calcular (próximamente)
+  </button>
+</div>
+{% endblock %}
+
+{% block panel_visualizacion %}
+<div class="aspect-video bg-muted rounded-lg grid place-items-center text-muted-foreground">
+  <div class="text-center p-6">
+    <i data-lucide="bar-chart-3" class="size-12 mx-auto mb-3 opacity-30"></i>
+    <p class="text-sm">Gráfico comparativo de criterios</p>
+    <p class="text-xs">Disponible en Fase 2</p>
+  </div>
+</div>
+{% endblock %}
+
+{% block panel_explicacion %}
+<div class="prose prose-sm max-w-none dark:prose-invert">
+  <h3>Selección del nivel de tensión</h3>
+  <p>
+    Tres criterios empíricos ayudan a justificar qué tensión usar para una línea de transmisión: <strong>Hefner</strong>, <strong>Still</strong> y la regla de <strong>1 kV/km</strong>.
+  </p>
+  <p class="text-sm text-muted-foreground">
+    El cálculo detallado se implementará en la Fase 2 del proyecto.
+  </p>
+</div>
+{% endblock %}

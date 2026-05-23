@@ -1,0 +1,16 @@
+{
+  "name": "calculo-linea-transmision",
+  "version": "1.0.0",
+  "description": "App educativa interactiva: diseño de línea de transmisión 500 kV",
+  "scripts": {
+    "build:css": "tailwindcss -i ./static/css/input.css -o ./static/css/styles.css --minify",
+    "watch:css": "tailwindcss -i ./static/css/input.css -o ./static/css/styles.css --watch"
+  },
+  "devDependencies": {
+    "tailwindcss": "^3.4.13",
+    "@tailwindcss/forms": "^0.5.9",
+    "@tailwindcss/typography": "^0.5.15",
+    "autoprefixer": "^10.4.20",
+    "postcss": "^8.4.47"
+  }
+}
