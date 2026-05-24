@@ -116,30 +116,34 @@
            userSelect: dragging ? 'none' : 'auto',
            overflow: 'hidden'
          }">
-      {# Botón X — FLOTANTE en la esquina superior derecha, sin header bar #}
-      <button type="button"
-              @click.stop="open = false"
-              @mousedown.stop
-              style="position:absolute; top:8px; right:8px; width:26px; height:26px; display:inline-flex; align-items:center; justify-content:center; border-radius:50%; background-color: var(--muted); border:none; cursor:pointer; padding:0; color: var(--muted-foreground); z-index:2; box-shadow: 0 2px 6px rgba(0,0,0,0.1);"
-              onmouseover="this.style.backgroundColor='var(--danger)';this.style.color='white';"
-              onmouseout="this.style.backgroundColor='var(--muted)';this.style.color='var(--muted-foreground)';"
-              aria-label="Cerrar">
-        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round">
-          <line x1="18" y1="6" x2="6" y2="18"></line>
-          <line x1="6" y1="6" x2="18" y2="18"></line>
-        </svg>
-      </button>
-
-      {# Contenido SCROLLEABLE — toda la zona es drag, excepto botones/links/términos.
-         padding-top GRANDE (2.75rem) para que la primera línea NO quede tapada por la X,
-         padding-right normal porque la X ya está fuera del flujo de texto #}
-      <div @mousedown="if (!$event.target.closest('button, a, .glossary-term')) startDrag($event)"
+      {# Header DEDICADO con badge "INFO" + botón X — separado del contenido para
+         que NUNCA se solapen visualmente #}
+      <div @mousedown="if (!$event.target.closest('button')) startDrag($event)"
            :style="dragging ? 'cursor:grabbing;' : 'cursor:grab;'"
-           style="flex:1; overflow-y:auto; padding: 2.75rem 1.25rem 1.25rem 1.25rem; word-wrap: break-word; overflow-wrap: break-word;">
-        <div style="display:flex; align-items:flex-start; gap:0.5rem;" :style="dragging ? 'pointer-events:none;' : ''">
-          <i data-lucide="info" class="size-4 shrink-0" style="color: var(--primary); margin-top: 2px;"></i>
-          <div style="flex:1; color: var(--foreground); min-width: 0;">{{ texto|safe }}</div>
+           style="flex-shrink:0; display:flex; align-items:center; justify-content:space-between; padding: 0.6rem 0.75rem 0.6rem 1rem; background: color-mix(in oklch, var(--primary) 8%, transparent); border-bottom: 1px solid color-mix(in oklch, var(--primary) 20%, transparent); user-select:none; border-top-left-radius: 0.6rem; border-top-right-radius: 0.6rem;">
+        <div style="display:flex; align-items:center; gap:6px; pointer-events:none;">
+          <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style="color: var(--primary);">
+            <circle cx="12" cy="12" r="10"></circle><line x1="12" y1="16" x2="12" y2="12"></line><line x1="12" y1="8" x2="12.01" y2="8"></line>
+          </svg>
+          <span style="font-size:11px; font-weight:700; color: var(--primary); text-transform:uppercase; letter-spacing:0.06em;">Explicación</span>
         </div>
+        <button type="button"
+                @click.stop="open = false"
+                @mousedown.stop
+                style="width:28px; height:28px; display:inline-flex; align-items:center; justify-content:center; border-radius:50%; background-color: var(--card); border:1px solid var(--border); cursor:pointer; padding:0; color: var(--muted-foreground); flex-shrink:0;"
+                onmouseover="this.style.backgroundColor='var(--danger)';this.style.color='white';this.style.borderColor='var(--danger)';"
+                onmouseout="this.style.backgroundColor='var(--card)';this.style.color='var(--muted-foreground)';this.style.borderColor='var(--border)';"
+                aria-label="Cerrar">
+          <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="18" y1="6" x2="6" y2="18"></line>
+            <line x1="6" y1="6" x2="18" y2="18"></line>
+          </svg>
+        </button>
+      </div>
+
+      {# Contenido SCROLLEABLE — separado del header, padding cómodo en TODOS lados #}
+      <div style="flex:1; overflow-y:auto; padding: 1rem 1.25rem 1.25rem 1.25rem; word-wrap: break-word; overflow-wrap: break-word;">
+        <div style="color: var(--foreground); min-width: 0;">{{ texto|safe }}</div>
       </div>
     </div>
   </template>
