@@ -191,13 +191,14 @@
         </div>
       </header>
 
-      {# Contenido del módulo: scrolleable #}
-      <div class="flex-1 overflow-y-auto px-8 py-8">
+      {# Contenido del módulo: scrolleable VERTICAL solamente. overflow-x:hidden
+         evita scroll horizontal que rompe la estética del layout #}
+      <div class="flex-1 overflow-y-auto overflow-x-hidden px-6 py-6">
         {% block module_content %}
-          <div class="grid grid-cols-1 lg:grid-cols-[1fr_1.2fr_1fr] gap-6">
+          <div class="grid grid-cols-1 lg:grid-cols-[minmax(0,1fr)_minmax(0,1.4fr)_minmax(0,1.1fr)] gap-4 min-w-0">
             {# Panel 1: Parámetros #}
-            <div class="card p-7 animate-fade-in">
-              <h2 class="text-sm font-semibold text-muted-foreground uppercase tracking-wider mb-5">
+            <div class="card p-5 animate-fade-in min-w-0">
+              <h2 class="text-sm font-semibold text-muted-foreground uppercase tracking-wider mb-4">
                 Parámetros
               </h2>
               {% block panel_parametros %}
@@ -206,8 +207,8 @@
             </div>
 
             {# Panel 2: Visualización #}
-            <div class="card p-7 animate-fade-in">
-              <h2 class="text-sm font-semibold text-muted-foreground uppercase tracking-wider mb-5">
+            <div class="card p-5 animate-fade-in min-w-0 overflow-x-hidden">
+              <h2 class="text-sm font-semibold text-muted-foreground uppercase tracking-wider mb-4">
                 Visualización
               </h2>
               {% block panel_visualizacion %}
@@ -218,8 +219,8 @@
             </div>
 
             {# Panel 3: Explicación didáctica #}
-            <div class="card p-7 animate-fade-in">
-              <h2 class="text-sm font-semibold text-muted-foreground uppercase tracking-wider mb-5">
+            <div class="card p-5 animate-fade-in min-w-0 overflow-x-hidden">
+              <h2 class="text-sm font-semibold text-muted-foreground uppercase tracking-wider mb-4">
                 Explicación
               </h2>
               {% block panel_explicacion %}
