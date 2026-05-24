@@ -60,18 +60,31 @@ def generar(r: ResultadoLineaLarga, dark_mode: bool = False) -> str:
     ax1.scatter([0], [r.tension_nominal_kv], color=color_v, s=60, zorder=5, ec="white", lw=2)
     ax1.scatter([r.longitud_km], [r.vg_ll_kv], color="#7c3aed", s=60, zorder=5, ec="white", lw=2)
 
+    # Decidir posición de etiquetas según si VG > VR (Ferranti) o VG < VR (normal)
+    # Para que NUNCA queden tapadas por la curva o salgan del chart
+    es_ferranti = r.vg_ll_kv > r.tension_nominal_kv
+    y_offset_receptor = -22 if not es_ferranti else 18
+    y_offset_generador = -22 if es_ferranti else 18
+
     ax1.annotate(f"Receptor\n{r.tension_nominal_kv:.0f} kV", xy=(0, r.tension_nominal_kv),
-                 xytext=(15, -25), textcoords="offset points", fontsize=9,
-                 color=color_v, fontweight="600", ha="left")
+                 xytext=(12, y_offset_receptor), textcoords="offset points", fontsize=9,
+                 color=color_v, fontweight="700", ha="left",
+                 bbox=dict(boxstyle="round,pad=0.3", facecolor="white", edgecolor=color_v, alpha=0.85, linewidth=1))
     ax1.annotate(f"Generador\n{r.vg_ll_kv:.1f} kV", xy=(r.longitud_km, r.vg_ll_kv),
-                 xytext=(-15, -25), textcoords="offset points", fontsize=9,
-                 color="#7c3aed", fontweight="600", ha="right")
+                 xytext=(-12, y_offset_generador), textcoords="offset points", fontsize=9,
+                 color="#7c3aed", fontweight="700", ha="right",
+                 bbox=dict(boxstyle="round,pad=0.3", facecolor="white", edgecolor="#7c3aed", alpha=0.85, linewidth=1))
 
     ax1.set_xlabel("Distancia desde extremo receptor (km)", fontweight="600")
     ax1.set_ylabel("Tensión línea-línea (kV)", fontweight="600")
     ax1.set_title("Perfil de tensión a lo largo de la línea")
     ax1.grid(True, alpha=0.3)
-    ax1.legend(loc="best", fontsize=9)
+    # Headroom arriba y abajo para que las etiquetas con cajita no se corten
+    y_min = min(min(tensiones_ll_kv), r.tension_nominal_kv)
+    y_max = max(max(tensiones_ll_kv), r.tension_nominal_kv)
+    rango = max(y_max - y_min, 5)
+    ax1.set_ylim(y_min - rango * 0.18, y_max + rango * 0.15)
+    ax1.legend(loc="upper right", fontsize=9, framealpha=0.92)
 
     # ===== Gráfico 2: indicadores de desempeño =====
     indicadores = ["Regulación\n(|%|)", "Pérdidas\n(%)", "Eficiencia\n(%)"]
