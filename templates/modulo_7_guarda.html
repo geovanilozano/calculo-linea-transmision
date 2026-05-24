@@ -59,49 +59,177 @@
   <div>
     <h3 class="text-base font-semibold mb-2">¿Qué se calcula aquí?</h3>
     <p class="text-sm text-muted-foreground leading-relaxed">
-      Las mismas 4 hipótesis mecánicas pero aplicadas al <strong class="text-foreground">cable de guarda</strong>
-      (acero galvanizado, alumoweld o OPGW).
+      Cubre las secciones <strong class="text-foreground">4.1 a 4.6</strong> del trabajo:
+      datos mecánicos del cable de guarda, constantes, ecuación de cambio de estado,
+      comprobación de hipótesis, flechas máximas y análisis de terreno.
+      El cable de guarda (acero EHS, alumoweld u OPGW) va en la cúspide de la torre
+      con un ángulo de protección α ≤ 30° respecto a las fases.
     </p>
   </div>
 
+  {# ===== 4.1 DATOS MECÁNICOS DEL CABLE DE GUARDA ===== #}
   <div>
-    <h3 class="text-base font-semibold mb-2">Función del cable de guarda</h3>
-    <p class="text-sm text-muted-foreground leading-relaxed">
-      Protege la línea contra <strong class="text-foreground">descargas atmosféricas directas</strong>.
-      Va en la cúspide de la torre con un ángulo de protección α ≤ 30° respecto a las fases.
-      El OPGW además lleva fibra óptica para comunicaciones.
-    </p>
+    <h3 class="text-base font-semibold mb-2 flex items-center gap-2">
+      <span class="text-xs font-mono font-bold px-1.5 py-0.5 rounded" style="background: var(--primary); color: var(--primary-foreground);">4.1</span>
+      Datos mecánicos del cable de guarda
+    </h3>
+    <div class="space-y-2 text-sm bg-muted/50 rounded-lg p-4">
+      <p class="text-muted-foreground leading-relaxed">
+        Se toman del catálogo del cable seleccionado: diámetro Φg (mm), sección A (mm²),
+        masa m (kg/m), carga de rotura σ_rot (kgf), módulo de elasticidad E y
+        coeficiente de dilatación α (≈ 11,5×10⁻⁶ /°C para acero EHS).
+      </p>
+    </div>
   </div>
 
+  {# ===== 4.2 CÁLCULO DE LAS CONSTANTES ===== #}
   <div>
-    <h3 class="text-base font-semibold mb-2">Fórmulas (mismas que conductor)</h3>
+    <h3 class="text-base font-semibold mb-2 flex items-center gap-2">
+      <span class="text-xs font-mono font-bold px-1.5 py-0.5 rounded" style="background: var(--primary); color: var(--primary-foreground);">4.2</span>
+      Cálculo de las constantes
+    </h3>
     <div class="space-y-3 text-sm bg-muted/50 rounded-lg p-4">
-      <div>
-        <span class="font-semibold text-primary">Carga viento Wv,g</span>{{ info_tooltip("Carga horizontal de viento sobre el cable de guarda (kgf/m). Misma fórmula que conductor pero con menor diámetro Φg → menor carga. El acero EHS resiste mucho más esfuerzo que el aluminio del conductor.") }}:
+
+      <div class="border-l-2 border-primary/40 pl-3">
+        <div class="text-[11px] font-mono font-bold text-primary mb-1">4.2.1 · Carga de Rotura σ_rot</div>
+        <div class="text-xs text-muted-foreground">
+          Tracción máxima que resiste el cable. Acero EHS: ~1116 MPa (vs 299 MPa del ACSR).
+          {{ info_tooltip("RTS (Rated Tensile Strength) del cable. Para acero EHS típico de 7/16 pulgadas: ~8200 kgf de carga de rotura. El factor de seguridad reduce esto a la tensión admisible σ_máx = σ_rot/FS.") }}
+        </div>
+      </div>
+
+      <div class="border-l-2 border-primary/40 pl-3">
+        <div class="text-[11px] font-mono font-bold text-primary mb-1">4.2.2 · Peso Aparente Wc,g</div>
+        $$W_{c,g} = m \cdot g$$
+        <p class="text-xs text-muted-foreground mt-1">
+          Peso del cable de guarda por unidad de longitud.
+          {{ info_tooltip("El acero es más denso que el aluminio. Cable EHS 7/16″ pesa ~0,583 kg/m (más liviano que el conductor de fase Drake ~1,628 kg/m porque la sección es menor).") }}
+        </p>
+      </div>
+
+      <div class="border-l-2 border-primary/40 pl-3">
+        <div class="text-[11px] font-mono font-bold text-primary mb-1">4.2.3 · Presión del Viento Wv,g</div>
         $$W_{v,g} = \frac{0{,}613 \cdot (V/3{,}6)^2 \cdot \Phi_g}{1000}$$
+        <p class="text-xs text-muted-foreground mt-1">
+          Misma fórmula que el conductor pero con menor diámetro Φg → menor carga horizontal.
+          {{ info_tooltip("El diámetro del cable de guarda es típicamente ~11-15 mm (la mitad del conductor de fase ACSR Drake que tiene ~28 mm). Esto reduce la carga del viento al 50%.") }}
+        </p>
       </div>
-      <div>
-        <span class="font-semibold text-primary">Carga resultante Wr,g</span>{{ info_tooltip("Suma vectorial del peso propio y la carga de viento sobre el cable de guarda. En el cable de guarda generalmente gobierna la Hipótesis A (máximo viento), opuesto al conductor donde gobierna la C (diaria, FS=5).") }}:
+
+      <div class="border-l-2 border-primary/40 pl-3">
+        <div class="text-[11px] font-mono font-bold text-primary mb-1">4.2.4 · Factor de Corrección Wr,g</div>
         $$W_{r,g} = \sqrt{W_{c,g}^2 + W_{v,g}^2}$$
+        <p class="text-xs text-muted-foreground mt-1">
+          Carga resultante (vectorial) del peso + viento sobre el cable de guarda.
+        </p>
       </div>
-      <div>
-        <span class="font-semibold text-primary">Flecha fg</span>{{ info_tooltip("Flecha del cable de guarda en cada hipótesis (m). CRÍTICO: debe ser MENOR que la flecha del conductor para que el ángulo de protección se mantenga ≤30° en todas las condiciones operativas.") }}:
-        $$f_g = \frac{W_{r,g} \cdot a^2}{8 \cdot T_g}$$
+
+      <div class="border-l-2 border-primary/40 pl-3">
+        <div class="text-[11px] font-mono font-bold text-primary mb-1">4.2.5 · Tensión Máxima σ_máx</div>
+        $$\sigma_{máx,g} = \frac{\sigma_{rot,g}}{FS}$$
+        <p class="text-xs text-muted-foreground mt-1">FS = 2,5 (normal) ó 5 (EDS diaria).
+          {{ info_tooltip("La tensión admisible NUNCA debe superarse en ninguna hipótesis. Como el acero tiene σ_rot mucho mayor que el aluminio, soporta mucho más esfuerzo horizontal.") }}
+        </p>
       </div>
-      <div>
-        <span class="font-semibold text-primary">Verificación blindaje</span>{{ info_tooltip("Condición geométrica clave: si la flecha del cable de guarda es menor o igual a la del conductor, el cable de guarda 'cuelga más arriba' que las fases y mantiene el ángulo de protección. Si fg > f_conductor en alguna hipótesis (ej. a alta temperatura), las fases quedan EXPUESTAS al rayo.") }}:
-        $$f_g \le f_{conductor} \implies \text{Zona de protección OK}$$
+
+      <div class="border-l-2 border-primary/40 pl-3">
+        <div class="text-[11px] font-mono font-bold text-primary mb-1">4.2.6 · Vano Crítico ac</div>
+        $$a_c = \sqrt{\frac{24 \cdot A^2 \cdot \sigma_{máx}^2 \cdot \alpha \cdot (\theta_A - \theta_B)}{W_{rA}^2 - W_{rB}^2}}$$
+        <p class="text-xs text-muted-foreground mt-1">
+          En el cable de guarda gobierna típicamente <strong class="text-foreground">Hip A</strong>
+          (viento máximo) porque la carga del viento sobre el cable de acero es proporcionalmente más alta.
+        </p>
       </div>
     </div>
   </div>
 
+  {# ===== 4.3 ECUACIÓN DE CAMBIO DE ESTADO ===== #}
+  <div>
+    <h3 class="text-base font-semibold mb-2 flex items-center gap-2">
+      <span class="text-xs font-mono font-bold px-1.5 py-0.5 rounded" style="background: var(--primary); color: var(--primary-foreground);">4.3</span>
+      Ecuación de cambio de estado
+    </h3>
+    <div class="space-y-2 text-sm bg-muted/50 rounded-lg p-4">
+      $$\sigma_2 - \frac{(W_{r2} \cdot a)^2 \cdot E}{24 \cdot A^2 \cdot \sigma_2^2} = \sigma_1 - \frac{(W_{r1} \cdot a)^2 \cdot E}{24 \cdot A^2 \cdot \sigma_1^2} - \alpha \cdot E \cdot (\theta_2 - \theta_1)$$
+      <p class="text-xs text-muted-foreground">
+        Misma cúbica que el conductor pero con E y α del acero. Como α del acero es menor
+        (11,5e-6 vs 18,9e-6), el cable de guarda se dilata MENOS con la temperatura
+        → su flecha varía menos entre hipótesis.
+      </p>
+    </div>
+  </div>
+
+  {# ===== 4.4 COMPROBACIÓN DE HIPÓTESIS ===== #}
+  <div>
+    <h3 class="text-base font-semibold mb-2 flex items-center gap-2">
+      <span class="text-xs font-mono font-bold px-1.5 py-0.5 rounded" style="background: var(--primary); color: var(--primary-foreground);">4.4</span>
+      Comprobación de hipótesis
+    </h3>
+    <div class="space-y-2 text-sm bg-muted/50 rounded-lg p-4">
+      <p class="text-xs text-muted-foreground">
+        Si vano de diseño &gt; ac → gobierna <strong class="text-foreground">Hip A</strong> (viento máx).
+        Si vano &lt; ac → gobierna <strong class="text-foreground">Hip B</strong> (mín temp).
+        La hipótesis extrema fija el estado base y de ahí se calculan las demás vía 4.3.
+      </p>
+    </div>
+  </div>
+
+  {# ===== 4.5 FLECHAS MÁXIMAS ===== #}
+  <div>
+    <h3 class="text-base font-semibold mb-2 flex items-center gap-2">
+      <span class="text-xs font-mono font-bold px-1.5 py-0.5 rounded" style="background: var(--primary); color: var(--primary-foreground);">4.5</span>
+      Cálculo de las flechas máximas (4 hipótesis)
+    </h3>
+    <div class="space-y-2 text-sm bg-muted/50 rounded-lg p-4">
+      $$f_{g,i} = \frac{W_{r,g,i} \cdot a^2}{8 \cdot T_{g,i}} \quad \text{para } i = A, B, C, D$$
+      <div class="grid grid-cols-2 gap-2 mt-3 text-[11px]">
+        <div class="text-muted-foreground">4.5.1 · Hip A (viento máx)</div>
+        <div class="text-muted-foreground">4.5.2 · Hip B (mín temp)</div>
+        <div class="text-muted-foreground">4.5.3 · Hip C (EDS diaria)</div>
+        <div class="text-muted-foreground">4.5.4 · Hip D (máx temp)</div>
+      </div>
+    </div>
+  </div>
+
+  {# ===== 4.6 TERRENO LLANO Y QUEBRADO ===== #}
+  <div>
+    <h3 class="text-base font-semibold mb-2 flex items-center gap-2">
+      <span class="text-xs font-mono font-bold px-1.5 py-0.5 rounded" style="background: var(--primary); color: var(--primary-foreground);">4.6</span>
+      Análisis de terreno llano y quebrado
+    </h3>
+    <div class="space-y-3 text-sm bg-muted/50 rounded-lg p-4">
+      <div class="border-l-2 border-primary/40 pl-3">
+        <div class="text-[11px] font-mono font-bold text-primary mb-1">4.6.1 · Terreno llano</div>
+        $$f_g = \frac{W_{r,g} \cdot a^2}{8 \cdot T_g}$$
+      </div>
+      <div class="border-l-2 border-primary/40 pl-3">
+        <div class="text-[11px] font-mono font-bold text-primary mb-1">4.6.2 · Terreno quebrado</div>
+        $$f_{g,incl} = \frac{f_{g,llano}}{\cos^2 \psi}$$
+      </div>
+    </div>
+  </div>
+
+  {# Verificación de blindaje (clave del cable de guarda) #}
+  <div class="rounded-lg p-4 border" style="border-color: var(--accent); background: color-mix(in oklch, var(--accent) 6%, transparent);">
+    <h3 class="text-sm font-semibold mb-2 flex items-center gap-2">
+      <i data-lucide="shield-check" class="size-4" style="color: var(--accent);"></i>
+      Verificación de blindaje (clave del diseño)
+    </h3>
+    $$f_g \le f_{conductor} \implies \text{Zona de protección OK}$$
+    <p class="text-xs text-muted-foreground mt-2">
+      Si la flecha del cable de guarda es ≤ flecha del conductor → cuelga más arriba que las fases
+      y mantiene el ángulo de protección ≤ 30° contra rayos.
+    </p>
+  </div>
+
+  {# Diferencias con conductor #}
   <div>
     <h3 class="text-base font-semibold mb-2">Diferencias clave con el conductor</h3>
     <ul class="space-y-1.5 text-sm text-muted-foreground">
-      <li>• <strong class="text-foreground">Acero EHS</strong>: rotura ~1116 MPa (vs 299 MPa del ACSR)</li>
-      <li>• <strong class="text-foreground">Dilatación menor</strong>: α=11.5e-6 /°C (vs 18.9e-6 del Al)</li>
-      <li>• <strong class="text-foreground">Hip A gobierna</strong> (viento máx) — opuesto al conductor</li>
-      <li>• <strong class="text-foreground">OPGW</strong>: añade comunicaciones por fibra óptica</li>
+      <li>• <strong class="text-foreground">Acero EHS</strong>: σ_rot ~1116 MPa (vs 299 MPa del ACSR)</li>
+      <li>• <strong class="text-foreground">Dilatación menor</strong>: α=11,5e-6 /°C (vs 18,9e-6 del Al)</li>
+      <li>• <strong class="text-foreground">Hip A gobierna</strong> típicamente (viento máx) — opuesto al conductor</li>
+      <li>• <strong class="text-foreground">OPGW</strong>: añade comunicaciones por fibra óptica integrada</li>
     </ul>
   </div>
 </div>
