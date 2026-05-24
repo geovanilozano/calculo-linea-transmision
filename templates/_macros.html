@@ -1,39 +1,73 @@
 {# Macros reutilizables del tour #}
 
 {# Tooltip clicable con icono ⓘ que muestra explicación al pulsar.
-   Usa portal con position:fixed para evitar problemas de z-index y overflow.
-   Todo el styling va en :style (objeto) para que Alpine lo merge correctamente. #}
+   - Ancho 28rem (más espacio para textos largos)
+   - Arrastrable desde el header (drag handle)
+   - Botón con estado activo visual cuando el tooltip está abierto
+   - Aplica glosario automáticamente al abrirse (palabras clickeables)
+   - Usa portal con position:fixed para evitar problemas de z-index/overflow #}
 {% macro info_tooltip(texto, posicion='left') %}
 <span x-data="{
         open: false,
         coords: { top: 0, left: 0 },
+        dragging: false,
+        dragStart: { x: 0, y: 0, startTop: 0, startLeft: 0 },
         place() {
           const btn = this.$refs.btn.getBoundingClientRect();
           const margin = 12;
-          const popW = 320;
+          const popW = 448;
           let left = btn.left;
           if (left + popW > window.innerWidth - margin) {
-            left = Math.max(margin, btn.right - popW);
+            left = Math.max(margin, window.innerWidth - popW - margin);
           }
           let top = btn.bottom + 8;
           this.coords = { top, left };
         },
-        toggle() { this.open = !this.open; if (this.open) this.$nextTick(() => this.place()); }
+        startDrag(e) {
+          this.dragging = true;
+          this.dragStart = { x: e.clientX, y: e.clientY, startTop: this.coords.top, startLeft: this.coords.left };
+          e.preventDefault();
+        },
+        doDrag(e) {
+          if (!this.dragging) return;
+          this.coords = {
+            top: this.dragStart.startTop + (e.clientY - this.dragStart.y),
+            left: this.dragStart.startLeft + (e.clientX - this.dragStart.x)
+          };
+        },
+        endDrag() { this.dragging = false; },
+        toggle() {
+          this.open = !this.open;
+          if (this.open) this.$nextTick(() => {
+            this.place();
+            const pop = this.$refs.pop;
+            if (pop && window.aplicarGlosario) window.aplicarGlosario(pop);
+          });
+        }
       }"
-      @scroll.window="if(open) place()"
+      @scroll.window="if(open && !dragging) place()"
       @resize.window="if(open) place()"
+      @mousemove.window="doDrag($event)"
+      @mouseup.window="endDrag()"
       class="inline-block align-middle ml-1">
   <button x-ref="btn"
           @click.stop="toggle()"
           @click.outside="open = false"
           @keydown.escape.window="open = false"
           type="button"
-          class="inline-flex items-center justify-center size-5 rounded-full bg-primary/15 hover:bg-primary/30 transition-colors align-middle cursor-help"
+          :style="open
+            ? 'background-color: var(--primary); transform: scale(1.15); box-shadow: 0 0 0 3px color-mix(in oklch, var(--primary) 25%, transparent);'
+            : 'background-color: color-mix(in oklch, var(--primary) 15%, transparent);'"
+          class="inline-flex items-center justify-center size-5 rounded-full transition-all align-middle cursor-help"
+          onmouseover="if(!this.style.transform.includes('1.15')){this.style.backgroundColor='color-mix(in oklch, var(--primary) 30%, transparent)';}"
+          onmouseout="if(!this.style.transform.includes('1.15')){this.style.backgroundColor='color-mix(in oklch, var(--primary) 15%, transparent)';}"
           aria-label="Más información">
-    <i data-lucide="info" class="size-3.5" style="color: var(--primary);"></i>
+    <i data-lucide="info" class="size-3.5"
+       :style="open ? 'color: white;' : 'color: var(--primary);'"></i>
   </button>
   <template x-teleport="body">
-    <div x-show="open" x-cloak
+    <div x-ref="pop"
+         x-show="open" x-cloak
          x-transition:enter="transition ease-out duration-150"
          x-transition:enter-start="opacity-0 -translate-y-1 scale-95"
          x-transition:enter-end="opacity-100 translate-y-0 scale-100"
@@ -41,38 +75,53 @@
            position: 'fixed',
            top: coords.top + 'px',
            left: coords.left + 'px',
-           width: '20rem',
+           width: '28rem',
            maxWidth: 'calc(100vw - 1.5rem)',
            backgroundColor: 'var(--card)',
            color: 'var(--foreground)',
            border: '2px solid var(--primary)',
            borderRadius: '0.75rem',
-           padding: '0.875rem 1rem',
-           fontSize: '0.78rem',
-           lineHeight: '1.55',
+           fontSize: '0.8rem',
+           lineHeight: '1.6',
            fontWeight: '400',
            textTransform: 'none',
            letterSpacing: 'normal',
            opacity: '1',
            boxShadow: '0 30px 60px -15px rgba(0,0,0,0.6), 0 0 0 4px color-mix(in oklch, var(--primary) 18%, transparent)',
            zIndex: '99999',
-           backdropFilter: 'none'
+           backdropFilter: 'none',
+           userSelect: dragging ? 'none' : 'auto'
          }">
-      {# Botón X para cerrar — esquina superior derecha #}
-      <button type="button"
-              @click.stop="open = false"
-              style="position:absolute; top:6px; right:6px; width:24px; height:24px; display:inline-flex; align-items:center; justify-content:center; border-radius:4px; background:transparent; border:none; cursor:pointer; padding:0; color: var(--muted-foreground);"
-              onmouseover="this.style.backgroundColor='var(--muted)';this.style.color='var(--foreground)';"
-              onmouseout="this.style.backgroundColor='transparent';this.style.color='var(--muted-foreground)';"
-              aria-label="Cerrar">
-        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-          <line x1="18" y1="6" x2="6" y2="18"></line>
-          <line x1="6" y1="6" x2="18" y2="18"></line>
-        </svg>
-      </button>
-      <div style="display:flex; align-items:flex-start; gap:0.5rem; padding-right:24px;">
-        <i data-lucide="info" class="size-4 shrink-0" style="color: var(--primary); margin-top: 2px;"></i>
-        <div style="flex:1; color: var(--foreground);">{{ texto|safe }}</div>
+      {# Drag handle: barra arrastrable arriba (8px alto) #}
+      <div @mousedown="startDrag($event)"
+           :style="dragging ? 'cursor:grabbing;' : 'cursor:grab;'"
+           style="display:flex; align-items:center; justify-content:space-between; gap:8px; padding:6px 8px 4px 12px; border-bottom: 1px solid var(--border); border-top-left-radius: 0.6rem; border-top-right-radius: 0.6rem; background: color-mix(in oklch, var(--primary) 5%, transparent);">
+        <div style="display:flex; align-items:center; gap:6px; pointer-events:none;">
+          <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="color: var(--muted-foreground);">
+            <circle cx="9" cy="6" r="1"></circle><circle cx="9" cy="12" r="1"></circle><circle cx="9" cy="18" r="1"></circle>
+            <circle cx="15" cy="6" r="1"></circle><circle cx="15" cy="12" r="1"></circle><circle cx="15" cy="18" r="1"></circle>
+          </svg>
+          <span style="font-size:10px; color: var(--muted-foreground); text-transform: uppercase; letter-spacing: 0.05em; font-weight: 600;">Arrastra para mover</span>
+        </div>
+        <button type="button"
+                @click.stop="open = false"
+                @mousedown.stop
+                style="width:22px; height:22px; display:inline-flex; align-items:center; justify-content:center; border-radius:4px; background:transparent; border:none; cursor:pointer; padding:0; color: var(--muted-foreground);"
+                onmouseover="this.style.backgroundColor='var(--muted)';this.style.color='var(--foreground)';"
+                onmouseout="this.style.backgroundColor='transparent';this.style.color='var(--muted-foreground)';"
+                aria-label="Cerrar">
+          <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="18" y1="6" x2="6" y2="18"></line>
+            <line x1="6" y1="6" x2="18" y2="18"></line>
+          </svg>
+        </button>
+      </div>
+      {# Contenido del tooltip #}
+      <div style="padding: 0.875rem 1rem;">
+        <div style="display:flex; align-items:flex-start; gap:0.5rem;">
+          <i data-lucide="info" class="size-4 shrink-0" style="color: var(--primary); margin-top: 2px;"></i>
+          <div style="flex:1; color: var(--foreground);">{{ texto|safe }}</div>
+        </div>
       </div>
     </div>
   </template>
