@@ -42,13 +42,13 @@
 
       <h1 class="text-4xl md:text-5xl font-bold tracking-tight mb-4 text-foreground max-w-2xl leading-tight">
         <span id="hero-nombre">{{ PROYECTO.nombre }}</span>
-        <span class="block text-primary mt-1" id="hero-tension-block"><span id="hero-tension">{{ "%.0f"|format(PROYECTO.tension_nominal_kv) }}</span> kV</span>
       </h1>
 
       <p class="text-lg text-muted-foreground max-w-2xl mb-8 leading-relaxed">
         Recorre paso a paso el cálculo completo del corredor
         <strong class="text-foreground" id="hero-corredor">{{ PROYECTO.corredor }}</strong>:
         desde la selección del nivel de tensión hasta el plantillado sobre el perfil topográfico.
+        La <strong class="text-foreground">tensión nominal</strong> se obtiene como resultado del módulo 1.
       </p>
 
       <div class="flex flex-wrap gap-3">
@@ -108,85 +108,187 @@
         </div>
       </div>
 
-      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
-
-        <div>
-          <label for="tension_nominal_kv" class="flex items-center gap-2 text-sm font-medium mb-2">
+      {# ===== 1.1 PARÁMETROS ELÉCTRICOS ===== #}
+      <div class="pb-5 border-b border-border">
+        <div class="flex items-center gap-2 mb-4">
+          <div class="size-7 rounded-md bg-primary/15 grid place-items-center">
             <i data-lucide="zap" class="size-4 text-primary"></i>
-            Tensión nominal
-          </label>
-          <div class="relative">
-            <input id="tension_nominal_kv" name="tension_nominal_kv" type="number" step="1" min="50" max="800"
-                   value="{{ PROYECTO.tension_nominal_kv }}" class="input font-mono pr-12">
-            <span class="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-muted-foreground font-mono">kV</span>
           </div>
-          <p class="text-xs text-muted-foreground mt-1.5">Escalones: 115 · 230 · 500 kV</p>
+          <h3 class="text-sm font-bold text-foreground uppercase tracking-wider">1.1 Parámetros eléctricos</h3>
         </div>
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
 
-        <div>
-          <label for="longitud_km" class="flex items-center gap-2 text-sm font-medium mb-2">
-            <i data-lucide="ruler" class="size-4 text-primary"></i>
-            Longitud de la línea
-          </label>
-          <div class="relative">
-            <input id="longitud_km" name="longitud_km" type="number" step="1" min="1" max="2000"
-                   value="{{ PROYECTO.longitud_km }}" class="input font-mono pr-12">
-            <span class="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-muted-foreground font-mono">km</span>
+          <div>
+            <label for="longitud_km" class="block text-xs font-medium text-muted-foreground mb-1.5">Longitud</label>
+            <div class="relative">
+              <input id="longitud_km" name="longitud_km" type="number" step="1" min="1" max="2000"
+                     value="{{ PROYECTO.longitud_km }}" class="input font-mono pr-12 text-sm">
+              <span class="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-muted-foreground font-mono">km</span>
+            </div>
           </div>
-          <p class="text-xs text-muted-foreground mt-1.5">&gt; 240 km = línea larga (ABCD)</p>
-        </div>
 
-        <div>
-          <label for="potencia_mw" class="flex items-center gap-2 text-sm font-medium mb-2">
-            <i data-lucide="gauge" class="size-4 text-primary"></i>
-            Potencia a transmitir
-          </label>
-          <div class="relative">
-            <input id="potencia_mw" name="potencia_mw" type="number" step="1" min="1" max="5000"
-                   value="{{ PROYECTO.potencia_mw }}" class="input font-mono pr-12">
-            <span class="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-muted-foreground font-mono">MW</span>
-          </div>
-          <p class="text-xs text-muted-foreground mt-1.5">Potencia activa en extremo receptor</p>
-        </div>
-
-        <div>
-          <label for="altitud_msnm" class="flex items-center gap-2 text-sm font-medium mb-2">
-            <i data-lucide="mountain" class="size-4 text-primary"></i>
-            Altitud
-          </label>
-          <div class="relative">
-            <input id="altitud_msnm" name="altitud_msnm" type="number" step="1" min="0" max="6000"
-                   value="{{ PROYECTO.altitud_msnm }}" class="input font-mono pr-12">
-            <span class="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-muted-foreground font-mono">m</span>
-          </div>
-          <p class="text-xs text-muted-foreground mt-1.5">Afecta Corona y distancias RETIE</p>
-        </div>
-
-        <div>
-          <label for="vano_diseno_m" class="flex items-center gap-2 text-sm font-medium mb-2">
-            <i data-lucide="git-commit-horizontal" class="size-4 text-primary"></i>
-            Vano de diseño
-          </label>
-          <div class="relative">
-            <input id="vano_diseno_m" name="vano_diseno_m" type="number" step="1" min="100" max="800"
-                   value="{{ PROYECTO.vano_diseno_m }}" class="input font-mono pr-12">
-            <span class="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-muted-foreground font-mono">m</span>
-          </div>
-          <p class="text-xs text-muted-foreground mt-1.5">Típico 350-450 m en 500 kV</p>
-        </div>
-
-        <div>
-          <label for="factor_potencia" class="flex items-center gap-2 text-sm font-medium mb-2">
-            <i data-lucide="sliders-horizontal" class="size-4 text-primary"></i>
-            Factor de potencia
-          </label>
-          <div class="relative">
+          <div>
+            <label for="factor_potencia" class="block text-xs font-medium text-muted-foreground mb-1.5">Factor de potencia</label>
             <input id="factor_potencia" name="factor_potencia" type="number" step="0.01" min="0.5" max="1"
-                   value="{{ PROYECTO.factor_potencia }}" class="input font-mono">
+                   value="{{ PROYECTO.factor_potencia }}" class="input font-mono text-sm">
           </div>
-          <p class="text-xs text-muted-foreground mt-1.5">1.0 = carga resistiva (efecto Ferranti)</p>
-        </div>
 
+          <div>
+            <label for="potencia_mw" class="block text-xs font-medium text-muted-foreground mb-1.5">Potencia a transmitir</label>
+            <div class="relative">
+              <input id="potencia_mw" name="potencia_mw" type="number" step="1" min="1" max="5000"
+                     value="{{ PROYECTO.potencia_mw }}" class="input font-mono pr-12 text-sm">
+              <span class="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-muted-foreground font-mono">MW</span>
+            </div>
+          </div>
+
+          <div>
+            <label for="altitud_msnm" class="block text-xs font-medium text-muted-foreground mb-1.5">Altura sobre el nivel del mar</label>
+            <div class="relative">
+              <input id="altitud_msnm" name="altitud_msnm" type="number" step="1" min="0" max="6000"
+                     value="{{ PROYECTO.altitud_msnm }}" class="input font-mono pr-12 text-sm">
+              <span class="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-muted-foreground font-mono">m</span>
+            </div>
+          </div>
+
+          <div>
+            <label for="temperatura_max_conductor_c" class="block text-xs font-medium text-muted-foreground mb-1.5">Temperatura máxima del conductor</label>
+            <div class="relative">
+              <input id="temperatura_max_conductor_c" name="temperatura_max_conductor_c" type="number" step="1" min="0" max="250"
+                     value="{{ PROYECTO.temperatura_max_conductor_c }}" class="input font-mono pr-12 text-sm">
+              <span class="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-muted-foreground font-mono">°C</span>
+            </div>
+          </div>
+
+          <div>
+            <label for="velocidad_viento_max_kmh" class="block text-xs font-medium text-muted-foreground mb-1.5">Velocidad máxima del viento</label>
+            <div class="relative">
+              <input id="velocidad_viento_max_kmh" name="velocidad_viento_max_kmh" type="number" step="1" min="0" max="300"
+                     value="{{ PROYECTO.velocidad_viento_max_kmh }}" class="input font-mono pr-14 text-sm">
+              <span class="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-muted-foreground font-mono">km/h</span>
+            </div>
+          </div>
+
+          <div>
+            <label for="temperatura_min_ambiente_c" class="block text-xs font-medium text-muted-foreground mb-1.5">Temperatura mínima</label>
+            <div class="relative">
+              <input id="temperatura_min_ambiente_c" name="temperatura_min_ambiente_c" type="number" step="1" min="-50" max="50"
+                     value="{{ PROYECTO.temperatura_min_ambiente_c }}" class="input font-mono pr-12 text-sm">
+              <span class="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-muted-foreground font-mono">°C</span>
+            </div>
+          </div>
+
+          <div>
+            <label for="regulacion_max_pct" class="block text-xs font-medium text-muted-foreground mb-1.5">Regulación máxima</label>
+            <div class="relative">
+              <input id="regulacion_max_pct" name="regulacion_max_pct" type="number" step="0.1" min="0" max="100"
+                     value="{{ PROYECTO.regulacion_max_pct }}" class="input font-mono pr-12 text-sm">
+              <span class="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-muted-foreground font-mono">%</span>
+            </div>
+          </div>
+
+          <div>
+            <label for="perdidas_max_pct" class="block text-xs font-medium text-muted-foreground mb-1.5">Pérdidas de potencia (máx)</label>
+            <div class="relative">
+              <input id="perdidas_max_pct" name="perdidas_max_pct" type="number" step="0.1" min="0" max="100"
+                     value="{{ PROYECTO.perdidas_max_pct }}" class="input font-mono pr-12 text-sm">
+              <span class="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-muted-foreground font-mono">%</span>
+            </div>
+          </div>
+
+          <div>
+            <label for="frecuencia_hz" class="block text-xs font-medium text-muted-foreground mb-1.5">Frecuencia</label>
+            <div class="relative">
+              <input id="frecuencia_hz" name="frecuencia_hz" type="number" step="1" min="50" max="60"
+                     value="{{ PROYECTO.frecuencia_hz }}" class="input font-mono pr-12 text-sm">
+              <span class="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-muted-foreground font-mono">Hz</span>
+            </div>
+          </div>
+
+          <div>
+            <label for="vano_diseno_m" class="block text-xs font-medium text-muted-foreground mb-1.5">Vano de diseño</label>
+            <div class="relative">
+              <input id="vano_diseno_m" name="vano_diseno_m" type="number" step="1" min="100" max="800"
+                     value="{{ PROYECTO.vano_diseno_m }}" class="input font-mono pr-12 text-sm">
+              <span class="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-muted-foreground font-mono">m</span>
+            </div>
+          </div>
+
+          <div>
+            <label for="tension_nominal_kv" class="block text-xs font-medium text-muted-foreground mb-1.5">
+              Tensión nominal <span class="text-[10px] italic">(referencia, se calcula en M1)</span>
+            </label>
+            <div class="relative">
+              <input id="tension_nominal_kv" name="tension_nominal_kv" type="number" step="1" min="50" max="800"
+                     value="{{ PROYECTO.tension_nominal_kv }}" class="input font-mono pr-12 text-sm" style="background: color-mix(in oklch, var(--primary) 5%, var(--card));">
+              <span class="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-muted-foreground font-mono">kV</span>
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+      {# ===== 1.2 PARÁMETROS MECÁNICOS — 4 HIPÓTESIS ===== #}
+      <div class="pb-5">
+        <div class="flex items-center gap-2 mb-2">
+          <div class="size-7 rounded-md bg-accent/15 grid place-items-center">
+            <i data-lucide="wind" class="size-4" style="color: var(--accent);"></i>
+          </div>
+          <h3 class="text-sm font-bold text-foreground uppercase tracking-wider">1.2 Parámetros mecánicos</h3>
+        </div>
+        <p class="text-xs text-muted-foreground mb-4">
+          4 hipótesis climáticas para el dimensionamiento mecánico del conductor y cable de guarda.
+        </p>
+
+        {# Cada hipótesis es una fila con 4 campos #}
+        {% set hipotesis = [
+          ('a', 'Hipótesis A · Máxima velocidad del viento', 'wind'),
+          ('b', 'Hipótesis B · Mínima temperatura', 'snowflake'),
+          ('c', 'Hipótesis C · Operación diaria', 'sun'),
+          ('d', 'Hipótesis D · Máxima temperatura', 'thermometer'),
+        ] %}
+
+        <div class="space-y-3">
+          {% for letra, titulo, icono in hipotesis %}
+          <div class="rounded-lg border border-border p-3" style="background: color-mix(in oklch, var(--muted) 25%, transparent);">
+            <div class="flex items-center gap-2 mb-2">
+              <i data-lucide="{{ icono }}" class="size-3.5" style="color: var(--accent);"></i>
+              <span class="text-xs font-semibold text-foreground">{{ titulo }}</span>
+            </div>
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-3">
+              <div>
+                <label for="hip_{{ letra }}_viento_kmh" class="block text-[11px] text-muted-foreground mb-1">Vel. viento</label>
+                <div class="relative">
+                  <input id="hip_{{ letra }}_viento_kmh" name="hip_{{ letra }}_viento_kmh" type="number" step="1" min="0" max="300"
+                         value="{{ PROYECTO['hip_' + letra + '_viento_kmh'] }}" class="input font-mono pr-12 text-sm py-1.5">
+                  <span class="absolute right-2 top-1/2 -translate-y-1/2 text-[10px] text-muted-foreground font-mono">km/h</span>
+                </div>
+              </div>
+              <div>
+                <label for="hip_{{ letra }}_temperatura_c" class="block text-[11px] text-muted-foreground mb-1">Temperatura</label>
+                <div class="relative">
+                  <input id="hip_{{ letra }}_temperatura_c" name="hip_{{ letra }}_temperatura_c" type="number" step="1" min="-50" max="200"
+                         value="{{ PROYECTO['hip_' + letra + '_temperatura_c'] }}" class="input font-mono pr-8 text-sm py-1.5">
+                  <span class="absolute right-2 top-1/2 -translate-y-1/2 text-[10px] text-muted-foreground font-mono">°C</span>
+                </div>
+              </div>
+              <div>
+                <label for="hip_{{ letra }}_delta_temp_c" class="block text-[11px] text-muted-foreground mb-1">Δ Temperatura</label>
+                <div class="relative">
+                  <input id="hip_{{ letra }}_delta_temp_c" name="hip_{{ letra }}_delta_temp_c" type="number" step="1" min="0" max="50"
+                         value="{{ PROYECTO['hip_' + letra + '_delta_temp_c'] }}" class="input font-mono pr-8 text-sm py-1.5">
+                  <span class="absolute right-2 top-1/2 -translate-y-1/2 text-[10px] text-muted-foreground font-mono">°C</span>
+                </div>
+              </div>
+              <div>
+                <label for="hip_{{ letra }}_fs" class="block text-[11px] text-muted-foreground mb-1">Factor seguridad</label>
+                <input id="hip_{{ letra }}_fs" name="hip_{{ letra }}_fs" type="number" step="0.1" min="1" max="10"
+                       value="{{ PROYECTO['hip_' + letra + '_fs'] }}" class="input font-mono text-sm py-1.5">
+              </div>
+            </div>
+          </div>
+          {% endfor %}
+        </div>
       </div>
 
       <div class="mt-5 pt-4 border-t border-border flex items-center justify-between gap-3 flex-wrap">

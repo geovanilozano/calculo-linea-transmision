@@ -190,10 +190,22 @@ def create_app() -> Flask:
         """Guarda los parámetros principales en la sesión y devuelve el resumen actualizado."""
         proyecto_session = session.get("proyecto", {})
 
-        # Campos numéricos
+        # Campos numéricos (eléctricos, geométricos y mecánicos)
         campos_floats = [
+            # Eléctricos
             "tension_nominal_kv", "longitud_km", "potencia_mw",
-            "altitud_msnm", "vano_diseno_m", "factor_potencia",
+            "factor_potencia", "frecuencia_hz",
+            "altitud_msnm",
+            "temperatura_max_conductor_c", "temperatura_min_ambiente_c",
+            "velocidad_viento_max_kmh",
+            "regulacion_max_pct", "perdidas_max_pct",
+            # Geométricos
+            "vano_diseno_m", "haz_separacion_m",
+            # Mecánicos — 4 hipótesis (16 campos)
+            "hip_a_viento_kmh", "hip_a_temperatura_c", "hip_a_delta_temp_c", "hip_a_fs",
+            "hip_b_viento_kmh", "hip_b_temperatura_c", "hip_b_delta_temp_c", "hip_b_fs",
+            "hip_c_viento_kmh", "hip_c_temperatura_c", "hip_c_delta_temp_c", "hip_c_fs",
+            "hip_d_viento_kmh", "hip_d_temperatura_c", "hip_d_delta_temp_c", "hip_d_fs",
         ]
         for campo in campos_floats:
             val = request.form.get(campo)
@@ -203,12 +215,20 @@ def create_app() -> Flask:
                 except ValueError:
                     pass
 
+        # Campos enteros
+        for campo in ("haz_subconductores", "n_discos_aislador"):
+            val = request.form.get(campo)
+            if val is not None and val.strip():
+                try:
+                    proyecto_session[campo] = int(float(val))
+                except ValueError:
+                    pass
+
         # Campos de texto (nombre, corredor)
-        campos_texto = ["nombre", "corredor"]
+        campos_texto = ["nombre", "corredor", "conductor_tipo"]
         for campo in campos_texto:
             val = request.form.get(campo)
             if val is not None and val.strip():
-                # Limitar longitud para evitar abuso
                 proyecto_session[campo] = val.strip()[:200]
 
         session["proyecto"] = proyecto_session

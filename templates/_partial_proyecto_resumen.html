@@ -34,14 +34,13 @@
   </div>
 </div>
 
-{# Script de sincronización directa del hero — funciona sin depender de OOB #}
+{# Script de sincronización directa del hero — funciona sin depender de OOB.
+   hero-tension ya no se usa: la tensión se calcula en el módulo 1, no es input. #}
 <script>
   (function() {
     var n = document.getElementById('hero-nombre');
-    var t = document.getElementById('hero-tension');
     var c = document.getElementById('hero-corredor');
     if (n) n.textContent = {{ PROYECTO.nombre|tojson }};
-    if (t) t.textContent = {{ "%.0f"|format(PROYECTO.tension_nominal_kv)|tojson }};
     if (c) c.textContent = {{ PROYECTO.corredor|tojson }};
     // Toast de confirmación
     var existing = document.getElementById('__save_toast');

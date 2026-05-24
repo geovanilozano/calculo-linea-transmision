@@ -9,21 +9,53 @@ class BaseConfig:
     BASE_DIR = Path(__file__).resolve().parent
     SECRET_KEY = os.environ.get("SECRET_KEY", "dev-secret-change-in-production")
 
-    # Parámetros por defecto del proyecto de línea de transmisión
+    # Parámetros por defecto del proyecto de línea de transmisión.
+    # NOTA: la tensión nominal (kV) se CALCULA en el módulo 1 a partir de P, L.
+    # No es un parámetro de entrada — es un RESULTADO del análisis.
     PROYECTO_DEFAULTS = {
-        "nombre": "Línea de Transmisión 500 kV",
+        # Identificación
+        "nombre": "Cálculo Línea de Transmisión",
         "corredor": "Santander de Quilichao – Manizales",
-        "tension_nominal_kv": 500,
-        "longitud_km": 307,
-        "potencia_mw": 300,
+
+        # ===== PARÁMETROS ELÉCTRICOS DE ENTRADA =====
+        "longitud_km": 300,
         "factor_potencia": 1.0,
-        "frecuencia_hz": 60,
+        "potencia_mw": 300,
         "altitud_msnm": 1000,
-        "temperatura_max_conductor_c": 65,
-        "temperatura_min_ambiente_c": 5,
+        "temperatura_max_conductor_c": 75,
         "velocidad_viento_max_kmh": 140,
+        "temperatura_min_ambiente_c": 5,
         "regulacion_max_pct": 19.0,
         "perdidas_max_pct": 4.7,
+        "frecuencia_hz": 60,
+
+        # Tensión nominal: se calcula en módulo 1 pero se guarda como referencia
+        # para los demás módulos. Default 500 kV (caso típico Colombia).
+        "tension_nominal_kv": 500,
+
+        # ===== PARÁMETROS MECÁNICOS — 4 HIPÓTESIS CLIMÁTICAS =====
+        # Hipótesis A: máxima velocidad del viento
+        "hip_a_viento_kmh": 140,
+        "hip_a_temperatura_c": 15,
+        "hip_a_delta_temp_c": 5,
+        "hip_a_fs": 2.5,
+        # Hipótesis B: mínima temperatura
+        "hip_b_viento_kmh": 35,
+        "hip_b_temperatura_c": 5,
+        "hip_b_delta_temp_c": 5,
+        "hip_b_fs": 2.5,
+        # Hipótesis C: operación diaria (EDS)
+        "hip_c_viento_kmh": 20,
+        "hip_c_temperatura_c": 27,
+        "hip_c_delta_temp_c": 10,
+        "hip_c_fs": 5.0,
+        # Hipótesis D: máxima temperatura
+        "hip_d_viento_kmh": 0,
+        "hip_d_temperatura_c": 65,
+        "hip_d_delta_temp_c": 5,
+        "hip_d_fs": 2.5,
+
+        # ===== PARÁMETROS GEOMÉTRICOS / CONSTRUCTIVOS =====
         "haz_subconductores": 3,
         "haz_separacion_m": 0.40,
         "conductor_tipo": "ACSR Drake 795 kcmil",
