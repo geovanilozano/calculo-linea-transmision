@@ -15,11 +15,15 @@
     --input: oklch(91% 0.005 250);
     --primary: oklch(55% 0.18 250);
     --primary-foreground: oklch(99% 0 0);
-    --accent: oklch(65% 0.15 50);
+    /* Acento (naranja cálido) — reservado para destacar VALORES y RESULTADOS clave */
+    --accent: oklch(68% 0.16 55);
     --accent-foreground: oklch(99% 0 0);
     --success: oklch(65% 0.15 145);
     --warning: oklch(75% 0.15 80);
     --danger: oklch(60% 0.20 25);
+    /* Color base para sombras tintadas */
+    --shadow-primary: oklch(55% 0.18 250 / 0.18);
+    --shadow-accent: oklch(68% 0.16 55 / 0.22);
   }
 
   .dark {
@@ -33,11 +37,13 @@
     --input: oklch(25% 0.01 250);
     --primary: oklch(70% 0.18 250);
     --primary-foreground: oklch(15% 0.005 250);
-    --accent: oklch(72% 0.15 50);
+    --accent: oklch(75% 0.16 55);
     --accent-foreground: oklch(15% 0.005 250);
     --success: oklch(70% 0.15 145);
     --warning: oklch(78% 0.15 80);
     --danger: oklch(65% 0.20 25);
+    --shadow-primary: oklch(70% 0.18 250 / 0.25);
+    --shadow-accent: oklch(75% 0.16 55 / 0.30);
   }
 
   * {
@@ -47,12 +53,21 @@
   html {
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
+    /* Color-scheme nativo: hace que checkboxes/scrollbars sigan el tema */
+    color-scheme: light;
   }
+  html.dark { color-scheme: dark; }
 
   body {
     @apply bg-background text-foreground font-sans antialiased;
-    font-feature-settings: "rlig" 1, "calt" 1;
+    /* tabular-nums: alinea los números en columnas — clave para una app de ingeniería */
+    font-feature-settings: "rlig" 1, "calt" 1, "ss01" 1;
+    font-variant-numeric: tabular-nums;
   }
+
+  /* Tipografía moderna: evita viudas/huérfanos en titulares y párrafos */
+  h1, h2, h3, h4 { text-wrap: balance; }
+  p { text-wrap: pretty; }
 
   /* Smooth theme transitions */
   body, .card, button, input, select, textarea {
@@ -71,18 +86,56 @@
       transition-duration: 0.01ms !important;
     }
   }
+
+  /* ===== View Transitions API (cross-document same-origin) =====
+     Anima la transición entre módulos del tour. Browsers que no lo soporten
+     (Firefox a fines de 2026) simplemente cargan la página sin animación. */
+  @view-transition { navigation: auto; }
+
+  ::view-transition-old(root) {
+    animation: vt-fade-out 160ms cubic-bezier(0.4, 0, 1, 1);
+  }
+  ::view-transition-new(root) {
+    animation: vt-fade-in 220ms cubic-bezier(0, 0, 0.2, 1);
+  }
+  @keyframes vt-fade-out {
+    to { opacity: 0; transform: translateY(-4px); }
+  }
+  @keyframes vt-fade-in {
+    from { opacity: 0; transform: translateY(6px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    ::view-transition-old(root),
+    ::view-transition-new(root) { animation: none; }
+  }
 }
 
 @layer components {
+
+  /* ===== Card con sombra tintada al hover ===== */
   .card {
     @apply bg-card text-card-foreground border border-border rounded-xl shadow-sm;
+    transition: box-shadow 220ms cubic-bezier(0.4, 0, 0.2, 1),
+                border-color 220ms ease,
+                transform 220ms ease;
+  }
+  .card:hover {
+    box-shadow:
+      0 1px 2px -1px var(--shadow-primary),
+      0 12px 28px -12px var(--shadow-primary);
+    border-color: color-mix(in oklch, var(--primary) 28%, var(--border));
   }
 
+  /* ===== Botones ===== */
   .btn-primary {
     @apply inline-flex items-center justify-center gap-2 px-4 py-2 rounded-lg
            bg-primary text-primary-foreground font-medium
            hover:opacity-90 active:scale-95 transition-all
            disabled:opacity-50 disabled:pointer-events-none;
+  }
+  .btn-primary:hover {
+    box-shadow: 0 6px 20px -8px var(--shadow-primary);
   }
 
   .btn-secondary {
@@ -98,40 +151,48 @@
            hover:bg-muted active:scale-95 transition-all;
   }
 
+  .btn-danger {
+    @apply inline-flex items-center justify-center gap-2 px-4 py-2 rounded-lg
+           font-medium text-white
+           hover:opacity-90 active:scale-95 transition-all
+           disabled:opacity-50 disabled:pointer-events-none;
+    background-color: #dc2626;
+  }
+
+  /* ===== Inputs ===== */
   .input {
     @apply w-full px-3 py-2 rounded-lg bg-card border border-input
            text-foreground placeholder:text-muted-foreground
            focus:border-primary focus:ring-1 focus:ring-primary
            disabled:opacity-50 disabled:cursor-not-allowed
            transition-colors;
+    font-variant-numeric: tabular-nums;
   }
 
+  /* ===== Badges ===== */
   .badge {
     @apply inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-xs font-medium;
   }
-
   .badge-success {
     @apply badge text-success;
     background-color: color-mix(in oklch, var(--success) 15%, transparent);
   }
-
   .badge-warning {
     @apply badge text-warning;
     background-color: color-mix(in oklch, var(--warning) 15%, transparent);
   }
-
   .badge-danger {
     @apply badge text-danger;
     background-color: color-mix(in oklch, var(--danger) 15%, transparent);
   }
 
+  /* ===== Sidebar links ===== */
   .sidebar-link {
     @apply flex items-center gap-3 px-3 py-2 rounded-lg text-sm
            text-muted-foreground font-medium
            hover:bg-muted hover:text-foreground
            transition-colors;
   }
-
   .sidebar-link-active {
     @apply sidebar-link text-primary;
     background-color: color-mix(in oklch, var(--primary) 10%, transparent);
@@ -140,4 +201,88 @@
     background-color: color-mix(in oklch, var(--primary) 15%, transparent);
     color: var(--primary);
   }
+
+  /* =================================================================
+     STATS — Sistema unificado para mostrar resultados numéricos.
+     Inspirado en Linear / Vercel / Stripe dashboards.
+
+     Uso:
+       <div class="stat">
+         <div class="stat-label">GMD</div>
+         <div class="stat-value">11.339</div>
+         <div class="stat-unit">m entre fases</div>
+       </div>
+
+     Para el resultado "hero" (el más importante del módulo):
+       <div class="stat-hero">
+         <div class="stat-label">Tensión recomendada</div>
+         <div class="stat-hero-value">500</div>
+         <div class="stat-unit">kV</div>
+       </div>
+     ================================================================= */
+  .stat {
+    @apply rounded-lg p-3.5 border;
+    background-color: color-mix(in oklch, var(--muted) 50%, transparent);
+    border-color: color-mix(in oklch, var(--border) 40%, transparent);
+    transition: background-color 180ms ease, border-color 180ms ease;
+  }
+  .stat:hover {
+    background-color: color-mix(in oklch, var(--accent) 6%, var(--muted));
+    border-color: color-mix(in oklch, var(--accent) 25%, transparent);
+  }
+
+  .stat-label {
+    @apply text-[10.5px] uppercase font-bold text-muted-foreground mb-1;
+    letter-spacing: 0.06em;
+  }
+
+  .stat-value {
+    @apply font-mono font-bold text-foreground;
+    font-size: 1.25rem;          /* 20px */
+    line-height: 1.1;
+    font-variant-numeric: tabular-nums;
+    letter-spacing: -0.01em;
+  }
+
+  /* Hero: el valor estrella del módulo. Acento naranja, tipografía grande */
+  .stat-hero-value {
+    @apply font-mono font-bold;
+    color: var(--accent);
+    font-size: 2.5rem;           /* 40px */
+    line-height: 1;
+    font-variant-numeric: tabular-nums;
+    letter-spacing: -0.025em;
+  }
+
+  .stat-unit {
+    @apply text-[11px] text-muted-foreground font-mono mt-0.5;
+  }
+
+  /* =================================================================
+     VALIDITY CHIPS — Estado de un resultado según normativa
+     ================================================================= */
+  .chip {
+    @apply inline-flex items-center gap-1.5 px-2 py-0.5 rounded-md text-[11px] font-semibold border;
+    font-variant-numeric: tabular-nums;
+  }
+  .chip-valid {
+    color: var(--success);
+    border-color: color-mix(in oklch, var(--success) 30%, transparent);
+    background-color: color-mix(in oklch, var(--success) 10%, transparent);
+  }
+  .chip-warn {
+    color: var(--warning);
+    border-color: color-mix(in oklch, var(--warning) 35%, transparent);
+    background-color: color-mix(in oklch, var(--warning) 12%, transparent);
+  }
+  .chip-fail {
+    color: var(--danger);
+    border-color: color-mix(in oklch, var(--danger) 35%, transparent);
+    background-color: color-mix(in oklch, var(--danger) 10%, transparent);
+  }
+
+  /* =================================================================
+     UTILIDAD: tabular-nums explícita (por si se necesita en spans)
+     ================================================================= */
+  .num { font-variant-numeric: tabular-nums; letter-spacing: -0.01em; }
 }

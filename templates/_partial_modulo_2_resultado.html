@@ -20,38 +20,40 @@
 
   {# Resultados clave #}
   <div class="grid grid-cols-2 gap-3">
-    <div class="bg-muted/50 rounded-lg p-4">
-      <div class="text-xs text-muted-foreground uppercase tracking-wider mb-1">GMD</div>
-      <div class="font-mono font-bold text-xl text-foreground">{{ "%.3f"|format(r.gmd_m) }}</div>
-      <div class="text-xs text-muted-foreground">m entre fases</div>
+    <div class="stat">
+      <div class="stat-label">GMD</div>
+      <div class="stat-value">{{ "%.3f"|format(r.gmd_m) }}</div>
+      <div class="stat-unit">m entre fases</div>
     </div>
-    <div class="bg-muted/50 rounded-lg p-4">
-      <div class="text-xs text-muted-foreground uppercase tracking-wider mb-1">GMR_L</div>
-      <div class="font-mono font-bold text-xl text-foreground">{{ "%.4f"|format(r.gmr_l_m) }}</div>
-      <div class="text-xs text-muted-foreground">m inductancia</div>
+    <div class="stat">
+      <div class="stat-label">GMR_L</div>
+      <div class="stat-value">{{ "%.4f"|format(r.gmr_l_m) }}</div>
+      <div class="stat-unit">m inductancia</div>
     </div>
-    <div class="bg-muted/50 rounded-lg p-4">
-      <div class="text-xs text-muted-foreground uppercase tracking-wider mb-1">GMR_C</div>
-      <div class="font-mono font-bold text-xl text-foreground">{{ "%.4f"|format(r.gmr_c_m) }}</div>
-      <div class="text-xs text-muted-foreground">m capacitancia</div>
+    <div class="stat">
+      <div class="stat-label">GMR_C</div>
+      <div class="stat-value">{{ "%.4f"|format(r.gmr_c_m) }}</div>
+      <div class="stat-unit">m capacitancia</div>
     </div>
-    <div class="bg-muted/50 rounded-lg p-4">
-      <div class="text-xs text-muted-foreground uppercase tracking-wider mb-1">R envolvente</div>
-      <div class="font-mono font-bold text-xl text-foreground">{{ "%.3f"|format(r.radio_circulo_envolvente_m) }}</div>
-      <div class="text-xs text-muted-foreground">m círculo del haz</div>
+    <div class="stat">
+      <div class="stat-label">R envolvente</div>
+      <div class="stat-value">{{ "%.3f"|format(r.radio_circulo_envolvente_m) }}</div>
+      <div class="stat-unit">m círculo del haz</div>
     </div>
   </div>
 
-  {# Info adicional #}
+  {# Estado de la configuración #}
   {% if r.triangulo_valido %}
-    <div class="rounded-lg p-3 flex items-center gap-3"
-         style="background: color-mix(in oklch, var(--success) 8%, transparent);">
-      <i data-lucide="check-circle-2" class="size-4 shrink-0" style="color: var(--success);"></i>
-      <p class="text-xs text-muted-foreground">
-        Configuración válida con haz de <strong class="text-foreground">{{ r.n_subconductores }}</strong>
+    <div class="flex items-center gap-2 flex-wrap pt-1">
+      <span class="chip chip-valid">
+        <i data-lucide="check" class="size-3"></i>
+        Configuración válida
+      </span>
+      <span class="text-xs text-muted-foreground">
+        Haz de <strong class="text-foreground num">{{ r.n_subconductores }}</strong>
         subconductor{{ 'es' if r.n_subconductores > 1 else '' }}
-        {% if r.n_subconductores > 1 %}separados <strong class="text-foreground">{{ r.db_m }} m</strong>{% endif %}.
-      </p>
+        {% if r.n_subconductores > 1 %}separados <strong class="text-foreground num">{{ r.db_m }} m</strong>{% endif %}.
+      </span>
     </div>
   {% endif %}
 </div>

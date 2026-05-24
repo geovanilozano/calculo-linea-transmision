@@ -5,57 +5,86 @@
   {{ figura_expandible(figura_b64, "Perfil de tensión a lo largo de la línea + indicadores") }}
 
   <div class="grid grid-cols-2 md:grid-cols-4 gap-2">
-    <div class="bg-muted/50 rounded-lg p-3">
-      <div class="text-xs text-muted-foreground mb-0.5">|Zc|</div>
-      <div class="font-mono font-bold text-foreground">{{ "%.1f"|format((r.zc_re**2 + r.zc_im**2)**0.5) }}</div>
-      <div class="text-xs text-muted-foreground">Ω característica</div>
+    <div class="stat">
+      <div class="stat-label">|Zc|</div>
+      <div class="stat-value">{{ "%.1f"|format((r.zc_re**2 + r.zc_im**2)**0.5) }}</div>
+      <div class="stat-unit">Ω característica</div>
     </div>
-    <div class="bg-muted/50 rounded-lg p-3">
-      <div class="text-xs text-muted-foreground mb-0.5">|A|</div>
-      <div class="font-mono font-bold text-foreground">{{ "%.4f"|format((r.a_re**2 + r.a_im**2)**0.5) }}</div>
-      <div class="text-xs text-muted-foreground">ABCD</div>
+    <div class="stat">
+      <div class="stat-label">|A|</div>
+      <div class="stat-value">{{ "%.4f"|format((r.a_re**2 + r.a_im**2)**0.5) }}</div>
+      <div class="stat-unit">ABCD</div>
     </div>
-    <div class="bg-muted/50 rounded-lg p-3">
-      <div class="text-xs text-muted-foreground mb-0.5">V_G</div>
-      <div class="font-mono font-bold text-foreground">{{ "%.1f"|format(r.vg_ll_kv) }}</div>
-      <div class="text-xs text-muted-foreground">kV generador</div>
+    <div class="stat">
+      <div class="stat-label">V_G</div>
+      <div class="stat-value">{{ "%.1f"|format(r.vg_ll_kv) }}</div>
+      <div class="stat-unit">kV generador</div>
     </div>
-    <div class="bg-muted/50 rounded-lg p-3">
-      <div class="text-xs text-muted-foreground mb-0.5">I_G</div>
-      <div class="font-mono font-bold text-foreground">{{ "%.0f"|format(r.ig_a) }}</div>
-      <div class="text-xs text-muted-foreground">A generador</div>
+    <div class="stat">
+      <div class="stat-label">I_G</div>
+      <div class="stat-value">{{ "%.0f"|format(r.ig_a) }}</div>
+      <div class="stat-unit">A generador</div>
     </div>
   </div>
 
-  {# Indicadores con validación #}
+  {# Indicadores con validación RETIE #}
   <div class="grid grid-cols-3 gap-3">
     {# Regulación #}
-    <div class="rounded-lg p-4 border-2"
-         style="border-color: var({{ 'success' if r.regulacion_cumple else 'danger' }}); background: color-mix(in oklch, var({{ 'success' if r.regulacion_cumple else 'danger' }}) 8%, transparent);">
-      <div class="text-xs uppercase tracking-wider mb-1" style="color: var({{ 'success' if r.regulacion_cumple else 'danger' }});">Regulación</div>
-      <div class="font-mono font-bold text-2xl text-foreground">{{ "%.2f"|format(r.regulacion_pct) }}%</div>
-      <div class="text-xs text-muted-foreground mt-1">
-        {% if r.regulacion_cumple %}✓ &lt; {{ r.reg_max_pct }}%{% else %}✗ supera {{ r.reg_max_pct }}%{% endif %}
+    <div class="rounded-xl p-4 border"
+         style="border-color: color-mix(in oklch, var({{ '--success' if r.regulacion_cumple else '--danger' }}) 35%, transparent);
+                background: color-mix(in oklch, var({{ '--success' if r.regulacion_cumple else '--danger' }}) 6%, var(--card));">
+      <div class="flex items-center justify-between mb-1.5">
+        <div class="stat-label" style="color: var({{ '--success' if r.regulacion_cumple else '--danger' }});">Regulación</div>
+        <span class="chip {{ 'chip-valid' if r.regulacion_cumple else 'chip-fail' }}">
+          <i data-lucide="{{ 'check' if r.regulacion_cumple else 'x' }}" class="size-3"></i>
+          {{ 'OK' if r.regulacion_cumple else 'Excede' }}
+        </span>
+      </div>
+      <div class="stat-hero-value" style="color: var(--foreground); font-size: 1.875rem;">
+        {{ "%.2f"|format(r.regulacion_pct) }}<span class="text-base text-muted-foreground font-medium">%</span>
+      </div>
+      <div class="text-[11px] text-muted-foreground mt-1.5">
+        Límite RETIE: <span class="num">{{ r.reg_max_pct }}%</span>
         {% if r.regulacion_pct < 0 %} <span class="block">(efecto Ferranti)</span>{% endif %}
       </div>
     </div>
 
     {# Pérdidas #}
-    <div class="rounded-lg p-4 border-2"
-         style="border-color: var({{ 'success' if r.perdidas_cumple else 'danger' }}); background: color-mix(in oklch, var({{ 'success' if r.perdidas_cumple else 'danger' }}) 8%, transparent);">
-      <div class="text-xs uppercase tracking-wider mb-1" style="color: var({{ 'success' if r.perdidas_cumple else 'danger' }});">Pérdidas</div>
-      <div class="font-mono font-bold text-2xl text-foreground">{{ "%.2f"|format(r.perdidas_pct) }}%</div>
-      <div class="text-xs text-muted-foreground mt-1">
-        {% if r.perdidas_cumple %}✓ &lt; {{ r.perdidas_max_pct }}%{% else %}✗ supera {{ r.perdidas_max_pct }}%{% endif %}
+    <div class="rounded-xl p-4 border"
+         style="border-color: color-mix(in oklch, var({{ '--success' if r.perdidas_cumple else '--danger' }}) 35%, transparent);
+                background: color-mix(in oklch, var({{ '--success' if r.perdidas_cumple else '--danger' }}) 6%, var(--card));">
+      <div class="flex items-center justify-between mb-1.5">
+        <div class="stat-label" style="color: var({{ '--success' if r.perdidas_cumple else '--danger' }});">Pérdidas</div>
+        <span class="chip {{ 'chip-valid' if r.perdidas_cumple else 'chip-fail' }}">
+          <i data-lucide="{{ 'check' if r.perdidas_cumple else 'x' }}" class="size-3"></i>
+          {{ 'OK' if r.perdidas_cumple else 'Excede' }}
+        </span>
+      </div>
+      <div class="stat-hero-value" style="color: var(--foreground); font-size: 1.875rem;">
+        {{ "%.2f"|format(r.perdidas_pct) }}<span class="text-base text-muted-foreground font-medium">%</span>
+      </div>
+      <div class="text-[11px] text-muted-foreground mt-1.5">
+        Límite RETIE: <span class="num">{{ r.perdidas_max_pct }}%</span>
       </div>
     </div>
 
     {# Eficiencia #}
-    <div class="rounded-lg p-4 border-2"
-         style="border-color: var(success); background: color-mix(in oklch, var(--success) 8%, transparent);">
-      <div class="text-xs uppercase tracking-wider mb-1" style="color: var(--success);">Eficiencia</div>
-      <div class="font-mono font-bold text-2xl text-foreground">{{ "%.2f"|format(r.eficiencia_pct) }}%</div>
-      <div class="text-xs text-muted-foreground mt-1">P_R / P_G</div>
+    <div class="rounded-xl p-4 border"
+         style="border-color: color-mix(in oklch, var(--success) 35%, transparent);
+                background: color-mix(in oklch, var(--success) 6%, var(--card));">
+      <div class="flex items-center justify-between mb-1.5">
+        <div class="stat-label" style="color: var(--success);">Eficiencia</div>
+        <span class="chip chip-valid">
+          <i data-lucide="trending-up" class="size-3"></i>
+          P_R / P_G
+        </span>
+      </div>
+      <div class="stat-hero-value" style="color: var(--foreground); font-size: 1.875rem;">
+        {{ "%.2f"|format(r.eficiencia_pct) }}<span class="text-base text-muted-foreground font-medium">%</span>
+      </div>
+      <div class="text-[11px] text-muted-foreground mt-1.5">
+        Potencia entregada / inyectada
+      </div>
     </div>
   </div>
 </div>

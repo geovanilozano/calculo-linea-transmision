@@ -5,64 +5,65 @@
   {{ figura_expandible(figura_b64, "Verificación del efecto Corona") }}
 
   <div class="grid grid-cols-2 md:grid-cols-3 gap-2">
-    <div class="bg-muted/50 rounded-lg p-3">
-      <div class="text-xs text-muted-foreground mb-0.5">R</div>
-      <div class="font-mono font-bold text-foreground">{{ "%.4f"|format(r.r_fase_ohm_km) }}</div>
-      <div class="text-xs text-muted-foreground">Ω/km</div>
+    <div class="stat">
+      <div class="stat-label">R</div>
+      <div class="stat-value">{{ "%.4f"|format(r.r_fase_ohm_km) }}</div>
+      <div class="stat-unit">Ω/km</div>
     </div>
-    <div class="bg-muted/50 rounded-lg p-3">
-      <div class="text-xs text-muted-foreground mb-0.5">X_L</div>
-      <div class="font-mono font-bold text-foreground">{{ "%.4f"|format(r.xl_fase_ohm_km) }}</div>
-      <div class="text-xs text-muted-foreground">Ω/km</div>
+    <div class="stat">
+      <div class="stat-label">X_L</div>
+      <div class="stat-value">{{ "%.4f"|format(r.xl_fase_ohm_km) }}</div>
+      <div class="stat-unit">Ω/km</div>
     </div>
-    <div class="bg-muted/50 rounded-lg p-3">
-      <div class="text-xs text-muted-foreground mb-0.5">B</div>
-      <div class="font-mono font-bold text-foreground">{{ "%.2e"|format(r.b_fase_s_km) }}</div>
-      <div class="text-xs text-muted-foreground">S/km</div>
+    <div class="stat">
+      <div class="stat-label">B</div>
+      <div class="stat-value">{{ "%.2e"|format(r.b_fase_s_km) }}</div>
+      <div class="stat-unit">S/km</div>
     </div>
-    <div class="bg-muted/50 rounded-lg p-3">
-      <div class="text-xs text-muted-foreground mb-0.5">|Z| total</div>
-      <div class="font-mono font-bold text-foreground">{{ "%.1f"|format((r.z_total_re**2 + r.z_total_im**2)**0.5) }}</div>
-      <div class="text-xs text-muted-foreground">Ω línea</div>
+    <div class="stat">
+      <div class="stat-label">|Z| total</div>
+      <div class="stat-value">{{ "%.1f"|format((r.z_total_re**2 + r.z_total_im**2)**0.5) }}</div>
+      <div class="stat-unit">Ω línea</div>
     </div>
-    <div class="bg-muted/50 rounded-lg p-3">
-      <div class="text-xs text-muted-foreground mb-0.5">|Y| total</div>
-      <div class="font-mono font-bold text-foreground">{{ "%.2e"|format(r.y_total_im) }}</div>
-      <div class="text-xs text-muted-foreground">S línea</div>
+    <div class="stat">
+      <div class="stat-label">|Y| total</div>
+      <div class="stat-value">{{ "%.2e"|format(r.y_total_im) }}</div>
+      <div class="stat-unit">S línea</div>
     </div>
-    <div class="bg-muted/50 rounded-lg p-3">
-      <div class="text-xs text-muted-foreground mb-0.5">δ (aire)</div>
-      <div class="font-mono font-bold text-foreground">{{ "%.3f"|format(r.densidad_relativa) }}</div>
-      <div class="text-xs text-muted-foreground">a {{ "%.0f"|format(r.altitud_msnm) }} m</div>
+    <div class="stat">
+      <div class="stat-label">δ (aire)</div>
+      <div class="stat-value">{{ "%.3f"|format(r.densidad_relativa) }}</div>
+      <div class="stat-unit">a {{ "%.0f"|format(r.altitud_msnm) }} m</div>
     </div>
   </div>
 
   {# Validación Corona #}
-  {% if r.corona_cumple %}
-    <div class="rounded-lg p-4 border-2"
-         style="border-color: var(--success); background: color-mix(in oklch, var(--success) 8%, transparent);">
-      <div class="flex items-start gap-3">
-        <i data-lucide="check-circle-2" class="size-5 shrink-0 mt-0.5" style="color: var(--success);"></i>
-        <div>
-          <div class="font-semibold text-foreground">Corona OK · Cs = {{ "%.2f"|format(r.coef_seguridad_corona) }} &gt; 1</div>
-          <p class="text-xs text-muted-foreground mt-1">
-            E_sup ({{ "%.2f"|format(r.gradiente_superficial_kv_cm) }} kV/cm) &lt; E_c ({{ "%.2f"|format(r.gradiente_critico_kv_cm) }} kV/cm)
-          </p>
+  <div class="rounded-xl p-4 border"
+       style="border-color: color-mix(in oklch, var({{ '--success' if r.corona_cumple else '--danger' }}) 35%, transparent);
+              background: color-mix(in oklch, var({{ '--success' if r.corona_cumple else '--danger' }}) 6%, var(--card));">
+    <div class="flex items-start gap-3">
+      <div class="shrink-0 size-9 rounded-lg grid place-items-center"
+           style="background: color-mix(in oklch, var({{ '--success' if r.corona_cumple else '--danger' }}) 18%, transparent);">
+        <i data-lucide="{{ 'check-circle-2' if r.corona_cumple else 'alert-triangle' }}" class="size-4"
+           style="color: var({{ '--success' if r.corona_cumple else '--danger' }});"></i>
+      </div>
+      <div class="min-w-0 flex-1">
+        <div class="flex items-center gap-2 flex-wrap mb-1">
+          <span class="font-semibold text-foreground">
+            Verificación Corona
+          </span>
+          <span class="chip {{ 'chip-valid' if r.corona_cumple else 'chip-fail' }}">
+            <i data-lucide="{{ 'check' if r.corona_cumple else 'x' }}" class="size-3"></i>
+            Cs = {{ "%.2f"|format(r.coef_seguridad_corona) }}
+          </span>
         </div>
+        <p class="text-xs text-muted-foreground">
+          E_sup = <span class="num text-foreground font-medium">{{ "%.2f"|format(r.gradiente_superficial_kv_cm) }}</span> kV/cm
+          {{ '&lt;' | safe if r.corona_cumple else '&gt;' | safe }}
+          E_crítico = <span class="num text-foreground font-medium">{{ "%.2f"|format(r.gradiente_critico_kv_cm) }}</span> kV/cm.
+          {% if not r.corona_cumple %}Considera aumentar el haz o la separación.{% endif %}
+        </p>
       </div>
     </div>
-  {% else %}
-    <div class="rounded-lg p-4 border-2"
-         style="border-color: var(--danger); background: color-mix(in oklch, var(--danger) 8%, transparent);">
-      <div class="flex items-start gap-3">
-        <i data-lucide="alert-triangle" class="size-5 shrink-0 mt-0.5" style="color: var(--danger);"></i>
-        <div>
-          <div class="font-semibold text-foreground">Corona NO cumple · Cs = {{ "%.2f"|format(r.coef_seguridad_corona) }}</div>
-          <p class="text-xs text-muted-foreground mt-1">
-            El gradiente superficial supera el crítico. Considera aumentar el haz o la separación.
-          </p>
-        </div>
-      </div>
-    </div>
-  {% endif %}
+  </div>
 </div>

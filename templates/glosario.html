@@ -35,18 +35,15 @@
       </div>
     </div>
 
-    {# Buscador #}
+    {# Buscador (type="text" para evitar el botón nativo de clear del navegador) #}
     <div class="relative max-w-2xl">
-      <div class="absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none">
-        <i data-lucide="search" class="size-4 text-muted-foreground"></i>
-      </div>
       <input
         id="glosario-search"
-        type="search"
+        type="text"
         x-model="query"
         @input.debounce.120ms="apply()"
         placeholder="Buscar un término… (p. ej. catenaria, BIL, efecto Corona)"
-        class="w-full pl-10 pr-10 py-2.5 rounded-lg border border-border bg-background text-foreground text-sm
+        class="w-full px-4 pr-10 py-2.5 rounded-lg border border-border bg-background text-foreground text-sm
                focus:outline-none focus:ring-2 focus:ring-primary/40 focus:border-primary/60 transition"
         autocomplete="off"
         spellcheck="false">

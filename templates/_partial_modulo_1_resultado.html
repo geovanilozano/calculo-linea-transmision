@@ -9,44 +9,48 @@
 
   {# Resultados numéricos en cards #}
   <div class="grid grid-cols-3 gap-2 mb-4">
-    <div class="bg-muted/50 rounded-lg p-3 text-center">
-      <div class="text-xs text-muted-foreground mb-1">Hefner</div>
-      <div class="font-mono font-bold text-foreground">{{ "%.0f"|format(r.hefner_kv) }}</div>
-      <div class="text-xs text-muted-foreground">kV</div>
+    <div class="stat text-center">
+      <div class="stat-label">Hefner</div>
+      <div class="stat-value">{{ "%.0f"|format(r.hefner_kv) }}</div>
+      <div class="stat-unit">kV</div>
     </div>
-    <div class="bg-muted/50 rounded-lg p-3 text-center">
-      <div class="text-xs text-muted-foreground mb-1">Still</div>
-      <div class="font-mono font-bold text-foreground">{{ "%.0f"|format(r.still_kv) }}</div>
-      <div class="text-xs text-muted-foreground">kV</div>
+    <div class="stat text-center">
+      <div class="stat-label">Still</div>
+      <div class="stat-value">{{ "%.0f"|format(r.still_kv) }}</div>
+      <div class="stat-unit">kV</div>
     </div>
-    <div class="bg-muted/50 rounded-lg p-3 text-center">
-      <div class="text-xs text-muted-foreground mb-1">1 kV/km</div>
-      <div class="font-mono font-bold text-foreground">{{ "%.0f"|format(r.regla_1kvkm_kv) }}</div>
-      <div class="text-xs text-muted-foreground">kV</div>
+    <div class="stat text-center">
+      <div class="stat-label">1 kV/km</div>
+      <div class="stat-value">{{ "%.0f"|format(r.regla_1kvkm_kv) }}</div>
+      <div class="stat-unit">kV</div>
     </div>
   </div>
 
-  {# Tensión recomendada destacada #}
-  <div class="rounded-lg p-4 border-2"
-       style="border-color: var(--success); background: color-mix(in oklch, var(--success) 8%, transparent);">
-    <div class="flex items-start gap-3">
-      <div class="shrink-0 size-10 rounded-lg grid place-items-center"
-           style="background: color-mix(in oklch, var(--success) 20%, transparent);">
-        <i data-lucide="check-circle-2" class="size-5" style="color: var(--success);"></i>
+  {# Tensión recomendada HERO #}
+  <div class="rounded-xl p-5 border"
+       style="border-color: color-mix(in oklch, var(--accent) 35%, transparent);
+              background: linear-gradient(135deg,
+                color-mix(in oklch, var(--accent) 4%, var(--card)),
+                color-mix(in oklch, var(--accent) 10%, var(--card)));">
+    <div class="flex items-start gap-4">
+      <div class="shrink-0 size-11 rounded-lg grid place-items-center"
+           style="background: color-mix(in oklch, var(--accent) 18%, transparent);">
+        <i data-lucide="zap" class="size-5" style="color: var(--accent);"></i>
       </div>
-      <div class="flex-1">
-        <div class="flex items-baseline gap-2 mb-1">
-          <span class="text-xs uppercase tracking-wider font-semibold" style="color: var(--success);">
-            Tensión recomendada
+      <div class="flex-1 min-w-0">
+        <div class="stat-label" style="color: var(--accent);">Tensión recomendada</div>
+        <div class="flex items-baseline gap-2 mb-2">
+          <span class="stat-hero-value">{{ r.tension_recomendada_kv }}</span>
+          <span class="text-lg text-muted-foreground font-mono font-medium">kV</span>
+          <span class="chip chip-valid ml-auto">
+            <i data-lucide="check" class="size-3"></i>
+            Cumple RETIE
           </span>
         </div>
-        <div class="flex items-baseline gap-1 mb-2">
-          <span class="text-3xl font-bold font-mono text-foreground">{{ r.tension_recomendada_kv }}</span>
-          <span class="text-lg text-muted-foreground font-mono">kV</span>
-        </div>
         <p class="text-sm text-muted-foreground leading-snug">{{ r.justificacion }}</p>
-        <div class="mt-2 pt-2 border-t border-success/20 flex items-center gap-1.5 text-xs" style="color: var(--success);">
-          <i data-lucide="zap" class="size-3.5"></i>
+        <div class="mt-2.5 pt-2 border-t flex items-center gap-1.5 text-xs"
+             style="border-color: color-mix(in oklch, var(--accent) 20%, transparent); color: var(--accent);">
+          <i data-lucide="arrow-right" class="size-3.5"></i>
           <span class="font-semibold">{{ r.tension_recomendada_kv }} kV propagado a los módulos 2-10</span>
         </div>
       </div>

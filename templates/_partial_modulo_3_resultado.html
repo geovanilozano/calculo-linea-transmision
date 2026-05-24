@@ -51,25 +51,25 @@
 
   {# Resultados calculados #}
   <div class="grid grid-cols-2 gap-3">
-    <div class="bg-muted/50 rounded-lg p-3">
-      <div class="text-xs text-muted-foreground uppercase tracking-wider mb-1">R fase (a T_op)</div>
-      <div class="font-mono font-bold text-lg text-foreground">{{ "%.4f"|format(r.resistencia_fase_ohm_km) }}</div>
-      <div class="text-xs text-muted-foreground">Ω/km haz {{ r.n_subc }}×</div>
+    <div class="stat">
+      <div class="stat-label">R fase (a T_op)</div>
+      <div class="stat-value">{{ "%.4f"|format(r.resistencia_fase_ohm_km) }}</div>
+      <div class="stat-unit">Ω/km haz {{ r.n_subc }}×</div>
     </div>
-    <div class="bg-muted/50 rounded-lg p-3">
-      <div class="text-xs text-muted-foreground uppercase tracking-wider mb-1">R total línea</div>
-      <div class="font-mono font-bold text-lg text-foreground">{{ "%.2f"|format(r.resistencia_total_fase_ohm) }}</div>
-      <div class="text-xs text-muted-foreground">Ω · {{ "%.0f"|format(r.longitud_km) }} km</div>
+    <div class="stat">
+      <div class="stat-label">R total línea</div>
+      <div class="stat-value">{{ "%.2f"|format(r.resistencia_total_fase_ohm) }}</div>
+      <div class="stat-unit">Ω · {{ "%.0f"|format(r.longitud_km) }} km</div>
     </div>
-    <div class="bg-muted/50 rounded-lg p-3">
-      <div class="text-xs text-muted-foreground uppercase tracking-wider mb-1">Ampacidad fase</div>
-      <div class="font-mono font-bold text-lg text-foreground">{{ "%.0f"|format(r.ampacidad_fase_a) }}</div>
-      <div class="text-xs text-muted-foreground">A · {{ r.n_subc }} × {{ "%.0f"|format(r.ampacidad_subc_a) }}</div>
+    <div class="stat">
+      <div class="stat-label">Ampacidad fase</div>
+      <div class="stat-value">{{ "%.0f"|format(r.ampacidad_fase_a) }}</div>
+      <div class="stat-unit">A · {{ r.n_subc }} × {{ "%.0f"|format(r.ampacidad_subc_a) }}</div>
     </div>
-    <div class="bg-muted/50 rounded-lg p-3">
-      <div class="text-xs text-muted-foreground uppercase tracking-wider mb-1">T operación</div>
-      <div class="font-mono font-bold text-lg text-foreground">{{ "%.0f"|format(r.temperatura_op_c) }}°C</div>
-      <div class="text-xs text-muted-foreground">Estado térmico</div>
+    <div class="stat">
+      <div class="stat-label">T operación</div>
+      <div class="stat-value">{{ "%.0f"|format(r.temperatura_op_c) }}°C</div>
+      <div class="stat-unit">Estado térmico</div>
     </div>
   </div>
 </div>
