@@ -74,12 +74,12 @@
       class="inline-block align-middle ml-1">
   <button x-ref="btn"
           @click.stop="toggle()"
-          @click.outside="open = false"
+          @click.outside="if (!$refs.pop || !$refs.pop.contains($event.target)) open = false"
           @keydown.escape.window="open = false"
           type="button"
           :style="open
             ? 'background-color: var(--primary);'
-            : 'background-color: color-mix(in oklch, var(--primary) 15%, transparent);'"
+            : 'background-color: transparent;'"
           class="inline-flex items-center justify-center size-5 rounded-full transition-colors align-middle cursor-help"
           aria-label="Más información">
     <i data-lucide="info" class="size-3.5"

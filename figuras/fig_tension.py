@@ -109,15 +109,26 @@ def generar(resultado: ResultadoTension, dark_mode: bool = False) -> str:
         f"L = {resultado.longitud_km:.0f} km",
         pad=15,
     )
-    ax.set_ylim(0, max(max(valores), ESCALONES_NORMALIZADOS_KV[-1]) * 1.15)
+    # Eje Y con headroom amplio para que la leyenda NO se monte sobre las barras/labels
+    ax.set_ylim(0, max(max(valores), ESCALONES_NORMALIZADOS_KV[-1]) * 1.30)
     ax.grid(axis="y", zorder=0)
     ax.set_axisbelow(True)
 
-    # Leyenda
+    # Leyenda POR ENCIMA del gráfico (fuera del área de barras) para que no se muerda
     legend_elements = [
         plt.Rectangle((0, 0), 1, 1, fc=color_primary, label="Criterio < escalón"),
         plt.Rectangle((0, 0), 1, 1, fc=color_accent, label="Criterio ≥ escalón"),
     ]
-    ax.legend(handles=legend_elements, loc="upper left", framealpha=0.9, fontsize=9)
+    ax.legend(
+        handles=legend_elements,
+        loc="upper center",
+        bbox_to_anchor=(0.5, -0.12),
+        ncol=2,
+        framealpha=0.9,
+        fontsize=9,
+        frameon=False,
+    )
+    # Espacio inferior extra para acomodar la leyenda externa
+    plt.subplots_adjust(bottom=0.18)
 
     return figura_a_base64(fig)
