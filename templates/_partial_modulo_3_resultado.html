@@ -1,0 +1,75 @@
+{# Partial módulo 3 - conductor con ficha técnica completa #}
+<div class="animate-fade-in space-y-4">
+
+  {# Header con conductor seleccionado y explicación destacada #}
+  <div class="rounded-lg border-2 p-5"
+       style="border-color: var(--primary); background: color-mix(in oklch, var(--primary) 5%, transparent);">
+    <div class="flex items-start justify-between gap-4 mb-3">
+      <div class="flex items-start gap-3">
+        <div class="size-10 rounded-lg shrink-0 grid place-items-center"
+             style="background: color-mix(in oklch, var(--primary) 15%, transparent);">
+          <i data-lucide="cable" class="size-5" style="color: var(--primary);"></i>
+        </div>
+        <div>
+          <div class="text-xs uppercase tracking-wider mb-0.5" style="color: var(--primary);">Conductor activo</div>
+          <div class="font-semibold text-foreground text-base">{{ cond.designacion }}</div>
+        </div>
+      </div>
+      <span class="badge shrink-0"
+            style="background: color-mix(in oklch, var(--primary) 15%, transparent); color: var(--primary);">
+        {{ cond.tipo }}
+      </span>
+    </div>
+    <div class="text-sm text-foreground leading-relaxed pl-13">
+      <strong class="text-primary">¿Cuándo usar?</strong>
+      {{ cond.uso_tipico }}
+    </div>
+  </div>
+
+  {% from "_macros.html" import figura_expandible %}
+  {{ figura_expandible(figura_b64, "Sección transversal del conductor", "w-full h-auto max-h-80 object-contain mx-auto") }}
+
+  {# Ficha técnica completa #}
+  <div class="rounded-lg border border-border overflow-hidden">
+    <div class="bg-muted/50 px-4 py-2 text-xs font-semibold text-muted-foreground uppercase tracking-wider">
+      Ficha técnica del conductor
+    </div>
+    <table class="w-full text-sm">
+      <tbody class="divide-y divide-border">
+        <tr><td class="px-4 py-2 text-muted-foreground">Diámetro exterior</td><td class="px-4 py-2 font-mono text-right">{{ cond.diametro_exterior_mm }} mm</td></tr>
+        <tr><td class="px-4 py-2 text-muted-foreground">Sección total</td><td class="px-4 py-2 font-mono text-right">{{ cond.seccion_total_mm2 }} mm²</td></tr>
+        <tr><td class="px-4 py-2 text-muted-foreground">GMR (radio medio geométrico)</td><td class="px-4 py-2 font-mono text-right">{{ cond.gmr_mm }} mm</td></tr>
+        <tr><td class="px-4 py-2 text-muted-foreground">Resistencia AC (65°C)</td><td class="px-4 py-2 font-mono text-right">{{ cond.resistencia_ac_65c_ohm_km }} Ω/km</td></tr>
+        <tr><td class="px-4 py-2 text-muted-foreground">Ampacidad nominal</td><td class="px-4 py-2 font-mono text-right">{{ cond.ampacidad_a }} A</td></tr>
+        <tr><td class="px-4 py-2 text-muted-foreground">Masa lineal</td><td class="px-4 py-2 font-mono text-right">{{ cond.masa_kg_m }} kg/m</td></tr>
+        <tr><td class="px-4 py-2 text-muted-foreground">Carga de rotura</td><td class="px-4 py-2 font-mono text-right">{{ cond.carga_rotura_kgf }} kgf</td></tr>
+        <tr><td class="px-4 py-2 text-muted-foreground">Módulo de elasticidad</td><td class="px-4 py-2 font-mono text-right">{{ cond.modulo_elasticidad_n_mm2 }} N/mm²</td></tr>
+        <tr><td class="px-4 py-2 text-muted-foreground">Coef. dilatación térmica</td><td class="px-4 py-2 font-mono text-right">{{ "%.3e"|format(cond.coef_dilatacion_invc) }} /°C</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  {# Resultados calculados #}
+  <div class="grid grid-cols-2 gap-3">
+    <div class="bg-muted/50 rounded-lg p-3">
+      <div class="text-xs text-muted-foreground uppercase tracking-wider mb-1">R fase (a T_op)</div>
+      <div class="font-mono font-bold text-lg text-foreground">{{ "%.4f"|format(r.resistencia_fase_ohm_km) }}</div>
+      <div class="text-xs text-muted-foreground">Ω/km — haz {{ r.n_subc }}×</div>
+    </div>
+    <div class="bg-muted/50 rounded-lg p-3">
+      <div class="text-xs text-muted-foreground uppercase tracking-wider mb-1">R total línea</div>
+      <div class="font-mono font-bold text-lg text-foreground">{{ "%.2f"|format(r.resistencia_total_fase_ohm) }}</div>
+      <div class="text-xs text-muted-foreground">Ω · {{ "%.0f"|format(r.longitud_km) }} km</div>
+    </div>
+    <div class="bg-muted/50 rounded-lg p-3">
+      <div class="text-xs text-muted-foreground uppercase tracking-wider mb-1">Ampacidad fase</div>
+      <div class="font-mono font-bold text-lg text-foreground">{{ "%.0f"|format(r.ampacidad_fase_a) }}</div>
+      <div class="text-xs text-muted-foreground">A · {{ r.n_subc }} × {{ "%.0f"|format(r.ampacidad_subc_a) }}</div>
+    </div>
+    <div class="bg-muted/50 rounded-lg p-3">
+      <div class="text-xs text-muted-foreground uppercase tracking-wider mb-1">T operación</div>
+      <div class="font-mono font-bold text-lg text-foreground">{{ "%.0f"|format(r.temperatura_op_c) }}°C</div>
+      <div class="text-xs text-muted-foreground">Estado térmico</div>
+    </div>
+  </div>
+</div>

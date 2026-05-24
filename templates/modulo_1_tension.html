@@ -1,40 +1,171 @@
 {% extends "base.html" %}
 
 {% block panel_parametros %}
-<div class="space-y-4">
+<form hx-post="{{ url_for('api_modulo_1_calcular') }}"
+      hx-target="#modulo-1-resultado"
+      hx-swap="innerHTML"
+      hx-trigger="load, input delay:400ms from:input"
+      class="space-y-4">
+
   <div>
-    <label class="block text-sm font-medium mb-1">Potencia (MW)</label>
-    <input type="number" class="input" value="{{ PROYECTO.potencia_mw }}" readonly>
+    <label for="potencia_mw" class="block text-sm font-medium mb-1.5">Potencia activa (MW)</label>
+    <div class="relative">
+      <input id="potencia_mw" name="potencia_mw" type="number" step="1" min="1" max="5000"
+             value="{{ PROYECTO.potencia_mw }}" class="input font-mono pr-12">
+      <span class="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-muted-foreground font-mono">MW</span>
+    </div>
   </div>
+
   <div>
-    <label class="block text-sm font-medium mb-1">Longitud (km)</label>
-    <input type="number" class="input" value="{{ PROYECTO.longitud_km }}" readonly>
+    <label for="longitud_km" class="block text-sm font-medium mb-1.5">Longitud de la línea (km)</label>
+    <div class="relative">
+      <input id="longitud_km" name="longitud_km" type="number" step="1" min="1" max="2000"
+             value="{{ PROYECTO.longitud_km }}" class="input font-mono pr-12">
+      <span class="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-muted-foreground font-mono">km</span>
+    </div>
   </div>
-  <button class="btn-primary w-full" disabled>
-    <i data-lucide="calculator" class="size-4"></i>
-    Calcular (próximamente)
-  </button>
+
+  <div class="pt-1 text-xs text-muted-foreground flex items-center gap-2">
+    <i data-lucide="zap" class="size-3.5"></i>
+    Los resultados se actualizan automáticamente
+  </div>
+</form>
+
+<div class="mt-6 pt-4 border-t border-border">
+  <h3 class="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-3">Escalones normalizados Colombia</h3>
+  <div class="space-y-1.5">
+    <div class="flex items-center justify-between text-sm">
+      <span class="font-mono text-foreground">115 kV</span>
+      <span class="text-xs text-muted-foreground">Subtransmisión / distribución regional</span>
+    </div>
+    <div class="flex items-center justify-between text-sm">
+      <span class="font-mono text-foreground">230 kV</span>
+      <span class="text-xs text-muted-foreground">Transmisión regional / interconexión</span>
+    </div>
+    <div class="flex items-center justify-between text-sm">
+      <span class="font-mono font-semibold text-primary">500 kV ★</span>
+      <span class="text-xs text-muted-foreground">Transmisión nacional (máximo)</span>
+    </div>
+  </div>
+  <div class="text-xs text-muted-foreground mt-3 pt-3 border-t border-border">
+    <strong class="text-foreground">500 kV es el escalón más alto</strong> normalizado en Colombia. Otros países usan 400 kV (Europa), 765 kV (Brasil/Venezuela), 800 kV (China/India).
+  </div>
 </div>
 {% endblock %}
 
 {% block panel_visualizacion %}
-<div class="aspect-video bg-muted rounded-lg grid place-items-center text-muted-foreground">
-  <div class="text-center p-6">
-    <i data-lucide="bar-chart-3" class="size-12 mx-auto mb-3 opacity-30"></i>
-    <p class="text-sm">Gráfico comparativo de criterios</p>
-    <p class="text-xs">Disponible en Fase 2</p>
+<div id="modulo-1-resultado" class="min-h-[300px]">
+  <div class="aspect-video grid place-items-center text-muted-foreground">
+    <div class="text-center">
+      <i data-lucide="loader-circle" class="size-8 mx-auto mb-2 animate-spin"></i>
+      <p class="text-sm">Calculando...</p>
+    </div>
   </div>
 </div>
 {% endblock %}
 
 {% block panel_explicacion %}
-<div class="prose prose-sm max-w-none dark:prose-invert">
-  <h3>Selección del nivel de tensión</h3>
-  <p>
-    Tres criterios empíricos ayudan a justificar qué tensión usar para una línea de transmisión: <strong>Hefner</strong>, <strong>Still</strong> y la regla de <strong>1 kV/km</strong>.
-  </p>
-  <p class="text-sm text-muted-foreground">
-    El cálculo detallado se implementará en la Fase 2 del proyecto.
-  </p>
+<div class="space-y-5">
+  <div>
+    <h3 class="text-base font-semibold mb-2">¿Qué se calcula aquí?</h3>
+    <p class="text-sm text-muted-foreground leading-relaxed">
+      Tres criterios empíricos sugieren cuál debería ser el nivel de tensión nominal en función
+      de la potencia y la longitud. El criterio adoptado es siempre el siguiente
+      <strong class="text-foreground">escalón normalizado igual o mayor</strong> al máximo de los tres.
+    </p>
+  </div>
+
+  <div>
+    <h3 class="text-base font-semibold mb-2">¿Para qué sirve?</h3>
+    <p class="text-sm text-muted-foreground leading-relaxed">
+      A mayor tensión, menor corriente para la misma potencia → <strong class="text-foreground">menos pérdidas Joule</strong>.
+      Pero también mayor costo de aislamiento, torres más altas, mayores distancias.
+      Estos criterios equilibran ambos factores.
+    </p>
+  </div>
+
+  {% from "_macros.html" import info_tooltip %}
+
+  <div>
+    <h3 class="text-base font-semibold mb-2">Las 3 fórmulas</h3>
+    <div class="space-y-3 text-sm bg-muted/50 rounded-lg p-4">
+      <div>
+        <span class="font-semibold text-primary">Hefner</span>{{ info_tooltip("Fórmula empírica europea que da una cota SUPERIOR del voltaje. Tiende a sobreestimar para potencias grandes. Útil para tener un techo conservador. Origen: Hefner-Alteneck, ingeniero alemán (s. XIX). Para 300 MW y 307 km → VL ≈ 96 kV (queda corto → usar siguiente escalón).") }} (cota superior, sobreestima para grandes P):
+        $$V_L = 0{,}1 \cdot \sqrt{P \cdot L}$$
+      </div>
+      <div>
+        <span class="font-semibold text-primary">Still</span>{{ info_tooltip("Fórmula más balanceada y precisa, ampliamente usada en EE.UU. y Latinoamérica. Combina factores de longitud (en millas, de ahí el /1,609) y potencia. Suele dar la mejor estimación. Para 300 MW y 307 km → VL ≈ 87 kV (insuficiente → 500 kV).") }} (más balanceado):
+        $$V_L = 5{,}5 \cdot \sqrt{\frac{L}{1{,}609} + \frac{P}{100}}$$
+      </div>
+      <div>
+        <span class="font-semibold text-primary">Regla 1 kV/km</span>{{ info_tooltip("Heurística rapidísima usada en chequeos de campo: la tensión nominal en kV debe ser aproximadamente igual a la longitud en km. Para 307 km → 307 kV, lo que obliga a saltar al escalón superior (500 kV). No tiene base teórica formal pero funciona bien en líneas de Sudamérica.") }} (chequeo rápido):
+        $$V_L = L$$
+      </div>
+      <div class="text-xs text-muted-foreground mt-3 pt-3 border-t border-border space-y-1">
+        <div class="font-semibold text-foreground mb-1">Significado de las variables:</div>
+        <div>• <strong class="text-foreground">$P$</strong> = Potencia activa a transmitir, en <strong>kW</strong> (kilowatts)</div>
+        <div>• <strong class="text-foreground">$L$</strong> = Longitud total de la línea, en <strong>km</strong> (kilómetros)</div>
+        <div>• <strong class="text-foreground">$V_L$</strong> = Tensión nominal entre líneas (línea-línea), en <strong>kV</strong> (kilovolts)</div>
+        <div class="pt-1 italic text-muted-foreground/80">Nota: la app convierte automáticamente MW → kW al calcular.</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="rounded-lg border-2 p-4"
+       style="border-color: var(--accent); background: color-mix(in oklch, var(--accent) 6%, transparent);">
+    <h3 class="text-base font-semibold mb-2 flex items-center gap-2">
+      <i data-lucide="book-open-text" class="size-4" style="color: var(--accent);"></i>
+      Normativa Colombiana
+    </h3>
+    <p class="text-sm text-muted-foreground leading-relaxed mb-3">
+      Los escalones de tensión para transmisión están normalizados por:
+    </p>
+    <ul class="text-xs text-muted-foreground space-y-2 list-disc list-inside">
+      <li>
+        <a href="https://www.minenergia.gov.co/es/micrositios/retie/" target="_blank" rel="noopener noreferrer"
+           class="text-primary hover:underline font-semibold inline-flex items-center gap-1">
+          RETIE Capítulo 12
+          <i data-lucide="external-link" class="size-3"></i>
+        </a>
+        — Tensiones nominales normalizadas en Colombia: <span class="font-mono">115 / 230 / 500 kV</span>
+      </li>
+      <li>
+        <a href="https://gestornormativo.creg.gov.co/gestor/entorno/docs/resolucion_creg_0097_2008.htm" target="_blank" rel="noopener noreferrer"
+           class="text-primary hover:underline font-semibold inline-flex items-center gap-1">
+          CREG Resolución 097/2008
+          <i data-lucide="external-link" class="size-3"></i>
+        </a>
+        — Regulación del Servicio de Transmisión Nacional (STN)
+      </li>
+      <li>
+        <a href="https://tienda.icontec.org/gp-tensiones-y-frecuencias-nominales-para-los-sistemas-de-suministro-de-energia-electrica-en-redes-de-servicio-publico-ntc1340-1985.html" target="_blank" rel="noopener noreferrer"
+           class="text-primary hover:underline font-semibold inline-flex items-center gap-1">
+          NTC 1340
+          <i data-lucide="external-link" class="size-3"></i>
+        </a>
+        — Tensiones nominales normalizadas para sistemas de potencia
+      </li>
+      <li>
+        <a href="https://www1.upme.gov.co/Energia_electrica/Paginas/Plan-de-Expansion-de-Referencia-Generacion-Transmision.aspx" target="_blank" rel="noopener noreferrer"
+           class="text-primary hover:underline font-semibold inline-flex items-center gap-1">
+          UPME — Plan de Expansión
+          <i data-lucide="external-link" class="size-3"></i>
+        </a>
+        — Define qué proyectos necesitan cada escalón
+      </li>
+    </ul>
+    <p class="text-xs text-muted-foreground mt-3 pt-3 border-t border-border">
+      📌 En Colombia <strong class="text-foreground">500 kV es el máximo</strong> nivel de tensión en operación. Para potencias y distancias mayores se requeriría HVDC o una nueva clase de tensión (que no existe actualmente).
+    </p>
+  </div>
+
+  <div>
+    <h3 class="text-base font-semibold mb-2">¿Qué pasa si...?</h3>
+    <ul class="space-y-1.5 text-sm text-muted-foreground">
+      <li>• <strong class="text-foreground">L = 50 km, P = 50 MW</strong>: 1 kV/km da 50 kV → probablemente 115 kV es suficiente</li>
+      <li>• <strong class="text-foreground">L = 300 km, P = 300 MW</strong>: el escenario base → 500 kV</li>
+      <li>• <strong class="text-foreground">L = 1000 km, P = 1000 MW</strong>: en otros países usarían 765 kV o HVDC</li>
+    </ul>
+  </div>
 </div>
 {% endblock %}

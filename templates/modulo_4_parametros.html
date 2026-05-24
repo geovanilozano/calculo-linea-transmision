@@ -1,33 +1,153 @@
 {% extends "base.html" %}
 
 {% block panel_parametros %}
-<div class="space-y-4">
-  <p class="text-sm text-muted-foreground">
-    Los parámetros eléctricos R, L, C y la verificación del efecto Corona se calcularán en la Fase 2.
-  </p>
-  <button class="btn-primary w-full" disabled>
-    <i data-lucide="calculator" class="size-4"></i>
-    Calcular (próximamente)
-  </button>
+<div class="text-xs text-muted-foreground mb-3 pb-3 border-b border-border">
+  <i data-lucide="cable" class="size-3.5 inline -mt-0.5"></i>
+  Conductor activo: <strong class="text-foreground">{{ CONDUCTOR.designacion }}</strong>
+  <a href="{{ url_for('modulo', modulo_id=3) }}" class="text-primary hover:underline ml-1">cambiar</a>
 </div>
+
+<form hx-post="{{ url_for('api_modulo_4_calcular') }}"
+      hx-target="#modulo-4-resultado"
+      hx-swap="innerHTML"
+      hx-trigger="load, input delay:400ms from:input, change delay:200ms from:select"
+      class="space-y-4">
+
+  <div>
+    <label for="tension_kv" class="block text-sm font-medium mb-1.5">Tensión nominal (kV)</label>
+    <input id="tension_kv" name="tension_kv" type="number" step="1" min="50" max="800"
+           value="{{ PROYECTO.tension_nominal_kv }}" class="input font-mono">
+  </div>
+
+  <div>
+    <label for="n_subc" class="block text-sm font-medium mb-1.5">Subconductores por fase</label>
+    <select id="n_subc" name="n_subc" class="input">
+      <option value="1">1 (simple)</option>
+      <option value="2">2 (haz doble)</option>
+      <option value="3" selected>3 (haz triple)</option>
+      <option value="4">4 (haz cuádruple)</option>
+    </select>
+  </div>
+
+  <div>
+    <label for="db_m" class="block text-sm font-medium mb-1.5">Separación haz d_b (m)</label>
+    <input id="db_m" name="db_m" type="number" step="0.05" min="0.05" max="1.0"
+           value="0.40" class="input font-mono">
+  </div>
+
+  <div>
+    <label for="altitud_msnm" class="block text-sm font-medium mb-1.5">Altitud (msnm)</label>
+    <input id="altitud_msnm" name="altitud_msnm" type="number" step="1" min="0" max="6000"
+           value="{{ PROYECTO.altitud_msnm }}" class="input font-mono">
+    <p class="text-xs text-muted-foreground mt-1">Afecta densidad del aire y Corona</p>
+  </div>
+
+  <div>
+    <label for="longitud_km" class="block text-sm font-medium mb-1.5">Longitud (km)</label>
+    <input id="longitud_km" name="longitud_km" type="number" step="1" min="1"
+           value="{{ PROYECTO.longitud_km }}" class="input font-mono">
+  </div>
+</form>
 {% endblock %}
 
 {% block panel_visualizacion %}
-<div class="aspect-video bg-muted rounded-lg grid place-items-center text-muted-foreground">
-  <div class="text-center p-6">
-    <i data-lucide="zap" class="size-12 mx-auto mb-3 opacity-30"></i>
-    <p class="text-sm">Gradiente superficial vs altitud</p>
-    <p class="text-xs">Disponible en Fase 2</p>
+<div id="modulo-4-resultado" class="min-h-[300px]">
+  <div class="aspect-video grid place-items-center text-muted-foreground">
+    <div class="text-center">
+      <i data-lucide="loader-circle" class="size-8 mx-auto mb-2 animate-spin"></i>
+      <p class="text-sm">Calculando...</p>
+    </div>
   </div>
 </div>
 {% endblock %}
 
 {% block panel_explicacion %}
-<div class="prose prose-sm max-w-none dark:prose-invert">
-  <h3>{{ modulo_info[2] }}</h3>
-  <p>{{ modulo_info[3] }}</p>
-  <p class="text-sm text-muted-foreground">
-    El contenido completo de este módulo se implementará en la Fase 2 (Cálculos) y Fase 3 (Figuras).
-  </p>
+<div class="space-y-5">
+  <div>
+    <h3 class="text-base font-semibold mb-2">¿Qué se calcula aquí?</h3>
+    <p class="text-sm text-muted-foreground leading-relaxed">
+      Los <strong class="text-foreground">parámetros eléctricos distribuidos</strong> R, L, C, X, B por km, la
+      impedancia y admitancia totales de la línea, y la <strong class="text-foreground">verificación del efecto Corona</strong>
+      por fórmula de Peek.
+    </p>
+  </div>
+
+  {% from "_macros.html" import info_tooltip %}
+
+  <div>
+    <h3 class="text-base font-semibold mb-2">Inductancia y capacitancia</h3>
+    <div class="space-y-3 text-sm bg-muted/50 rounded-lg p-4">
+      <div>
+        <span class="font-semibold text-primary">Inductancia L</span>{{ info_tooltip("Capacidad de la línea para almacenar energía en forma de campo magnético. Determina la reactancia inductiva XL = 2πf·L (en Ω/km), que se opone al cambio de corriente alterna. A mayor GMD entre fases y menor GMR del haz, mayor inductancia.") }}:
+        $$L = 2 \times 10^{-7} \cdot \ln\left(\frac{GMD}{GMR_L}\right) \text{ [H/m]}$$
+      </div>
+      <div>
+        <span class="font-semibold text-primary">Reactancia inductiva XL</span>{{ info_tooltip("Oposición que ofrece la inductancia al paso de corriente AC. Es la parte imaginaria positiva de la impedancia. Para 60 Hz: XL = 377·L. Determina principalmente la caída de tensión y el ángulo de fase.") }}:
+        $$X_L = 2\pi f \cdot L$$
+      </div>
+      <div>
+        <span class="font-semibold text-primary">Capacitancia C</span>{{ info_tooltip("Capacidad de la línea para almacenar energía en forma de campo eléctrico entre fases y entre fase-tierra. Genera corriente capacitiva (efecto Ferranti). A mayor GMR del haz, mayor capacitancia.") }}:
+        $$C = \frac{2\pi \varepsilon_0}{\ln(GMD / GMR_C)} \text{ [F/m]}$$
+      </div>
+      <div>
+        <span class="font-semibold text-primary">Susceptancia b</span>{{ info_tooltip("Componente imaginaria de la admitancia capacitiva. b = 2πf·C. En líneas largas con baja carga produce el efecto Ferranti: la tensión en el receptor puede ser mayor que en el generador.") }}:
+        $$b = 2\pi f \cdot C$$
+      </div>
+      <p class="text-xs text-muted-foreground mt-2">$\varepsilon_0 = 8{,}854 \times 10^{-12}$ F/m  ·  $f = 60$ Hz</p>
+    </div>
+  </div>
+
+  <div>
+    <h3 class="text-base font-semibold mb-2">Impedancia y admitancia totales</h3>
+    <div class="space-y-3 text-sm bg-muted/50 rounded-lg p-4">
+      <div>
+        <span class="font-semibold text-primary">Impedancia total Z</span>{{ info_tooltip("Oposición total al flujo de corriente AC por fase, en toda la longitud de la línea. Combina la parte resistiva R (pérdidas Joule) con la inductiva jXL. Determina la caída de tensión y la potencia reactiva consumida.") }}:
+        $$Z = (R_{fase} + jX_L) \cdot L \text{ [}\Omega\text{]}$$
+      </div>
+      <div>
+        <span class="font-semibold text-primary">Admitancia total Y</span>{{ info_tooltip("Inversa de la impedancia transversal. Y = jb·L (puramente capacitiva si no hay Corona). Mide cuánta corriente fluye 'a tierra' por la capacitancia distribuida de la línea.") }}:
+        $$Y = jb \cdot L \text{ [S]}$$
+      </div>
+    </div>
+  </div>
+
+  <div>
+    <h3 class="text-base font-semibold mb-2">Densidad del aire y Corona (Peek)</h3>
+    <div class="space-y-3 text-sm bg-muted/50 rounded-lg p-4">
+      <div>
+        <span class="font-semibold text-primary">Presión barométrica h</span>{{ info_tooltip("Presión atmosférica medida en cmHg. Decrece exponencialmente con la altitud según la fórmula barométrica internacional. A 0 msnm: h=76 cmHg. A 3000 msnm: h≈53 cmHg.") }}:
+        $$h = 76 \cdot e^{-h_{snm}/7463}$$
+      </div>
+      <div>
+        <span class="font-semibold text-primary">Densidad relativa del aire δ</span>{{ info_tooltip("Densidad del aire respecto a condiciones estándar (nivel del mar, 25°C, donde δ=1). Disminuye con altitud y temperatura. A menor δ, menor rigidez dieléctrica del aire → más fácil que aparezca el efecto Corona.") }}:
+        $$\delta = \frac{3{,}921 \cdot h}{273 + \theta}$$
+      </div>
+      <div>
+        <span class="font-semibold text-primary">Gradiente crítico Ec (Peek)</span>{{ info_tooltip("Campo eléctrico mínimo en la superficie del conductor que causa ionización del aire (fórmula empírica de Peek). Si el gradiente superficial Esup supera Ec, aparece el efecto Corona: descargas eléctricas, pérdidas, ruido y radiointerferencia.") }}:
+        $$E_c = 30 \cdot m \cdot \delta \cdot \left(1 + \frac{0{,}301}{\sqrt{r \cdot \delta}}\right)$$
+      </div>
+      <div>
+        <span class="font-semibold text-primary">Gradiente superficial del haz Esup</span>{{ info_tooltip("Campo eléctrico máximo en la superficie del conductor para la tensión nominal de operación. Se calcula con la geometría del haz (n subconductores) y la GMD entre fases. Debe ser MENOR que Ec para evitar Corona permanente.") }}:
+        $$E_{sup} = \frac{V_{f-n,pico}}{n \cdot r \cdot \ln\left(\frac{GMD}{RMG_{haz}}\right)}$$
+      </div>
+      <div>
+        <span class="font-semibold text-primary">Coeficiente de seguridad Cs</span>{{ info_tooltip("Razón entre el gradiente crítico y el gradiente superficial. Si Cs > 1: el campo de operación está por debajo del crítico → no hay descargas Corona. Si Cs ≤ 1: hay Corona permanente → mal diseño (aumentar haz, mayor diámetro o más subconductores).") }}:
+        $$C_s = \frac{E_c}{E_{sup}} > 1 \implies \text{No hay Corona}$$
+      </div>
+      <p class="text-xs text-muted-foreground mt-2 pt-2 border-t border-border">
+        $m = 0{,}85$ (rugosidad conductor trenzado)  ·  $h$ en cmHg  ·  $\theta$ en °C
+      </p>
+    </div>
+  </div>
+
+  <div>
+    <h3 class="text-base font-semibold mb-2">¿Qué pasa si...?</h3>
+    <ul class="space-y-1.5 text-sm text-muted-foreground">
+      <li>• <strong class="text-foreground">↑ altitud</strong>: δ baja → Ec baja → menos margen Corona</li>
+      <li>• <strong class="text-foreground">↑ separación db</strong>: aumenta GMR_L del haz → cae XL → mejora regulación</li>
+      <li>• <strong class="text-foreground">↑ n subconductores</strong>: mejora drásticamente Corona y reduce R</li>
+      <li>• <strong class="text-foreground">Conductor más grueso</strong> (mayor r): mejor Corona</li>
+    </ul>
+  </div>
 </div>
 {% endblock %}

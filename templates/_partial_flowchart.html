@@ -1,0 +1,395 @@
+﻿{# Diagrama de flujo / bloques completo del proceso de diseño
+   de una línea de transmisión 500 kV. Se abre con JS puro (sin Alpine x-show)
+   para evitar cualquier flash al cargar la página.
+   Cada paso/fase tiene un ⓘ tooltip explicativo. #}
+{% from "_macros.html" import info_tooltip %}
+
+<div>
+  {# Botón disparador — visible en el hero #}
+  <button onclick="document.getElementById('__flowchart_modal').style.display='flex'; document.body.style.overflow='hidden';"
+          type="button"
+          class="btn-secondary text-base px-6 py-3 inline-flex"
+          title="Ver el flujo completo de cálculo paso a paso">
+    <i data-lucide="git-fork" class="size-4"></i>
+    Ver diagrama de flujo
+  </button>
+
+  {# ===== MODAL ===== HIDDEN BY DEFAULT con display:none inline #}
+  <div id="__flowchart_modal"
+       onclick="if(event.target===this){this.style.display='none'; document.body.style.overflow='';}"
+       style="display:none; position:fixed; inset:0; z-index:99998; background:rgba(0,0,0,0.85); backdrop-filter:blur(4px); align-items:flex-start; justify-content:center; padding:2rem 1rem; overflow-y:auto;">
+
+    {# Caja del modal — el onclick del padre cierra solo si event.target===modal-overlay #}
+    <div style="background-color: var(--card); border-radius: 16px; border: 1px solid var(--border); max-width: 1280px; width: 100%; padding: 2rem; box-shadow: 0 30px 80px rgba(0,0,0,0.5); position: relative; margin: auto;">
+
+      {# Header #}
+      <div class="flex items-start justify-between gap-4 mb-6 pb-4 border-b border-border">
+        <div>
+          <div class="flex items-center gap-2 mb-2">
+            <span class="badge" style="background: color-mix(in oklch, var(--primary) 15%, transparent); color: var(--primary);">
+              <i data-lucide="workflow" class="size-3"></i>
+              Diagrama de flujo
+            </span>
+          </div>
+          <h2 class="text-2xl font-bold text-foreground">Proceso completo de cálculo</h2>
+          <p class="text-sm text-muted-foreground mt-1">
+            Los 11 pasos del diseño de una línea de transmisión, con sus condiciones de validación y reiteración.
+          </p>
+        </div>
+        <button onclick="document.getElementById('__flowchart_modal').style.display='none'; document.body.style.overflow='';"
+                type="button"
+                class="size-9 rounded-lg grid place-items-center hover:bg-muted transition-colors shrink-0"
+                aria-label="Cerrar">
+          <i data-lucide="x" class="size-5"></i>
+        </button>
+      </div>
+
+      {# Leyenda #}
+      <div class="flex flex-wrap items-center gap-4 mb-6 text-xs text-muted-foreground">
+        <div class="flex items-center gap-1.5">
+          <span class="size-3 rounded" style="background: color-mix(in oklch, var(--primary) 25%, transparent); border: 1px solid var(--primary);"></span>
+          Paso de cálculo
+        </div>
+        <div class="flex items-center gap-1.5">
+          <span class="size-3 rotate-45" style="background: color-mix(in oklch, var(--warning) 25%, transparent); border: 1px solid var(--warning);"></span>
+          Decisión / validación
+        </div>
+        <div class="flex items-center gap-1.5">
+          <span class="size-3 rounded" style="background: color-mix(in oklch, var(--success) 25%, transparent); border: 1px solid var(--success);"></span>
+          Resultado validado
+        </div>
+        <div class="flex items-center gap-1.5">
+          <i data-lucide="rotate-ccw" class="size-3.5" style="color: var(--danger);"></i>
+          Si no cumple → volver al paso indicado
+        </div>
+      </div>
+
+      {# ===== DIAGRAMA ===== #}
+      <div class="space-y-2">
+
+        {# FASE 1: ENTRADA #}
+        <div class="rounded-lg border border-border p-4 mb-3" style="background: color-mix(in oklch, var(--muted) 20%, transparent);">
+          <div class="text-xs uppercase tracking-wider text-muted-foreground mb-3 font-semibold flex items-center">
+            Fase 1 · Entrada y selección de tensión
+            {{ info_tooltip("<strong>Objetivo de la fase:</strong> Recopilar los datos básicos del proyecto y determinar el nivel de tensión nominal más adecuado. Es el PUNTO DE PARTIDA: sin tensión definida no se puede avanzar con ningún cálculo posterior. La tensión determina el tamaño físico de la línea (alturas, distancias), el costo del aislamiento y el nivel de pérdidas.") }}
+          </div>
+          <div class="flex items-stretch gap-2 flex-wrap">
+            {# Paso 0 #}
+            <div class="flex-1 min-w-[180px] rounded-lg p-3 "
+               style="background: var(--card); border: 2px solid var(--primary); box-shadow: 0 2px 6px rgba(0,0,0,0.1);">
+              <div class="flex items-center gap-2 mb-1.5">
+                <span class="size-6 rounded-full text-white text-xs font-bold grid place-items-center" style="background: var(--primary);">0</span>
+                <span class="font-semibold text-sm text-foreground">Datos de entrada</span>
+                {{ info_tooltip("<strong>¿Qué datos debes ingresar?</strong><br>• <strong>Potencia P</strong> (MW): la carga que demanda el extremo receptor. Ej: 300 MW.<br>• <strong>Longitud L</strong> (km): distancia entre subestaciones. Ej: 307 km.<br>• <strong>Altitud</strong> (msnm): afecta densidad del aire y distancias RETIE. Ej: 1000 msnm.<br>• <strong>Vano de diseño</strong> (m): distancia entre torres. Ej: 400 m (típico 500 kV).<br>• <strong>Factor de potencia</strong> (cos φ): 0.9-1.0 típico. 1.0 = carga resistiva pura.<br><br><strong>¿Qué obtienes?</strong> Los datos se persisten y propagan automáticamente a TODOS los módulos siguientes.") }}
+              </div>
+              <div class="text-xs text-muted-foreground">P (MW), L (km), altitud, vano, factor potencia</div>
+            </div>
+
+            <div class="flex items-center"><i data-lucide="arrow-right" class="size-5 text-muted-foreground"></i></div>
+
+            {# Paso 1 #}
+            <div class="flex-1 min-w-[200px] rounded-lg p-3 "
+               style="background: var(--card); border: 2px solid var(--primary); box-shadow: 0 2px 6px rgba(0,0,0,0.1);">
+              <div class="flex items-center gap-2 mb-1.5">
+                <span class="size-6 rounded-full text-white text-xs font-bold grid place-items-center" style="background: var(--primary);">1</span>
+                <span class="font-semibold text-sm text-foreground">Tensión nominal</span>
+                {{ info_tooltip("<strong>¿Qué hace este paso?</strong> Aplica 3 fórmulas empíricas para estimar la tensión recomendada:<br>• <strong>Hefner:</strong> VL = 0.1·√(P·L) — cota superior conservadora<br>• <strong>Still:</strong> VL = 5.5·√(L/1.609 + P/100) — la más balanceada<br>• <strong>Regla 1 kV/km:</strong> VL = L — chequeo rápido<br><br><strong>¿Qué obtienes?</strong> Se adopta el siguiente escalón normalizado de Colombia (115, 230 o 500 kV) por encima del máximo de las tres fórmulas. Para 300 MW · 307 km → 500 kV.<br><br><strong>Norma:</strong> RETIE Cap. 12, NTC 1340.") }}
+              </div>
+              <div class="text-xs text-muted-foreground">Hefner, Still, 1kV/km → adoptar escalón normalizado (115/230/500)</div>
+            </div>
+
+            <div class="flex items-center"><i data-lucide="arrow-right" class="size-5 text-muted-foreground"></i></div>
+
+            {# Decisión #}
+            <div class="flex-1 min-w-[200px] rounded-lg p-3"
+                 style="background: color-mix(in oklch, var(--warning) 8%, transparent); border: 2px solid var(--warning);">
+              <div class="flex items-center gap-2 mb-1.5">
+                <i data-lucide="git-branch" class="size-4" style="color: var(--warning);"></i>
+                <span class="font-semibold text-sm text-foreground">¿VL ≤ 500 kV?</span>
+                {{ info_tooltip("<strong>¿Por qué esta validación?</strong> Colombia tiene normalizados solo tres escalones de transmisión: <strong>115, 230 y 500 kV</strong>. Si las fórmulas sugieren más de 500 kV (porque P o L son muy grandes), no existe un escalón superior disponible.<br><br><strong>¿Qué hacer si NO cumple?</strong><br>• Usar <strong>HVDC</strong> (corriente continua de alta tensión) — más eficiente para distancias > 600 km<br>• Dividir en <strong>2+ circuitos paralelos</strong> de 500 kV<br>• Reducir la potencia transmitida por línea<br><br><strong>Caso típico:</strong> proyectos de 1000+ MW con > 800 km usan HVDC ±500 kV (ej: Itaipú-Brasil).") }}
+              </div>
+              <div class="text-xs text-muted-foreground">Si NO → en Colombia no hay escalón superior. Considerar HVDC o múltiples circuitos.</div>
+            </div>
+          </div>
+        </div>
+
+        {# FASE 2: GEOMETRÍA Y CONDUCTOR #}
+        <div class="rounded-lg border border-border p-4 mb-3" style="background: color-mix(in oklch, var(--muted) 20%, transparent);">
+          <div class="text-xs uppercase tracking-wider text-muted-foreground mb-3 font-semibold flex items-center">
+            Fase 2 · Geometría y conductor
+            {{ info_tooltip("<strong>Objetivo de la fase:</strong> Definir cómo se distribuyen físicamente los conductores en la torre (configuración geométrica) y qué tipo de cable se va a utilizar. Esta fase define el ESQUELETO ELÉCTRICO de la línea: cuán separadas están las fases, cuántos cables por fase (haz), y qué material conducirá la corriente. Es la base para calcular R, L, C en el siguiente paso.") }}
+          </div>
+          <div class="flex items-stretch gap-2 flex-wrap">
+            <div class="flex-1 min-w-[200px] rounded-lg p-3 "
+               style="background: var(--card); border: 2px solid var(--primary);">
+              <div class="flex items-center gap-2 mb-1.5">
+                <span class="size-6 rounded-full text-white text-xs font-bold grid place-items-center" style="background: var(--primary);">2</span>
+                <span class="font-semibold text-sm text-foreground">Configuración línea</span>
+                {{ info_tooltip("<strong>¿Qué datos debes ingresar?</strong><br>• <strong>D12, D23, D13</strong> (m): distancias entre las 3 fases en la torre. Para 500 kV horizontal: D12=D23=9 m, D13=18 m.<br>• <strong>n subconductores</strong>: 1 (simple), 2 (haz doble), <strong>3 (haz triple — estándar 500 kV)</strong>, 4 (cuádruple).<br>• <strong>db</strong> (m): separación dentro del haz, típico 0.40 m.<br><br><strong>¿Qué obtienes?</strong><br>• <strong>GMD</strong> (Distancia Media Geométrica entre fases) — para inductancia y capacitancia<br>• <strong>GMR_L</strong> (Radio Medio Geométrico para L) — del haz para inductancia<br>• <strong>GMR_C</strong> (idem para capacitancia)<br><br>Estos 3 valores ALIMENTAN los cálculos eléctricos de los pasos 4 y 5.") }}
+              </div>
+              <div class="text-xs text-muted-foreground">GMD entre fases, GMR_L y GMR_C del haz (1/2/3/4 subc.)</div>
+            </div>
+
+            <div class="flex items-center"><i data-lucide="arrow-right" class="size-5 text-muted-foreground"></i></div>
+
+            <div class="flex-1 min-w-[200px] rounded-lg p-3 "
+               style="background: var(--card); border: 2px solid var(--primary);">
+              <div class="flex items-center gap-2 mb-1.5">
+                <span class="size-6 rounded-full text-white text-xs font-bold grid place-items-center" style="background: var(--primary);">3</span>
+                <span class="font-semibold text-sm text-foreground">Conductor</span>
+                {{ info_tooltip("<strong>¿Qué debes elegir?</strong><br>• <strong>Tipo de conductor</strong> del catálogo (9 opciones):<br>&nbsp;&nbsp;– <strong>ACSR</strong> (Drake, Bluejay, Bittern...): aluminio + alma de acero, el más común<br>&nbsp;&nbsp;– <strong>AAAC</strong>: aleación de aluminio, mejor anticorrosión, zonas costeras<br>&nbsp;&nbsp;– <strong>ACAR</strong>: alma de aleación + hilos Al puro, ideal contaminación<br>&nbsp;&nbsp;– <strong>ACSS</strong>: opera hasta 200°C, ideal para repotenciar líneas existentes<br>• <strong>Temperatura de operación</strong> (°C): típica 65-75°C<br><br><strong>¿Qué obtienes?</strong><br>• R por fase (Ω/km) con corrección por temperatura<br>• Ampacidad (A) — corriente máxima admisible<br>• Datos físicos (diámetro, peso, GMR) para los cálculos mecánicos<br><br><strong>Criterio típico 500 kV/300 MW:</strong> ACSR Drake o Bluejay en haz triple.") }}
+              </div>
+              <div class="text-xs text-muted-foreground">ACSR / AAAC / ACAR / ACSS · R/km, ampacidad, corrección térmica</div>
+            </div>
+
+            <div class="flex items-center"><i data-lucide="arrow-right" class="size-5 text-muted-foreground"></i></div>
+
+            <div class="flex-1 min-w-[200px] rounded-lg p-3"
+                 style="background: color-mix(in oklch, var(--warning) 8%, transparent); border: 2px solid var(--warning);">
+              <div class="flex items-center gap-2 mb-1.5">
+                <i data-lucide="git-branch" class="size-4" style="color: var(--warning);"></i>
+                <span class="font-semibold text-sm text-foreground">¿Ampacidad ≥ I_diseño?</span>
+                {{ info_tooltip("<strong>¿Qué se valida?</strong> Que la corriente que la carga demanda (I_diseño = P/(√3·VL·cosφ)) NO exceda la corriente máxima que el conductor soporta sin sobrecalentarse (ampacidad).<br><br><strong>Ejemplo 300 MW · 500 kV · cosφ=0.95:</strong><br>I_diseño = 300000/(√3·500·0.95) ≈ <strong>364 A por fase</strong><br>Con haz triple = 364/3 ≈ <strong>121 A por subconductor</strong><br>ACSR Drake: ampacidad ≈ 900 A por subconductor → MUY HOLGADO ✓<br><br><strong>¿Qué hacer si NO cumple?</strong><br>1. Aumentar n_subconductores (3 → 4)<br>2. Elegir conductor de mayor sección (Drake → Bluejay)<br>3. Cambiar a ACSS (opera a temperatura mayor)<br>4. Como ÚLTIMO recurso, subir nivel de tensión (vuelve a paso 1)") }}
+              </div>
+              <div class="text-xs text-muted-foreground">Si NO → <i data-lucide="rotate-ccw" class="inline size-3" style="color: var(--danger);"></i> volver a <strong>paso 3</strong>: conductor de mayor sección o más subconductores</div>
+            </div>
+          </div>
+        </div>
+
+        {# FASE 3: PARÁMETROS Y CORONA #}
+        <div class="rounded-lg border border-border p-4 mb-3" style="background: color-mix(in oklch, var(--muted) 20%, transparent);">
+          <div class="text-xs uppercase tracking-wider text-muted-foreground mb-3 font-semibold flex items-center">
+            Fase 3 · Parámetros eléctricos y efecto Corona
+            {{ info_tooltip("<strong>Objetivo de la fase:</strong> Calcular los parámetros eléctricos distribuidos (R, L, C por km) que caracterizan la línea como circuito, y verificar que la línea NO produzca efecto Corona permanente. El efecto Corona genera pérdidas extras, ruido audible, interferencia de radio y degradación del aislante — debe estar bajo control desde el diseño.") }}
+          </div>
+          <div class="flex items-stretch gap-2 flex-wrap">
+            <div class="flex-1 min-w-[220px] rounded-lg p-3 "
+               style="background: var(--card); border: 2px solid var(--primary);">
+              <div class="flex items-center gap-2 mb-1.5">
+                <span class="size-6 rounded-full text-white text-xs font-bold grid place-items-center" style="background: var(--primary);">4</span>
+                <span class="font-semibold text-sm text-foreground">R, L, C + Corona</span>
+                {{ info_tooltip("<strong>¿Qué hace este paso?</strong> Combina la geometría (paso 2) con el conductor (paso 3) para calcular los 'parámetros distribuidos' de la línea:<br><br><strong>Parámetros eléctricos:</strong><br>• <strong>L</strong> = 2×10⁻⁷·ln(GMD/GMR_L) H/m → reactancia inductiva XL = 2πf·L<br>• <strong>C</strong> = 2π·ε₀/ln(GMD/GMR_C) F/m → susceptancia b = 2πf·C<br>• Impedancia Z = (R + jXL)·L y admitancia Y = jb·L<br><br><strong>Verificación Corona (fórmula de Peek):</strong><br>• <strong>δ</strong> (densidad aire): cae con altitud → menor margen<br>• <strong>Ec</strong> (gradiente crítico): campo que ioniza el aire<br>• <strong>Esup</strong> (gradiente en superficie): para la tensión nominal<br>• <strong>Cs = Ec/Esup</strong> debe ser MAYOR que 1<br><br><strong>Datos a ingresar:</strong> tensión, n subconductores, db, altitud (los toma del proyecto).") }}
+              </div>
+              <div class="text-xs text-muted-foreground">Inductancia, capacitancia, gradiente Esup (Peek), coeficiente seguridad Cs</div>
+            </div>
+
+            <div class="flex items-center"><i data-lucide="arrow-right" class="size-5 text-muted-foreground"></i></div>
+
+            <div class="flex-1 min-w-[260px] rounded-lg p-3"
+                 style="background: color-mix(in oklch, var(--warning) 8%, transparent); border: 2px solid var(--warning);">
+              <div class="flex items-center gap-2 mb-1.5">
+                <i data-lucide="git-branch" class="size-4" style="color: var(--warning);"></i>
+                <span class="font-semibold text-sm text-foreground">¿Cs > 1 (Esup &lt; Ec)?</span>
+                {{ info_tooltip("<strong>¿Qué se valida?</strong> Que el gradiente eléctrico en la superficie del conductor (Esup) sea MENOR que el gradiente crítico de ionización del aire (Ec). Si Esup ≥ Ec → hay Corona PERMANENTE (descargas eléctricas constantes), lo cual es inaceptable en diseño.<br><br><strong>Recomendación típica:</strong> Cs ≥ 1.1-1.2 para tener margen de seguridad ante días lluviosos (la lluvia baja Ec ~15%).<br><br><strong>¿Qué hacer si NO cumple?</strong><br>1. <strong>Aumentar n subconductores</strong> (lo más efectivo): 3 → 4 reduce Esup ~20%<br>2. <strong>Aumentar separación db</strong> del haz: 0.40 → 0.50 m<br>3. <strong>Conductor de mayor diámetro</strong>: Drake (28 mm) → Bluejay (32 mm)<br>4. <strong>Bajar la altitud</strong> (no siempre posible, pero a 1000 msnm es mejor que 3000)<br><br>En el módulo 4 verás un semáforo verde/rojo según el resultado.") }}
+              </div>
+              <div class="text-xs text-muted-foreground">
+                Si NO → <i data-lucide="rotate-ccw" class="inline size-3" style="color: var(--danger);"></i> volver a <strong>paso 2-3</strong>:
+                aumentar n subconductores, mayor db o conductor más grueso
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {# FASE 4: DESEMPEÑO ELÉCTRICO #}
+        <div class="rounded-lg border border-border p-4 mb-3" style="background: color-mix(in oklch, var(--muted) 20%, transparent);">
+          <div class="text-xs uppercase tracking-wider text-muted-foreground mb-3 font-semibold flex items-center">
+            Fase 4 · Desempeño eléctrico
+            {{ info_tooltip("<strong>Objetivo de la fase:</strong> Determinar cómo se comportará la línea en operación real: cuánta tensión necesita el generador para que la carga reciba la nominal, cuánta potencia se pierde por el camino y cuál es la eficiencia. Esta es la PRUEBA FINAL del diseño eléctrico: si no cumple los umbrales (regulación, pérdidas, eficiencia), hay que rediseñar.") }}
+          </div>
+          <div class="flex items-stretch gap-2 flex-wrap">
+            <div class="flex-1 min-w-[220px] rounded-lg p-3 "
+               style="background: var(--card); border: 2px solid var(--primary);">
+              <div class="flex items-center gap-2 mb-1.5">
+                <span class="size-6 rounded-full text-white text-xs font-bold grid place-items-center" style="background: var(--primary);">5</span>
+                <span class="font-semibold text-sm text-foreground">Línea larga (ABCD)</span>
+                {{ info_tooltip("<strong>¿Qué hace este paso?</strong> Aplica el modelo de PARÁMETROS DISTRIBUIDOS (cuadripolo ABCD) que considera que R, L, C están repartidos a lo largo de toda la línea (no concentrados en un punto). Es OBLIGATORIO para L > 240 km.<br><br><strong>Cálculos clave:</strong><br>• Zc = √(z/y) — impedancia característica<br>• γ = √(z·y) — constante de propagación<br>• A = D = cosh(γL), B = Zc·sinh(γL), C = sinh(γL)/Zc<br>• VG = A·VR + B·IR (tensión del generador)<br>• IG = C·VR + D·IR (corriente del generador)<br><br><strong>Indicadores que obtienes:</strong><br>• <strong>Regulación %</strong>: variación de tensión entre vacío y carga<br>• <strong>Pérdidas ΔP%</strong>: % de potencia perdida en R<br>• <strong>Eficiencia η</strong>: % de potencia útil entregada<br>• <strong>Efecto Ferranti</strong>: si VR > VG con poca carga<br><br><strong>Datos:</strong> tensión, potencia, longitud, factor de potencia.") }}
+              </div>
+              <div class="text-xs text-muted-foreground">Zc, γ, parámetros ABCD, VG, IG, regulación, pérdidas, eficiencia</div>
+            </div>
+
+            <div class="flex items-center"><i data-lucide="arrow-right" class="size-5 text-muted-foreground"></i></div>
+
+            <div class="flex-1 min-w-[260px] rounded-lg p-3"
+                 style="background: color-mix(in oklch, var(--warning) 8%, transparent); border: 2px solid var(--warning);">
+              <div class="flex items-center gap-2 mb-1.5">
+                <i data-lucide="git-branch" class="size-4" style="color: var(--warning);"></i>
+                <span class="font-semibold text-sm text-foreground">¿Reg &lt; 10% y ΔP &lt; 5%?</span>
+                {{ info_tooltip("<strong>¿Qué umbrales se validan?</strong><br>• <strong>Regulación ≤ 10%</strong> (RETIE) — idealmente ≤ 5%. Variación máxima de tensión entre operación en vacío y plena carga. Si es alta, los usuarios verían parpadeos y desgaste de equipos.<br>• <strong>Pérdidas ΔP ≤ 5%</strong> (UPME) — idealmente ≤ 3%. Es la energía que se 'evapora' como calor en los conductores. Cada 1% de pérdidas en 300 MW = 3 MW perdidos = $$ al año.<br>• <strong>Eficiencia η ≥ 95%</strong> (deseable).<br><br><strong>¿Qué hacer si NO cumple?</strong><br>1. <strong>Subir tensión</strong> (volver al paso 1): pasa de 230 → 500 kV — la solución más efectiva, reduce I al 46% y pérdidas al 21%<br>2. <strong>Mayor sección de conductor</strong> (volver al paso 3): Drake → Bluejay reduce R ~25%<br>3. <strong>Más subconductores</strong>: 3 → 4 reduce R 25%<br>4. <strong>Compensación reactiva</strong> (banco de capacitores) — corrige Ferranti<br><br><strong>Para 500 kV · 300 MW · 307 km:</strong> típico Reg ≈ 3-4%, ΔP ≈ 2-3% ✓") }}
+              </div>
+              <div class="text-xs text-muted-foreground">
+                Si NO → <i data-lucide="rotate-ccw" class="inline size-3" style="color: var(--danger);"></i> volver a
+                <strong>paso 1</strong> (subir tensión) o <strong>paso 3</strong> (mayor sección)
+              </div>
+            </div>
+          </div>
+          <div class="mt-2 text-xs text-muted-foreground pl-2 border-l-2 border-accent">
+            <i data-lucide="info" class="inline size-3"></i>
+            <strong>Nota:</strong> si L &lt; 240 km, usar modelo de línea corta (sin capacitancia distribuida); si L &gt; 240 km, usar ABCD obligatorio.
+          </div>
+        </div>
+
+        {# FASE 5: MECÁNICA #}
+        <div class="rounded-lg border border-border p-4 mb-3" style="background: color-mix(in oklch, var(--muted) 20%, transparent);">
+          <div class="text-xs uppercase tracking-wider text-muted-foreground mb-3 font-semibold flex items-center">
+            Fase 5 · Mecánica de cables (4 hipótesis climáticas)
+            {{ info_tooltip("<strong>Objetivo de la fase:</strong> Verificar que los cables (conductor y cable de guarda) RESISTAN mecánicamente todas las condiciones climáticas a las que estarán sometidos: viento máximo, frío extremo, alta temperatura. Determinar la flecha (cuánto cuelga el cable) en cada condición — dato CLAVE para definir la altura de las torres en el siguiente paso.<br><br><strong>4 hipótesis del proyecto colombiano:</strong><br>• Hip A: viento máx 140 km/h, 15°C, FS=2.5<br>• Hip B: mín temperatura 5°C, FS=2.5<br>• Hip C: EDS (every-day-stress) 27°C, FS=5<br>• Hip D: máx temperatura 65°C — produce FLECHA MÁXIMA") }}
+          </div>
+          <div class="flex items-stretch gap-2 flex-wrap">
+            <div class="flex-1 min-w-[220px] rounded-lg p-3 "
+               style="background: var(--card); border: 2px solid var(--primary);">
+              <div class="flex items-center gap-2 mb-1.5">
+                <span class="size-6 rounded-full text-white text-xs font-bold grid place-items-center" style="background: var(--primary);">6</span>
+                <span class="font-semibold text-sm text-foreground">Mecánica conductor</span>
+                {{ info_tooltip("<strong>¿Qué hace este paso?</strong> Para cada una de las 4 hipótesis climáticas calcula:<br>• <strong>Wc</strong> peso propio del conductor (kgf/m)<br>• <strong>Wv</strong> carga horizontal de viento (kgf/m)<br>• <strong>Wr</strong> = √(Wc² + Wv²) — carga resultante<br>• <strong>Vano crítico ac</strong>: vano límite donde dos hipótesis producen igual esfuerzo<br>• <strong>Hipótesis gobernante</strong>: la que produce el máximo esfuerzo<br>• <strong>Cambio de estado</strong>: ecuación cúbica que conecta los estados climáticos<br>• <strong>Flecha f</strong>: cuánto cae el cable en el centro del vano<br><br><strong>Datos a ingresar:</strong> vano de diseño (m). El resto lo toma del catálogo del conductor (peso, módulo Young, dilatación, carga de rotura).<br><br><strong>Resultado clave:</strong> <strong>f_máx en Hip D</strong> (caliente) — define la altura de la torre.") }}
+              </div>
+              <div class="text-xs text-muted-foreground">Hip A,B,C,D · vano crítico · cambio de estado · flecha máx</div>
+            </div>
+
+            <div class="flex items-center"><i data-lucide="arrow-right" class="size-5 text-muted-foreground"></i></div>
+
+            <div class="flex-1 min-w-[200px] rounded-lg p-3 "
+               style="background: var(--card); border: 2px solid var(--primary);">
+              <div class="flex items-center gap-2 mb-1.5">
+                <span class="size-6 rounded-full text-white text-xs font-bold grid place-items-center" style="background: var(--primary);">7</span>
+                <span class="font-semibold text-sm text-foreground">Cable de guarda</span>
+                {{ info_tooltip("<strong>¿Qué hace este paso?</strong> Aplica las MISMAS 4 hipótesis mecánicas pero al cable de guarda (el que va en la cúspide de la torre para protección contra rayos).<br><br><strong>Tipos a seleccionar:</strong><br>• <strong>Acero EHS</strong> (Extra High Strength): el más común, resistencia 1116 MPa<br>• <strong>Alumoweld</strong> (Al+acero): combina baja R con resistencia mecánica<br>• <strong>OPGW</strong> (Optical Ground Wire): incluye fibra óptica para comunicaciones — estándar en líneas troncales modernas<br><br><strong>Diferencias con el conductor:</strong><br>• Resistencia mecánica MUCHO mayor (acero vs aluminio)<br>• Coef. dilatación MENOR (11.5e-6 vs 18.9e-6 /°C)<br>• Hip A (viento máx) generalmente GOBIERNA — opuesto al conductor (donde gobierna Hip C)<br><br><strong>Resultado clave:</strong> flecha del cable de guarda en cada hipótesis (debe ser MENOR que la del conductor para mantener protección).") }}
+              </div>
+              <div class="text-xs text-muted-foreground">Mismas 4 hipótesis con acero EHS / alumoweld / OPGW</div>
+            </div>
+
+            <div class="flex items-center"><i data-lucide="arrow-right" class="size-5 text-muted-foreground"></i></div>
+
+            <div class="flex-1 min-w-[200px] rounded-lg p-3"
+                 style="background: color-mix(in oklch, var(--warning) 8%, transparent); border: 2px solid var(--warning);">
+              <div class="flex items-center gap-2 mb-1.5">
+                <i data-lucide="git-branch" class="size-4" style="color: var(--warning);"></i>
+                <span class="font-semibold text-sm text-foreground">¿f_guarda ≤ f_conductor?</span>
+                {{ info_tooltip("<strong>¿Qué se valida?</strong> Que la flecha del cable de guarda (fg) sea MENOR o IGUAL a la del conductor (f), EN TODAS las hipótesis climáticas. Esta condición geométrica es CRÍTICA porque garantiza que el cable de guarda siempre quede 'por encima' del conductor, manteniendo la protección contra rayos directos (ángulo ≤ 30°).<br><br><strong>Caso típico de incumplimiento:</strong> en Hip D (alta temperatura) el conductor se dilata mucho y baja, pero el cable de guarda (acero, menor dilatación) baja menos → fg < f ✓. Pero si el tensado del cable de guarda está mal calculado, podría quedar más bajo que el conductor.<br><br><strong>¿Qué hacer si NO cumple?</strong><br>1. <strong>Aumentar el tensado mecánico</strong> del cable de guarda (reduce su flecha)<br>2. Cambiar de OPGW (más pesado) a EHS puro<br>3. Acortar el vano de diseño<br><br>Esto NO requiere volver a fases anteriores, solo ajustar la 'tensión de tendido'.") }}
+              </div>
+              <div class="text-xs text-muted-foreground">Si NO → <i data-lucide="rotate-ccw" class="inline size-3" style="color: var(--danger);"></i> ajustar tensado del cable de guarda</div>
+            </div>
+          </div>
+        </div>
+
+        {# FASE 6: AISLADORES Y TORRE #}
+        <div class="rounded-lg border border-border p-4 mb-3" style="background: color-mix(in oklch, var(--muted) 20%, transparent);">
+          <div class="text-xs uppercase tracking-wider text-muted-foreground mb-3 font-semibold flex items-center">
+            Fase 6 · Aisladores, torre y blindaje
+            {{ info_tooltip("<strong>Objetivo de la fase:</strong> Determinar la cadena de aisladores que sostendrá el conductor (cuántos discos, qué tipo) y diseñar la torre completa: alturas, distancias mínimas según RETIE/IEC, ángulo de protección contra rayos. Es donde el diseño eléctrico se convierte en ESTRUCTURA FÍSICA real.") }}
+          </div>
+          <div class="flex items-stretch gap-2 flex-wrap">
+            <div class="flex-1 min-w-[200px] rounded-lg p-3 "
+               style="background: var(--card); border: 2px solid var(--primary);">
+              <div class="flex items-center gap-2 mb-1.5">
+                <span class="size-6 rounded-full text-white text-xs font-bold grid place-items-center" style="background: var(--primary);">8</span>
+                <span class="font-semibold text-sm text-foreground">Aisladores</span>
+                {{ info_tooltip("<strong>¿Qué hace este paso?</strong> Selecciona el número de discos de la cadena de aisladores según DOS criterios independientes:<br><br><strong>1. Por línea de fuga (contaminación):</strong><br>Nf = k·VL / L_fuga_unitaria<br>k según IEC 60815: ligera 16, media 20, ALTA 25, muy alta 31, severa 44 mm/kV<br><br><strong>2. Por tensión disruptiva (BIL):</strong><br>NBIL = 1.2·BIL / (V_disco_lluvia · 0.9)<br>BIL = 1550 kV para 500 kV (IEC 60071)<br><br><strong>Se adopta el MAYOR de los dos</strong> (criterio más exigente). Para 500 kV típicamente N = 24-28 discos.<br><br><strong>Datos a ingresar:</strong><br>• Tipo de aislador del catálogo (porcelana ANSI 52-3, vidrio U120BS, antifog U160BP...)<br>• Tensión nominal<br>• Nivel de contaminación de la zona<br><br><strong>Salidas:</strong> N discos, longitud cadena (m), peso cadena (kg), FS mecánico ≥ 2.0 (RETIE).") }}
+              </div>
+              <div class="text-xs text-muted-foreground">N_discos = máx(Nf, NBIL) · FS ≥ 2.0 · cadena simple/doble</div>
+            </div>
+
+            <div class="flex items-center"><i data-lucide="arrow-right" class="size-5 text-muted-foreground"></i></div>
+
+            <div class="flex-1 min-w-[200px] rounded-lg p-3 "
+               style="background: var(--card); border: 2px solid var(--primary);">
+              <div class="flex items-center gap-2 mb-1.5">
+                <span class="size-6 rounded-full text-white text-xs font-bold grid place-items-center" style="background: var(--primary);">9</span>
+                <span class="font-semibold text-sm text-foreground">Torre</span>
+                {{ info_tooltip("<strong>¿Qué hace este paso?</strong> Calcula la geometría completa de la torre:<br><br><strong>Distancias RETIE (con corrección por altitud):</strong><br>• A terreno NO transitable: 7.5 m base<br>• A vía vehicular: 9.0 m base<br>• A vía de primer orden: 10.5 m<br>• +3% por cada 300 m sobre 1000 msnm<br><br><strong>Distancia entre fases Dff:</strong><br>Dff = kc·VLL + √(L_cadena + f_máx) — debe ser ≥ 9-10 m en 500 kV<br><br><strong>Altura del apoyo:</strong><br>H_apoyo = d_terreno + f_máx + L_cadena + h_seguridad<br><br><strong>Altura total:</strong><br>H_total = H_apoyo + d_guarda + h_remate — típica 40-50 m en 500 kV<br><br><strong>Número de estructuras:</strong><br>N = ⌈L_línea / vano⌉. Para 307 km · vano 400 m → ~768 torres.<br><br><strong>Datos:</strong> tensión, altitud, flecha máx (del paso 6), longitud cadena (del paso 8), vano. <strong>Normas:</strong> RETIE Art. 13, NTC 4552, IEC 60071.") }}
+              </div>
+              <div class="text-xs text-muted-foreground">Distancias RETIE (altitud), H_apoyo, H_total, N° estructuras</div>
+            </div>
+
+            <div class="flex items-center"><i data-lucide="arrow-right" class="size-5 text-muted-foreground"></i></div>
+
+            <div class="flex-1 min-w-[200px] rounded-lg p-3"
+                 style="background: color-mix(in oklch, var(--warning) 8%, transparent); border: 2px solid var(--warning);">
+              <div class="flex items-center gap-2 mb-1.5">
+                <i data-lucide="git-branch" class="size-4" style="color: var(--warning);"></i>
+                <span class="font-semibold text-sm text-foreground">¿α ≤ 30° (blindaje)?</span>
+                {{ info_tooltip("<strong>¿Qué se valida?</strong> El ángulo de protección (α) es el formado entre la vertical que pasa por el cable de guarda y la línea que une el cable de guarda con la fase exterior. Define el 'cono de protección' contra impactos directos de rayo.<br><br><strong>Norma:</strong> RETIE y NTC 4552 exigen <strong>α ≤ 30°</strong> en 500 kV. A mayor ángulo, mayor probabilidad de que el rayo impacte directamente la fase, causando un 'flameo inverso' (back-flashover) que abre el circuito.<br><br><strong>Cálculo:</strong> α = arctan(dh/dv) donde dh = separación horizontal y dv = separación vertical entre guarda y fase.<br><br><strong>¿Qué hacer si NO cumple?</strong><br>1. <strong>Reducir separación horizontal del cable de guarda</strong> (acercarlo al eje central)<br>2. <strong>Subir el cable de guarda</strong> (aumentar h_remate)<br>3. <strong>Doble cable de guarda</strong> (uno a cada lado) — método más usado en líneas modernas<br>4. <strong>Pararrayos de línea</strong> en torres críticas") }}
+              </div>
+              <div class="text-xs text-muted-foreground">Si NO → <i data-lucide="rotate-ccw" class="inline size-3" style="color: var(--danger);"></i> reducir separación horizontal del cable de guarda</div>
+            </div>
+          </div>
+        </div>
+
+        {# FASE 7: PLANTILLADO Y RESULTADO FINAL #}
+        <div class="rounded-lg border border-border p-4 mb-3" style="background: color-mix(in oklch, var(--muted) 20%, transparent);">
+          <div class="text-xs uppercase tracking-wider text-muted-foreground mb-3 font-semibold flex items-center">
+            Fase 7 · Plantillado sobre perfil topográfico
+            {{ info_tooltip("<strong>Objetivo de la fase:</strong> UBICAR físicamente cada una de las torres sobre el terreno real, considerando la topografía (montañas, valles, cruces de ríos, vías). Es la etapa final del diseño: convierte los cálculos abstractos en una RUTA REAL con coordenadas para cada torre. Sin plantillado no se puede iniciar la construcción.") }}
+          </div>
+          <div class="flex items-stretch gap-2 flex-wrap">
+            <div class="flex-1 min-w-[200px] rounded-lg p-3 "
+               style="background: var(--card); border: 2px solid var(--primary);">
+              <div class="flex items-center gap-2 mb-1.5">
+                <span class="size-6 rounded-full text-white text-xs font-bold grid place-items-center" style="background: var(--primary);">10</span>
+                <span class="font-semibold text-sm text-foreground">Plantillado</span>
+                {{ info_tooltip("<strong>¿Qué hace este paso?</strong> Genera una PLANTILLA gráfica (4 curvas parabólicas superpuestas) que se desplaza manualmente sobre el perfil topográfico para encontrar las posiciones óptimas de las torres.<br><br><strong>Las 4 curvas patrón:</strong><br>1. <strong>Conductor caliente</strong> (Hip D — máx flecha): la posición MÁS BAJA del cable<br>2. <strong>Distancia mínima al terreno</strong>: caliente + d_terreno (RETIE). NO puede intersectar el perfil del suelo<br>3. <strong>Pie de apoyo</strong>: caliente − H_apoyo. Marca DÓNDE se debe ubicar la siguiente torre (donde toca el perfil)<br>4. <strong>Conductor frío</strong> (Hip B): posición MÁS ALTA del cable<br><br><strong>Procedimiento clásico:</strong><br>1. Ubicar el origen en la primera torre<br>2. Verificar que la curva 'distancia terreno' no intersecta el perfil<br>3. Marcar donde la curva 'pie de apoyo' toca el perfil → ahí va la siguiente torre<br>4. Repetir hasta el final del trazado<br><br><strong>Ingresar:</strong> vano de diseño. El sistema toma flecha máx y H_apoyo de pasos anteriores.<br><br><strong>Escala estándar:</strong> 1:2000 horizontal / 1:500 vertical (los planos se imprimen con esta proporción).") }}
+              </div>
+              <div class="text-xs text-muted-foreground">4 curvas patrón: caliente, distancia terreno, pie apoyo, frío</div>
+            </div>
+
+            <div class="flex items-center"><i data-lucide="arrow-right" class="size-5 text-muted-foreground"></i></div>
+
+            <div class="flex-1 min-w-[200px] rounded-lg p-3"
+                 style="background: color-mix(in oklch, var(--warning) 8%, transparent); border: 2px solid var(--warning);">
+              <div class="flex items-center gap-2 mb-1.5">
+                <i data-lucide="git-branch" class="size-4" style="color: var(--warning);"></i>
+                <span class="font-semibold text-sm text-foreground">¿Curva terreno NO intersecta perfil?</span>
+                {{ info_tooltip("<strong>¿Qué se valida?</strong> Que en NINGÚN punto del vano la curva 'distancia mínima al terreno' atraviese o quede por debajo del perfil del suelo. Si esto ocurre, significa que el conductor (en su posición más baja, Hip D) quedaría a menos distancia del suelo que la mínima reglamentaria → PELIGRO de descarga al suelo o a vehículos/personas.<br><br><strong>Casos típicos de problema:</strong><br>• Terreno con colinas pronunciadas en el medio del vano<br>• Cruces de ríos profundos (el conductor queda muy alto en los apoyos pero la flecha lo hace bajar mucho en el centro)<br>• Vanos muy largos sobre terreno plano sin elevación natural<br><br><strong>¿Qué hacer si NO cumple?</strong><br>1. <strong>Acortar el vano</strong>: agregar una torre intermedia (más caro pero seguro)<br>2. <strong>Aumentar la altura de la torre</strong>: usar 'extensiones' (patas más largas)<br>3. <strong>Cambiar el trazado</strong>: bordear el obstáculo en lugar de cruzarlo<br>4. <strong>Aumentar el tensado</strong>: reduce flecha (pero requiere torres más robustas)<br><br>Es el ÚLTIMO check antes de aprobar el diseño constructivo.") }}
+              </div>
+              <div class="text-xs text-muted-foreground">Si NO → <i data-lucide="rotate-ccw" class="inline size-3" style="color: var(--danger);"></i> torre más alta o vano más corto</div>
+            </div>
+
+            <div class="flex items-center"><i data-lucide="arrow-right" class="size-5 text-muted-foreground"></i></div>
+
+            {# Resultado final #}
+            <div class="flex-1 min-w-[200px] rounded-lg p-3"
+                 style="background: color-mix(in oklch, var(--success) 10%, transparent); border: 2px solid var(--success);">
+              <div class="flex items-center gap-2 mb-1.5">
+                <i data-lucide="check-circle-2" class="size-5" style="color: var(--success);"></i>
+                <span class="font-semibold text-sm text-foreground">Diseño validado</span>
+                {{ info_tooltip("<strong>¡Diseño completo!</strong><br>Si llegaste aquí pasando todas las validaciones, tu línea de transmisión cumple con:<br><br><strong>✓ Requisitos eléctricos:</strong><br>• Nivel de tensión apropiado (escalón normalizado)<br>• Sin efecto Corona permanente (Cs > 1)<br>• Regulación de tensión < 10% (RETIE)<br>• Pérdidas Joule < 5% (UPME)<br>• Eficiencia ≥ 95%<br><br><strong>✓ Requisitos mecánicos:</strong><br>• Conductor resiste 4 hipótesis climáticas con FS ≥ 2.5 (5 EDS)<br>• Cable de guarda resiste con f_guarda ≤ f_conductor<br>• Aisladores con FS ≥ 2.0 contra rotura mecánica<br><br><strong>✓ Requisitos de seguridad:</strong><br>• Distancias RETIE al suelo corregidas por altitud<br>• Distancia entre fases mayor que mínima reglamentaria<br>• Cadena de aisladores con N discos suficiente (fuga + BIL)<br>• Blindaje contra rayos con ángulo ≤ 30°<br>• Curva terreno NO intersecta perfil topográfico<br><br><strong>Resultado entregable:</strong> Memoria de cálculo + planos de planta/perfil + lista de materiales (conductores, cables, aisladores, herrajes, estructuras).") }}
+              </div>
+              <div class="text-xs text-muted-foreground">Línea de transmisión 500 kV con todos los criterios RETIE/IEC cumplidos</div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+      {# Footer #}
+      <div class="mt-6 pt-4 border-t border-border flex flex-wrap items-center justify-between gap-3">
+        <p class="text-xs text-muted-foreground">
+          <i data-lucide="info" class="inline size-3"></i>
+          Pulsa el ícono ⓘ de cada paso/fase para ver la explicación detallada · ESC o click fuera para cerrar
+        </p>
+        <a href="{{ url_for('modulo', modulo_id=1) }}"
+           onclick="document.body.style.overflow='';"
+           class="btn-primary text-sm">
+          <i data-lucide="play" class="size-4"></i>
+          Iniciar el tour desde el paso 1
+        </a>
+      </div>
+    </div>
+  </div>
+</div>
+
+{# Listener global de tecla ESC para cerrar el modal del flowchart #}
+<script>
+  (function() {
+    if (window.__flowchartEscBound) return;
+    window.__flowchartEscBound = true;
+    document.addEventListener('keydown', function(e) {
+      if (e.key === 'Escape') {
+        var modal = document.getElementById('__flowchart_modal');
+        if (modal && modal.style.display === 'flex') {
+          modal.style.display = 'none';
+          document.body.style.overflow = '';
+        }
+      }
+    });
+  })();
+</script>

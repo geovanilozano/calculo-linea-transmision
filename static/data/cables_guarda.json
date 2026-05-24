@@ -1,0 +1,53 @@
+{
+  "default_id": "ehs_7_16",
+  "cables": [
+    {
+      "id": "ehs_7_16",
+      "designacion": "EHS 7/16\" Acero galvanizado",
+      "material": "Acero galvanizado clase A",
+      "diametro_mm": 11.1,
+      "seccion_mm2": 72,
+      "masa_kg_m": 0.583,
+      "carga_rotura_kgf": 8200,
+      "modulo_elasticidad_n_mm2": 190000,
+      "coef_dilatacion_invc": 0.0000115,
+      "uso_tipico": "Estándar para líneas 500 kV de baja-media probabilidad de descargas"
+    },
+    {
+      "id": "ehs_3_8",
+      "designacion": "EHS 3/8\" Acero galvanizado",
+      "material": "Acero galvanizado clase A",
+      "diametro_mm": 9.5,
+      "seccion_mm2": 51,
+      "masa_kg_m": 0.404,
+      "carga_rotura_kgf": 5670,
+      "modulo_elasticidad_n_mm2": 190000,
+      "coef_dilatacion_invc": 0.0000115,
+      "uso_tipico": "Líneas más livianas, menor carga sobre la torre"
+    },
+    {
+      "id": "alumoweld_7n8",
+      "designacion": "Alumoweld 7 No. 8 AW",
+      "material": "Acero recubierto en aluminio",
+      "diametro_mm": 10.9,
+      "seccion_mm2": 56,
+      "masa_kg_m": 0.456,
+      "carga_rotura_kgf": 6580,
+      "modulo_elasticidad_n_mm2": 160000,
+      "coef_dilatacion_invc": 0.0000130,
+      "uso_tipico": "Mejor conductividad que EHS, anticorrosión, zonas costeras"
+    },
+    {
+      "id": "opgw_48f",
+      "designacion": "OPGW 48 Fibras Ópticas",
+      "material": "Fibra óptica + acero/aluminio",
+      "diametro_mm": 14.0,
+      "seccion_mm2": 110,
+      "masa_kg_m": 0.620,
+      "carga_rotura_kgf": 6800,
+      "modulo_elasticidad_n_mm2": 105000,
+      "coef_dilatacion_invc": 0.0000170,
+      "uso_tipico": "Doble función: blindaje contra rayos + comunicaciones por fibra óptica"
+    }
+  ]
+}

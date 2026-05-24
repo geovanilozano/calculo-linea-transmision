@@ -1,40 +1,123 @@
 {% extends "base.html" %}
 
 {% block panel_parametros %}
-<div class="space-y-4">
+<form hx-post="{{ url_for('api_modulo_2_calcular') }}"
+      hx-target="#modulo-2-resultado"
+      hx-swap="innerHTML"
+      hx-trigger="load, input delay:400ms from:input, change delay:200ms from:select"
+      class="space-y-4">
+
   <div>
-    <label class="block text-sm font-medium mb-1">Distancia D₁₂ (m)</label>
-    <input type="number" step="0.1" class="input" value="9.0">
+    <h3 class="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-2">Distancias entre fases</h3>
+    <div class="grid grid-cols-3 gap-2">
+      <div>
+        <label for="d12_m" class="block text-xs font-medium mb-1">D₁₂ (m)</label>
+        <input id="d12_m" name="d12_m" type="number" step="0.1" min="0.1" max="50"
+               value="9.0" class="input font-mono text-sm">
+      </div>
+      <div>
+        <label for="d23_m" class="block text-xs font-medium mb-1">D₂₃ (m)</label>
+        <input id="d23_m" name="d23_m" type="number" step="0.1" min="0.1" max="50"
+               value="9.0" class="input font-mono text-sm">
+      </div>
+      <div>
+        <label for="d13_m" class="block text-xs font-medium mb-1">D₁₃ (m)</label>
+        <input id="d13_m" name="d13_m" type="number" step="0.1" min="0.1" max="50"
+               value="18.0" class="input font-mono text-sm">
+      </div>
+    </div>
   </div>
+
   <div>
-    <label class="block text-sm font-medium mb-1">Distancia D₂₃ (m)</label>
-    <input type="number" step="0.1" class="input" value="9.0">
+    <label for="n_subc" class="block text-sm font-medium mb-1.5">Subconductores por fase</label>
+    <select id="n_subc" name="n_subc" class="input">
+      <option value="1">1 — Simple</option>
+      <option value="2">2 — Haz doble</option>
+      <option value="3" selected>3 — Haz triple (estándar 500 kV)</option>
+      <option value="4">4 — Haz cuádruple</option>
+    </select>
   </div>
+
   <div>
-    <label class="block text-sm font-medium mb-1">Distancia D₁₃ (m)</label>
-    <input type="number" step="0.1" class="input" value="18.0">
+    <label for="db_m" class="block text-sm font-medium mb-1.5">Separación del haz (m)</label>
+    <div class="relative">
+      <input id="db_m" name="db_m" type="number" step="0.05" min="0.05" max="1.0"
+             value="0.40" class="input font-mono pr-12">
+      <span class="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-muted-foreground font-mono">m</span>
+    </div>
   </div>
-  <button class="btn-primary w-full" disabled>
-    <i data-lucide="calculator" class="size-4"></i>
-    Calcular GMD (próximamente)
-  </button>
+
+  <div class="pt-1 text-xs text-muted-foreground flex items-center gap-2">
+    <i data-lucide="zap" class="size-3.5"></i>
+    Resultados live al cambiar inputs
+  </div>
+</form>
+
+<div class="mt-6 pt-4 border-t border-border">
+  <div class="text-xs text-muted-foreground">
+    Datos del conductor: <span class="font-mono text-foreground">{{ CONDUCTOR.designacion }}</span><br>
+    r = {{ CONDUCTOR.radio_fisico_mm }} mm · GMR = {{ CONDUCTOR.gmr_mm }} mm
+  </div>
 </div>
 {% endblock %}
 
 {% block panel_visualizacion %}
-<div class="aspect-video bg-muted rounded-lg grid place-items-center text-muted-foreground">
-  <div class="text-center p-6">
-    <i data-lucide="triangle" class="size-12 mx-auto mb-3 opacity-30"></i>
-    <p class="text-sm">Configuración geométrica de fases</p>
-    <p class="text-xs">Disponible en Fase 2</p>
+<div id="modulo-2-resultado" class="min-h-[300px]">
+  <div class="aspect-video grid place-items-center text-muted-foreground">
+    <div class="text-center">
+      <i data-lucide="loader-circle" class="size-8 mx-auto mb-2 animate-spin"></i>
+      <p class="text-sm">Calculando...</p>
+    </div>
   </div>
 </div>
 {% endblock %}
 
 {% block panel_explicacion %}
-<div class="prose prose-sm max-w-none dark:prose-invert">
-  <h3>Configuración geométrica</h3>
-  <p>Cálculo de la <strong>Distancia Media Geométrica (GMD)</strong> y el <strong>Radio Medio Geométrico (GMR)</strong> del haz triple.</p>
-  <p class="text-sm text-muted-foreground">Implementación pendiente en Fase 2.</p>
+<div class="space-y-5">
+  <div>
+    <h3 class="text-base font-semibold mb-2">¿Qué se calcula aquí?</h3>
+    <p class="text-sm text-muted-foreground leading-relaxed">
+      Las <strong class="text-foreground">distancias geométricas equivalentes</strong> de la línea: GMD entre fases
+      y GMR del haz para inductancia, capacitancia y efecto Corona.
+    </p>
+  </div>
+
+  <div>
+    <h3 class="text-base font-semibold mb-2">¿Para qué sirve?</h3>
+    <p class="text-sm text-muted-foreground leading-relaxed">
+      Estos valores son la entrada para calcular R, L, C de la línea. Un haz triple aumenta el
+      GMR efectivo del conductor, lo que reduce la reactancia inductiva y mejora el comportamiento
+      frente al efecto Corona.
+    </p>
+  </div>
+
+  {% from "_macros.html" import info_tooltip %}
+
+  <div>
+    <h3 class="text-base font-semibold mb-2">Fórmulas</h3>
+    <div class="space-y-3 text-sm bg-muted/50 rounded-lg p-4">
+      <div>
+        <span class="font-semibold text-primary">GMD (entre fases)</span>{{ info_tooltip("Distancia Media Geométrica entre las tres fases (m). Es la media geométrica de las distancias D12, D23, D13. Se usa porque las tres fases NO están a la misma distancia entre sí en configuración real (horizontal o triangular), y necesitamos una distancia EQUIVALENTE para calcular inductancia y capacitancia.") }}:
+        $$GMD = \sqrt[3]{D_{12} \cdot D_{23} \cdot D_{13}}$$
+      </div>
+      <div>
+        <span class="font-semibold text-primary">GMR_L (haz, inductancia)</span>{{ info_tooltip("Radio Medio Geométrico del haz para cálculo de INDUCTANCIA (m). Considera el GMR individual de cada subconductor (~0,78·r para cables trenzados) y la separación db entre ellos. A mayor GMR_L → MENOR inductancia → mejor regulación de tensión.") }}:
+        $$GMR_L = \sqrt[3]{GMR_{sub} \cdot d_b^2}$$
+      </div>
+      <div>
+        <span class="font-semibold text-primary">GMR_C (haz, capacitancia)</span>{{ info_tooltip("Radio Medio Geométrico del haz para cálculo de CAPACITANCIA (m). A diferencia del GMR_L, aquí se usa el RADIO FÍSICO r del conductor (no el GMR), porque la capacitancia depende de la superficie externa. A mayor GMR_C → MAYOR capacitancia → más efecto Ferranti en líneas largas.") }}:
+        $$GMR_C = \sqrt[3]{r \cdot d_b^2}$$
+      </div>
+    </div>
+  </div>
+
+  <div>
+    <h3 class="text-base font-semibold mb-2">¿Qué pasa si...?</h3>
+    <ul class="space-y-1.5 text-sm text-muted-foreground">
+      <li>• <strong class="text-foreground">↑ db (separación del haz)</strong>: aumenta GMR_L y GMR_C → menor reactancia</li>
+      <li>• <strong class="text-foreground">↑ subconductores</strong>: comportamiento como conductor de mayor diámetro</li>
+      <li>• <strong class="text-foreground">Triángulo inválido</strong>: la suma de los 2 lados menores debe superar al mayor</li>
+    </ul>
+  </div>
 </div>
 {% endblock %}

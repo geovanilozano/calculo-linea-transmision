@@ -25,6 +25,12 @@
   {# Lucide icons #}
   <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
 
+  {# KaTeX para renderizar fórmulas matemáticas (con try/catch para no romper la página) #}
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css" crossorigin="anonymous">
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js" crossorigin="anonymous"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js" crossorigin="anonymous"
+    onload="try{renderMathInElement(document.body,{delimiters:[{left:'$$',right:'$$',display:true},{left:'$',right:'$',display:false}],throwOnError:false})}catch(e){console.warn('KaTeX init error:',e)}"></script>
+
   {# Theme flicker prevention #}
   <script>
     (function() {
@@ -34,50 +40,90 @@
     })();
   </script>
 
+  {# Alpine x-cloak: oculta elementos con x-cloak hasta que Alpine los procesa.
+     Sin esta regla, los modales y tooltips parpadean visibles al cargar. #}
+  <style>
+    [x-cloak] { display: none !important; }
+  </style>
+
   {% block extra_head %}{% endblock %}
 </head>
-<body class="min-h-screen bg-background text-foreground">
+<body class="h-screen overflow-hidden bg-background text-foreground"
+      x-data="{
+        sidebarExpanded: localStorage.getItem('sidebarExpanded') !== 'false',
+        toggleSidebar() {
+          this.sidebarExpanded = !this.sidebarExpanded;
+          localStorage.setItem('sidebarExpanded', this.sidebarExpanded);
+        }
+      }">
 
-  {# Layout principal: sidebar + content #}
-  <div class="flex min-h-screen">
+  {# Layout principal: sidebar fijo + content con header sticky #}
+  <div class="flex h-full">
 
-    {# ===== SIDEBAR ===== #}
-    <aside class="w-72 shrink-0 border-r border-border bg-card flex flex-col">
+    {# ===== SIDEBAR — siempre visible, alterna entre expandido (w-72) y colapsado (w-16) ===== #}
+    <aside :style="sidebarExpanded ? 'width:18rem' : 'width:4rem'"
+           style="transition: width 0.2s ease;"
+           class="shrink-0 border-r border-border bg-card flex flex-col overflow-hidden">
 
-      {# Logo / título #}
-      <div class="px-6 py-5 border-b border-border">
-        <a href="{{ url_for('modulo', modulo_id=0) }}" class="flex items-center gap-3 group">
-          <div class="size-10 rounded-lg bg-primary/10 grid place-items-center group-hover:bg-primary/15 transition-colors">
+      {# Logo / título + botón colapsar #}
+      <div class="border-b border-border flex items-center"
+           :class="sidebarExpanded ? 'px-6 py-5 justify-between gap-2' : 'px-3 py-5 justify-center'">
+        <a href="{{ url_for('modulo', modulo_id=0) }}"
+           class="flex items-center gap-3 group min-w-0"
+           :class="sidebarExpanded ? 'flex-1' : ''"
+           :title="sidebarExpanded ? '' : 'Línea 500 kV — Inicio'">
+          <div class="size-10 rounded-lg bg-primary/10 grid place-items-center group-hover:bg-primary/15 transition-colors shrink-0">
             <i data-lucide="zap" class="size-5 text-primary"></i>
           </div>
-          <div>
-            <div class="font-semibold text-foreground text-sm">Línea 500 kV</div>
+          <div class="min-w-0" x-show="sidebarExpanded" x-transition.opacity>
+            <div class="font-semibold text-foreground text-sm truncate">Línea 500 kV</div>
             <div class="text-xs text-muted-foreground">Tour Educativo</div>
           </div>
         </a>
+        <button x-show="sidebarExpanded" x-transition.opacity
+                @click="toggleSidebar()"
+                class="size-8 rounded-lg grid place-items-center hover:bg-muted transition-colors shrink-0"
+                title="Colapsar barra lateral (Ctrl+B)"
+                aria-label="Colapsar barra lateral">
+          <i data-lucide="panel-left-close" class="size-4 text-muted-foreground"></i>
+        </button>
+      </div>
+
+      {# Botón expandir — solo visible cuando está colapsado #}
+      <div x-show="!sidebarExpanded" x-transition.opacity class="px-2 py-2 border-b border-border">
+        <button @click="toggleSidebar()"
+                class="w-full h-10 rounded-lg grid place-items-center hover:bg-muted transition-colors"
+                title="Expandir barra lateral (Ctrl+B)"
+                aria-label="Expandir barra lateral">
+          <i data-lucide="panel-left-open" class="size-4 text-muted-foreground"></i>
+        </button>
       </div>
 
       {# Navegación de módulos #}
-      <nav class="flex-1 px-3 py-4 overflow-y-auto">
-        <div class="text-xs font-semibold text-muted-foreground uppercase tracking-wider px-3 mb-2">
+      <nav class="flex-1 py-4 overflow-y-auto overflow-x-hidden"
+           :class="sidebarExpanded ? 'px-3' : 'px-2'">
+        <div x-show="sidebarExpanded" x-transition.opacity
+             class="text-xs font-semibold text-muted-foreground uppercase tracking-wider px-3 mb-2">
           Módulos
         </div>
         {% for mod_id, mod_slug, mod_nombre, mod_desc in MODULOS %}
           <a href="{{ url_for('modulo', modulo_id=mod_id) }}"
+             :class="sidebarExpanded ? '' : 'justify-center !px-0 !gap-0'"
+             :title="sidebarExpanded ? '' : '{{ mod_id }} · {{ mod_nombre }}'"
              class="{% if mod_id == modulo_id %}sidebar-link-active{% else %}sidebar-link{% endif %}">
-            <span class="size-6 rounded-md bg-muted text-muted-foreground text-xs font-mono grid place-items-center {% if mod_id == modulo_id %}bg-primary/20 text-primary{% endif %}">
+            <span class="size-6 rounded-md bg-muted text-muted-foreground text-xs font-mono grid place-items-center shrink-0 {% if mod_id == modulo_id %}bg-primary/20 text-primary{% endif %}">
               {{ mod_id }}
             </span>
-            <span class="flex-1 truncate">{{ mod_nombre }}</span>
+            <span class="flex-1 truncate" x-show="sidebarExpanded" x-transition.opacity>{{ mod_nombre }}</span>
             {% if mod_id == modulo_id %}
-              <i data-lucide="chevron-right" class="size-4 text-primary"></i>
+              <i data-lucide="chevron-right" class="size-4 text-primary shrink-0" x-show="sidebarExpanded" x-transition.opacity></i>
             {% endif %}
           </a>
         {% endfor %}
       </nav>
 
-      {# Progress bar #}
-      <div class="px-6 py-4 border-t border-border">
+      {# Progress bar — solo visible cuando expandido #}
+      <div x-show="sidebarExpanded" x-transition.opacity class="px-6 py-4 border-t border-border">
         <div class="flex items-center justify-between text-xs text-muted-foreground mb-2">
           <span>Progreso del tour</span>
           <span class="font-mono">{{ modulo_id + 1 }}/{{ MODULOS|length }}</span>
@@ -88,9 +134,18 @@
         </div>
       </div>
 
+      {# Progress bar minimalista cuando está colapsado #}
+      <div x-show="!sidebarExpanded" x-transition.opacity class="px-2 py-3 border-t border-border">
+        <div class="h-1.5 bg-muted rounded-full overflow-hidden" :title="'{{ modulo_id + 1 }}/{{ MODULOS|length }}'">
+          <div class="h-full bg-primary rounded-full transition-all duration-500"
+               style="width: {{ progreso_pct }}%"></div>
+        </div>
+      </div>
+
       {# Footer con theme toggle #}
-      <div class="px-3 py-3 border-t border-border flex items-center justify-between">
-        <span class="text-xs text-muted-foreground px-3">
+      <div class="border-t border-border flex items-center"
+           :class="sidebarExpanded ? 'px-3 py-3 justify-between' : 'px-2 py-3 justify-center'">
+        <span x-show="sidebarExpanded" x-transition.opacity class="text-xs text-muted-foreground px-3">
           v1.0 · MIT
         </span>
         <button @click="$store.theme.toggle()"
@@ -103,31 +158,33 @@
     </aside>
 
     {# ===== CONTENT ===== #}
-    <main class="flex-1 flex flex-col min-w-0">
+    <main class="flex-1 flex flex-col min-w-0 h-full">
 
-      {# Header del módulo #}
-      <header class="px-8 py-6 border-b border-border bg-card/50 backdrop-blur-sm">
+      {# Header del módulo (sticky) #}
+      <header class="shrink-0 px-8 pt-6 pb-5 border-b border-border bg-card/80 backdrop-blur-md z-10">
         <div class="flex items-start justify-between gap-6">
-          <div>
-            <div class="flex items-center gap-2 text-sm text-muted-foreground mb-1">
-              <span>Módulo {{ modulo_id }}</span>
-              <span>·</span>
-              <span>{{ modulo_info[3] if modulo_info }}</span>
+          <div class="min-w-0">
+            <div class="flex items-center gap-2 text-sm text-muted-foreground mb-2">
+              <span class="font-mono">Módulo {{ modulo_id }}</span>
+              {% if modulo_info %}
+                <span class="text-muted-foreground/50">·</span>
+                <span class="truncate">{{ modulo_info[3] }}</span>
+              {% endif %}
             </div>
-            <h1 class="text-3xl font-bold tracking-tight text-foreground">
-              {% block module_title %}{{ modulo_info[2] if modulo_info }}{% endblock %}
+            <h1 class="text-2xl md:text-3xl font-bold tracking-tight text-foreground leading-tight">
+              {% block module_title %}{{ modulo_info[2] if modulo_info else '404' }}{% endblock %}
             </h1>
           </div>
         </div>
       </header>
 
-      {# Contenido del módulo: 3 paneles #}
-      <div class="flex-1 overflow-y-auto px-8 py-6">
+      {# Contenido del módulo: scrolleable #}
+      <div class="flex-1 overflow-y-auto px-8 py-8">
         {% block module_content %}
           <div class="grid grid-cols-1 lg:grid-cols-[1fr_1.2fr_1fr] gap-6">
             {# Panel 1: Parámetros #}
-            <div class="card p-6 animate-fade-in">
-              <h2 class="text-sm font-semibold text-muted-foreground uppercase tracking-wider mb-4">
+            <div class="card p-7 animate-fade-in">
+              <h2 class="text-sm font-semibold text-muted-foreground uppercase tracking-wider mb-5">
                 Parámetros
               </h2>
               {% block panel_parametros %}
@@ -136,8 +193,8 @@
             </div>
 
             {# Panel 2: Visualización #}
-            <div class="card p-6 animate-fade-in">
-              <h2 class="text-sm font-semibold text-muted-foreground uppercase tracking-wider mb-4">
+            <div class="card p-7 animate-fade-in">
+              <h2 class="text-sm font-semibold text-muted-foreground uppercase tracking-wider mb-5">
                 Visualización
               </h2>
               {% block panel_visualizacion %}
@@ -148,8 +205,8 @@
             </div>
 
             {# Panel 3: Explicación didáctica #}
-            <div class="card p-6 animate-fade-in">
-              <h2 class="text-sm font-semibold text-muted-foreground uppercase tracking-wider mb-4">
+            <div class="card p-7 animate-fade-in">
+              <h2 class="text-sm font-semibold text-muted-foreground uppercase tracking-wider mb-5">
                 Explicación
               </h2>
               {% block panel_explicacion %}
@@ -160,8 +217,8 @@
         {% endblock %}
       </div>
 
-      {# Footer navegación #}
-      <footer class="px-8 py-4 border-t border-border bg-card/50 backdrop-blur-sm">
+      {# Footer navegación (sticky) #}
+      <footer class="shrink-0 px-8 py-4 border-t border-border bg-card/80 backdrop-blur-md">
         <div class="flex items-center justify-between gap-4">
           {% if anterior is not none %}
             <a href="{{ url_for('modulo', modulo_id=anterior) }}" class="btn-secondary">
@@ -188,13 +245,163 @@
     </main>
   </div>
 
-  {# Inicializar iconos Lucide después de que cargue todo #}
+  {# ===== MODAL GLOBAL DE IMAGEN EXPANDIDA ===== #}
+  <div x-data x-show="$store.imageModal.open" x-cloak
+       x-transition:enter="transition ease-out duration-200"
+       x-transition:enter-start="opacity-0"
+       x-transition:enter-end="opacity-100"
+       x-transition:leave="transition ease-in duration-150"
+       x-transition:leave-start="opacity-100"
+       x-transition:leave-end="opacity-0"
+       @click="$store.imageModal.close()"
+       @keydown.escape.window="$store.imageModal.close()"
+       class="fixed inset-0 z-50 bg-background/95 backdrop-blur-md grid place-items-center p-6 md:p-12 cursor-zoom-out">
+    <img :src="$store.imageModal.src" :alt="$store.imageModal.alt"
+         class="max-w-full max-h-full object-contain rounded-lg shadow-2xl"
+         @click.stop>
+    <button @click.stop="$store.imageModal.close()"
+            class="absolute top-4 right-4 size-11 rounded-lg bg-card border border-border grid place-items-center hover:bg-muted shadow-lg"
+            aria-label="Cerrar">
+      <i data-lucide="x" class="size-5"></i>
+    </button>
+    <div class="absolute bottom-4 left-1/2 -translate-x-1/2 text-xs text-muted-foreground bg-card/90 backdrop-blur px-3 py-1.5 rounded-full border border-border">
+      <i data-lucide="info" class="size-3 inline -mt-0.5"></i>
+      Click fuera o ESC para cerrar
+    </div>
+  </div>
+
+  {# Inicializar iconos Lucide + re-render KaTeX después de cualquier swap + manejo de errores HTMX #}
   <script>
+    // FALLBACK ROBUSTO: hacer el primer cálculo con fetch() nativo, sin depender de HTMX
+    async function _loadInitialContent() {
+      const forms = document.querySelectorAll('form[hx-trigger*="load"]');
+      console.log('[Tour] Forms con hx-trigger=load encontrados:', forms.length);
+
+      for (const form of forms) {
+        const url = form.getAttribute('hx-post') || form.getAttribute('hx-get');
+        const targetSel = form.getAttribute('hx-target');
+        if (!url || !targetSel) continue;
+
+        const target = document.querySelector(targetSel);
+        if (!target) continue;
+
+        // Si el target ya tiene contenido real (no spinner), saltar
+        if (target.querySelector && !target.querySelector('.animate-spin')) continue;
+
+        const method = form.hasAttribute('hx-post') ? 'POST' : 'GET';
+        console.log('[Tour] Cargando:', method, url, '->', targetSel);
+
+        try {
+          const response = await fetch(url, {
+            method: method,
+            body: method === 'POST' ? new FormData(form) : undefined,
+            credentials: 'same-origin'
+          });
+          if (!response.ok) {
+            throw new Error('HTTP ' + response.status);
+          }
+          const html = await response.text();
+          target.innerHTML = html;
+
+          // Re-render iconos y KaTeX
+          if (window.lucide) lucide.createIcons();
+          if (window.renderMathInElement) {
+            try {
+              renderMathInElement(target, {
+                delimiters: [
+                  {left: '$$', right: '$$', display: true},
+                  {left: '$', right: '$', display: false}
+                ],
+                throwOnError: false
+              });
+            } catch(e) { console.warn('[Tour] KaTeX error:', e); }
+          }
+        } catch (err) {
+          console.error('[Tour] Error cargando:', err);
+          target.innerHTML = `
+            <div class="rounded-lg border-2 p-6 text-center" style="border-color: var(--danger); background: color-mix(in oklch, var(--danger) 6%, transparent);">
+              <p class="font-semibold mb-2">Error al cargar</p>
+              <p class="text-sm text-muted-foreground mb-4">${err.message || err}</p>
+              <button onclick="window.location.reload()" class="btn-primary text-sm">Recargar</button>
+            </div>`;
+          if (window.lucide) lucide.createIcons();
+        }
+      }
+    }
+
     document.addEventListener('DOMContentLoaded', () => {
       if (window.lucide) lucide.createIcons();
+      // Esperar a que HTMX y KaTeX estén listos, luego disparar
+      setTimeout(_loadInitialContent, 500);
     });
-    document.addEventListener('htmx:afterSwap', () => {
+
+    // Atajo Ctrl+B / Cmd+B para alternar sidebar
+    document.addEventListener('keydown', (e) => {
+      if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'b') {
+        e.preventDefault();
+        const body = document.body;
+        if (body._x_dataStack && body._x_dataStack[0]) {
+          body._x_dataStack[0].toggleSidebar();
+        }
+      }
+    });
+    document.addEventListener('htmx:afterSwap', (e) => {
       if (window.lucide) lucide.createIcons();
+      if (window.renderMathInElement) {
+        try {
+          renderMathInElement(e.detail.target, {
+            delimiters: [
+              {left: '$$', right: '$$', display: true},
+              {left: '$', right: '$', display: false}
+            ],
+            throwOnError: false
+          });
+        } catch (err) {
+          console.warn('KaTeX render error (non-fatal):', err);
+        }
+      }
+      // Ejecutar manualmente <script> tags del contenido swappeado
+      // (HTMX 2.x por defecto NO los ejecuta automáticamente)
+      try {
+        const scripts = e.detail.target.querySelectorAll('script');
+        scripts.forEach((oldScript) => {
+          const newScript = document.createElement('script');
+          if (oldScript.src) {
+            newScript.src = oldScript.src;
+          } else {
+            newScript.textContent = oldScript.textContent;
+          }
+          oldScript.parentNode.replaceChild(newScript, oldScript);
+        });
+      } catch (err) {
+        console.warn('Script exec error:', err);
+      }
+    });
+
+    {# Si HTMX no logra hacer la petición o el servidor responde con error #}
+    function _htmxErrorMessage(target, msg) {
+      target.innerHTML = `
+        <div class="rounded-lg border-2 p-6 text-center" style="border-color: var(--danger); background: color-mix(in oklch, var(--danger) 6%, transparent);">
+          <div class="size-12 mx-auto mb-3 rounded-full grid place-items-center" style="background: color-mix(in oklch, var(--danger) 15%, transparent);">
+            <i data-lucide="alert-triangle" class="size-6" style="color: var(--danger);"></i>
+          </div>
+          <p class="font-semibold mb-2">No se pudo cargar el cálculo</p>
+          <p class="text-sm text-muted-foreground mb-4">${msg}</p>
+          <button onclick="window.location.reload()" class="btn-primary text-sm">
+            <i data-lucide="refresh-cw" class="size-3.5"></i>
+            Recargar página
+          </button>
+        </div>`;
+      if (window.lucide) lucide.createIcons();
+    }
+    document.body.addEventListener('htmx:responseError', (e) => {
+      _htmxErrorMessage(e.detail.target, `Servidor respondió: ${e.detail.xhr.status}`);
+    });
+    document.body.addEventListener('htmx:sendError', (e) => {
+      _htmxErrorMessage(e.detail.target, 'No hay conexión con el servidor. ¿Está corriendo Flask?');
+    });
+    document.body.addEventListener('htmx:timeout', (e) => {
+      _htmxErrorMessage(e.detail.target, 'El servidor tardó demasiado en responder.');
     });
   </script>
 

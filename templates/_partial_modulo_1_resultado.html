@@ -1,0 +1,51 @@
+{% from "_macros.html" import figura_expandible %}
+{# Partial devuelto por POST /api/modulo/1/calcular #}
+<div class="animate-fade-in">
+
+  {# Figura #}
+  <div class="mb-4">
+    {{ figura_expandible(figura_b64, "Comparación de criterios de tensión") }}
+  </div>
+
+  {# Resultados numéricos en cards #}
+  <div class="grid grid-cols-3 gap-2 mb-4">
+    <div class="bg-muted/50 rounded-lg p-3 text-center">
+      <div class="text-xs text-muted-foreground mb-1">Hefner</div>
+      <div class="font-mono font-bold text-foreground">{{ "%.0f"|format(r.hefner_kv) }}</div>
+      <div class="text-xs text-muted-foreground">kV</div>
+    </div>
+    <div class="bg-muted/50 rounded-lg p-3 text-center">
+      <div class="text-xs text-muted-foreground mb-1">Still</div>
+      <div class="font-mono font-bold text-foreground">{{ "%.0f"|format(r.still_kv) }}</div>
+      <div class="text-xs text-muted-foreground">kV</div>
+    </div>
+    <div class="bg-muted/50 rounded-lg p-3 text-center">
+      <div class="text-xs text-muted-foreground mb-1">1 kV/km</div>
+      <div class="font-mono font-bold text-foreground">{{ "%.0f"|format(r.regla_1kvkm_kv) }}</div>
+      <div class="text-xs text-muted-foreground">kV</div>
+    </div>
+  </div>
+
+  {# Tensión recomendada destacada #}
+  <div class="rounded-lg p-4 border-2"
+       style="border-color: var(--success); background: color-mix(in oklch, var(--success) 8%, transparent);">
+    <div class="flex items-start gap-3">
+      <div class="shrink-0 size-10 rounded-lg grid place-items-center"
+           style="background: color-mix(in oklch, var(--success) 20%, transparent);">
+        <i data-lucide="check-circle-2" class="size-5" style="color: var(--success);"></i>
+      </div>
+      <div class="flex-1">
+        <div class="flex items-baseline gap-2 mb-1">
+          <span class="text-xs uppercase tracking-wider font-semibold" style="color: var(--success);">
+            Tensión recomendada
+          </span>
+        </div>
+        <div class="flex items-baseline gap-1 mb-2">
+          <span class="text-3xl font-bold font-mono text-foreground">{{ r.tension_recomendada_kv }}</span>
+          <span class="text-lg text-muted-foreground font-mono">kV</span>
+        </div>
+        <p class="text-sm text-muted-foreground leading-snug">{{ r.justificacion }}</p>
+      </div>
+    </div>
+  </div>
+</div>

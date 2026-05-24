@@ -1,37 +1,132 @@
 {% extends "base.html" %}
 
 {% block panel_parametros %}
-<div class="space-y-4">
+<div class="text-xs text-muted-foreground mb-3 pb-3 border-b border-border">
+  <i data-lucide="cable" class="size-3.5 inline -mt-0.5"></i>
+  Conductor activo: <strong class="text-foreground">{{ CONDUCTOR.designacion }}</strong>
+  <a href="{{ url_for('modulo', modulo_id=3) }}" class="text-primary hover:underline ml-1">cambiar</a>
+</div>
+
+<form hx-post="{{ url_for('api_modulo_10_calcular') }}"
+      hx-target="#modulo-10-resultado"
+      hx-swap="innerHTML"
+      hx-trigger="load, input delay:400ms from:input"
+      class="space-y-4">
+
   <div>
-    <label class="block text-sm font-medium mb-1">Vano de diseño (m)</label>
-    <input type="number" class="input" value="{{ PROYECTO.vano_diseno_m }}" readonly>
+    <label for="vano_m" class="block text-sm font-medium mb-1.5">Vano de diseño (m)</label>
+    <input id="vano_m" name="vano_m" type="number" step="1" min="100" max="800"
+           value="{{ PROYECTO.vano_diseno_m }}" class="input font-mono">
   </div>
-  <p class="text-sm text-muted-foreground">
-    Las 4 curvas patrón del plantillado (caliente, terreno, pie apoyo, frío) sobre el perfil topográfico se mostrarán en la Fase 3.
-  </p>
-  <button class="btn-primary w-full" disabled>
-    <i data-lucide="calculator" class="size-4"></i>
-    Generar plantilla (próximamente)
-  </button>
+</form>
+
+<div class="mt-5 pt-4 border-t border-border space-y-3 text-xs">
+  <div class="font-semibold text-muted-foreground uppercase tracking-wider mb-2">Las 4 curvas patrón</div>
+  <div class="space-y-2">
+    <div class="flex items-start gap-2">
+      <div class="w-4 h-0.5 mt-2.5 shrink-0" style="background: #dc2626;"></div>
+      <div><strong class="text-foreground">1. Caliente</strong> · Hipótesis D · máx flecha</div>
+    </div>
+    <div class="flex items-start gap-2">
+      <div class="w-4 h-0.5 mt-2.5 shrink-0" style="background: #059669;"></div>
+      <div><strong class="text-foreground">2. Distancia terreno</strong> · caliente + 9 m</div>
+    </div>
+    <div class="flex items-start gap-2">
+      <div class="w-4 h-0.5 mt-2.5 shrink-0" style="background: #7c3aed;"></div>
+      <div><strong class="text-foreground">3. Pie de apoyo</strong> · caliente − H_apoyo</div>
+    </div>
+    <div class="flex items-start gap-2">
+      <div class="w-4 h-0.5 mt-2.5 shrink-0" style="background: #2563eb;"></div>
+      <div><strong class="text-foreground">4. Frío</strong> · Hipótesis B · mín flecha</div>
+    </div>
+  </div>
 </div>
 {% endblock %}
 
 {% block panel_visualizacion %}
-<div class="aspect-video bg-muted rounded-lg grid place-items-center text-muted-foreground">
-  <div class="text-center p-6">
-    <i data-lucide="trending-down" class="size-12 mx-auto mb-3 opacity-30"></i>
-    <p class="text-sm">4 curvas patrón sobre perfil topográfico</p>
-    <p class="text-xs">Disponible en Fase 3</p>
+<div id="modulo-10-resultado" class="min-h-[300px]">
+  <div class="aspect-video grid place-items-center text-muted-foreground">
+    <div class="text-center">
+      <i data-lucide="loader-circle" class="size-8 mx-auto mb-2 animate-spin"></i>
+      <p class="text-sm">Calculando...</p>
+    </div>
   </div>
 </div>
 {% endblock %}
 
 {% block panel_explicacion %}
-<div class="prose prose-sm max-w-none dark:prose-invert">
-  <h3>{{ modulo_info[2] }}</h3>
-  <p>{{ modulo_info[3] }}</p>
-  <p class="text-sm text-muted-foreground">
-    El contenido completo de este módulo se implementará en la Fase 2 (Cálculos) y Fase 3 (Figuras).
-  </p>
+<div class="space-y-5">
+  <div>
+    <h3 class="text-base font-semibold mb-2">¿Qué es el plantillado?</h3>
+    <p class="text-sm text-muted-foreground leading-relaxed">
+      Es el <strong class="text-foreground">procedimiento gráfico</strong> de localización de torres
+      sobre el perfil topográfico real. Usa 4 curvas patrón superpuestas al terreno para decidir
+      dónde poner cada estructura.
+    </p>
+  </div>
+
+  {% from "_macros.html" import info_tooltip %}
+
+  <div>
+    <h3 class="text-base font-semibold mb-2">Ecuación base de la parábola</h3>
+    <div class="space-y-3 text-sm bg-muted/50 rounded-lg p-4">
+      <div>
+        <span class="font-semibold text-primary">Parábola y(x)</span>{{ info_tooltip("Aproximación parabólica de la catenaria del conductor (válida para vanos hasta 600 m). y es la distancia vertical bajo la cuerda apoyo-apoyo. En x=0 (centro del vano) y=0; en los extremos y=flecha. Es más simple que la ecuación catenaria real (cosh) y suficiente para diseño práctico.") }}:
+        $$y(x) = \frac{x^2}{2C}$$
+      </div>
+      <div>
+        <span class="font-semibold text-primary">Parámetro C</span>{{ info_tooltip("Parámetro de la catenaria (m). Es la relación entre el tensado horizontal del conductor y su peso por unidad de longitud. Define la 'curvatura' de la parábola: a mayor C → menor flecha → curva más plana. Para 500 kV ACSR Drake: C ≈ 1500-2500 m según la hipótesis.") }}:
+        $$C = \frac{T}{w_a}$$
+      </div>
+      <p class="text-xs text-muted-foreground mt-2">
+        $T$ = tensión del conductor (N), $w_a$ = peso lineal (N/m), $C$ = parámetro catenaria.
+      </p>
+    </div>
+  </div>
+
+  <div>
+    <h3 class="text-base font-semibold mb-2">Las 4 ecuaciones de las curvas</h3>
+    <div class="space-y-3 text-sm bg-muted/50 rounded-lg p-4">
+      <div>
+        <span class="font-semibold text-primary">1. Conductor caliente</span>{{ info_tooltip("Curva del conductor en su condición de máxima flecha (Hipótesis D: máx temperatura, sin viento). Es la posición MÁS BAJA del cable. Define la distancia crítica al suelo y por tanto la altura mínima de las torres.") }}:
+        $$y_{cal}(x) = \frac{x^2}{2 \cdot C_D}$$
+      </div>
+      <div>
+        <span class="font-semibold text-primary">2. Distancia mínima al terreno</span>{{ info_tooltip("Curva del conductor caliente desplazada hacia arriba en d_terreno (típicamente 9-12 m). Esta curva NO PUEDE intersectar el perfil del terreno; si lo hace, la torre debe ser más alta o el vano debe acortarse.") }}:
+        $$y_{terr}(x) = d_{terreno} + \frac{x^2}{2 \cdot C_D}$$
+      </div>
+      <div>
+        <span class="font-semibold text-primary">3. Pie de apoyo</span>{{ info_tooltip("Curva del conductor caliente desplazada hacia abajo en H_apoyo (altura de la torre). Indica DÓNDE debe ubicarse la siguiente torre: en el punto donde esta curva TOCA o INTERSECTA el perfil del terreno.") }}:
+        $$y_{apoyo}(x) = \frac{x^2}{2 \cdot C_D} - H_{apoyo}$$
+      </div>
+      <div>
+        <span class="font-semibold text-primary">4. Conductor frío</span>{{ info_tooltip("Curva del conductor en su condición de mínima flecha (Hipótesis B: mín temperatura, viento moderado). Es la posición MÁS ALTA del cable. Define la separación vertical entre fases en cantilever y la oscilación del haz por viento.") }}:
+        $$y_{frio}(x) = \frac{x^2}{2 \cdot C_B}$$
+      </div>
+      <p class="text-xs text-muted-foreground mt-2 pt-2 border-t border-border">
+        Las 4 curvas comparten origen en el punto más bajo del conductor caliente.
+      </p>
+    </div>
+  </div>
+
+  <div>
+    <h3 class="text-base font-semibold mb-2">Procedimiento de localización</h3>
+    <ol class="space-y-1 text-sm text-muted-foreground list-decimal list-inside">
+      <li>Ubicar la plantilla con su origen en el primer apoyo</li>
+      <li>Verificar que <em>distancia mínima al terreno</em> no intersecte el perfil</li>
+      <li>Marcar donde la curva <em>pie de apoyo</em> toca el perfil → siguiente torre</li>
+      <li>Repetir hasta el final del trazado</li>
+    </ol>
+  </div>
+
+  <div>
+    <h3 class="text-base font-semibold mb-2">¿Qué pasa si...?</h3>
+    <ul class="space-y-1 text-sm text-muted-foreground">
+      <li>• <strong class="text-foreground">Terreno irregular</strong>: vanos más cortos, más torres</li>
+      <li>• <strong class="text-foreground">Pendientes fuertes</strong>: torres con extensiones (patas largas)</li>
+      <li>• <strong class="text-foreground">Cruces especiales</strong>: aumentar altura/distancia (RETIE Tabla 13.1)</li>
+      <li>• <strong class="text-foreground">↑ vano</strong>: ↑ flecha → más altura de torre → más costo por torre pero menos torres</li>
+    </ul>
+  </div>
 </div>
 {% endblock %}

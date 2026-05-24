@@ -1,0 +1,86 @@
+{# Partial módulo 8 - aisladores con tipo seleccionado #}
+<div class="animate-fade-in space-y-4">
+
+  {# Header con aislador seleccionado + explicación destacada #}
+  <div class="rounded-lg border-2 p-5"
+       style="border-color: var(--primary); background: color-mix(in oklch, var(--primary) 5%, transparent);">
+    <div class="flex items-start gap-3 mb-2">
+      <div class="size-10 rounded-lg shrink-0 grid place-items-center"
+           style="background: color-mix(in oklch, var(--primary) 15%, transparent);">
+        <i data-lucide="link" class="size-5" style="color: var(--primary);"></i>
+      </div>
+      <div>
+        <div class="text-xs uppercase tracking-wider mb-0.5" style="color: var(--primary);">Aislador activo</div>
+        <div class="font-semibold text-foreground">{{ aisl.designacion }}</div>
+      </div>
+    </div>
+    <div class="text-sm text-foreground leading-relaxed">
+      <strong class="text-primary">¿Cuándo usar?</strong>
+      {{ aisl.uso_tipico }}
+    </div>
+  </div>
+
+  {% from "_macros.html" import figura_expandible %}
+  {{ figura_expandible(figura_b64, "Cadena de aisladores y criterios de selección") }}
+
+  <div class="grid grid-cols-3 gap-3">
+    <div class="bg-muted/50 rounded-lg p-4 text-center">
+      <div class="text-xs text-muted-foreground mb-1">Por fuga</div>
+      <div class="font-mono font-bold text-2xl text-foreground">{{ r.n_discos_por_fuga }}</div>
+      <div class="text-xs text-muted-foreground">discos</div>
+    </div>
+    <div class="bg-muted/50 rounded-lg p-4 text-center">
+      <div class="text-xs text-muted-foreground mb-1">Por BIL</div>
+      <div class="font-mono font-bold text-2xl text-foreground">{{ r.n_discos_por_bil }}</div>
+      <div class="text-xs text-muted-foreground">discos</div>
+    </div>
+    <div class="rounded-lg p-4 text-center"
+         style="background: color-mix(in oklch, var(--success) 12%, transparent);">
+      <div class="text-xs uppercase tracking-wider mb-1" style="color: var(--success);">Adoptado</div>
+      <div class="font-mono font-bold text-2xl text-foreground">{{ r.n_discos_adoptado }}</div>
+      <div class="text-xs text-muted-foreground">máx(fuga, BIL)</div>
+    </div>
+  </div>
+
+  <div class="grid grid-cols-2 gap-3">
+    <div class="bg-muted/50 rounded-lg p-3">
+      <div class="text-xs text-muted-foreground mb-0.5">Longitud cadena</div>
+      <div class="font-mono font-bold text-foreground">{{ "%.2f"|format(r.longitud_cadena_m) }} m</div>
+      <div class="text-xs text-muted-foreground">{{ r.n_discos_adoptado }} × {{ r.altura_unitaria_mm }} mm + herrajes</div>
+    </div>
+    <div class="bg-muted/50 rounded-lg p-3">
+      <div class="text-xs text-muted-foreground mb-0.5">Peso cadena</div>
+      <div class="font-mono font-bold text-foreground">{{ "%.1f"|format(r.peso_cadena_kg) }} kg</div>
+      <div class="text-xs text-muted-foreground">{{ r.n_discos_adoptado }} × {{ r.peso_unitario_kg }} kg + herrajes</div>
+    </div>
+  </div>
+
+  {% if r.cadena_doble_requerida %}
+    <div class="rounded-lg p-4 border-2"
+         style="border-color: var(--warning); background: color-mix(in oklch, var(--warning) 8%, transparent);">
+      <div class="flex items-start gap-3">
+        <i data-lucide="layers" class="size-5 shrink-0 mt-0.5" style="color: var(--warning);"></i>
+        <div>
+          <div class="font-semibold text-foreground">Adoptar cadena DOBLE en paralelo</div>
+          <p class="text-xs text-muted-foreground mt-1">
+            FS simple = {{ "%.2f"|format(r.fs_cadena_simple) }} &lt; 2.0 (insuficiente).
+            FS doble = {{ "%.2f"|format(r.fs_cadena_doble) }} ✓ cumple RETIE.
+          </p>
+        </div>
+      </div>
+    </div>
+  {% else %}
+    <div class="rounded-lg p-4"
+         style="background: color-mix(in oklch, var(--success) 8%, transparent);">
+      <div class="flex items-start gap-3">
+        <i data-lucide="check-circle-2" class="size-5 shrink-0 mt-0.5" style="color: var(--success);"></i>
+        <div>
+          <div class="font-semibold text-foreground">Cadena simple suficiente</div>
+          <p class="text-xs text-muted-foreground mt-1">
+            FS = {{ "%.2f"|format(r.fs_cadena_simple) }} ≥ 2.0 ✓
+          </p>
+        </div>
+      </div>
+    </div>
+  {% endif %}
+</div>

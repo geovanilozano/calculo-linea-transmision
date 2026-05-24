@@ -1,0 +1,61 @@
+{# Partial módulo 9 - torre #}
+<div class="animate-fade-in space-y-4">
+
+  {% from "_macros.html" import figura_expandible %}
+  {{ figura_expandible(figura_b64, "Silueta de la torre con distancias RETIE", "w-full h-auto max-h-[500px] object-contain mx-auto") }}
+
+  <div class="grid grid-cols-2 gap-3">
+    <div class="bg-muted/50 rounded-lg p-3">
+      <div class="text-xs text-muted-foreground mb-0.5">D al terreno</div>
+      <div class="font-mono font-bold text-foreground">{{ "%.2f"|format(r.d_terreno_m) }} m</div>
+      <div class="text-xs text-muted-foreground">RETIE con altitud</div>
+    </div>
+    <div class="bg-muted/50 rounded-lg p-3">
+      <div class="text-xs text-muted-foreground mb-0.5">D entre fases (mín)</div>
+      <div class="font-mono font-bold text-foreground">{{ "%.2f"|format(r.d_entre_fases_m) }} m</div>
+      <div class="text-xs text-muted-foreground">Adoptado: {{ r.separacion_fases_adoptada_m }} m</div>
+    </div>
+    <div class="bg-muted/50 rounded-lg p-3">
+      <div class="text-xs text-muted-foreground mb-0.5">H apoyo conductor</div>
+      <div class="font-mono font-bold text-foreground">{{ "%.2f"|format(r.h_apoyo_conductor_m) }} m</div>
+      <div class="text-xs text-muted-foreground">Desde el suelo</div>
+    </div>
+    <div class="bg-muted/50 rounded-lg p-3">
+      <div class="text-xs text-muted-foreground mb-0.5">H total torre</div>
+      <div class="font-mono font-bold text-foreground">{{ "%.1f"|format(r.h_total_torre_m) }} m</div>
+      <div class="text-xs text-muted-foreground">Incluye cable guarda</div>
+    </div>
+  </div>
+
+  {# Ángulo de protección #}
+  <div class="rounded-lg p-4 border-2"
+       style="border-color: var({{ 'success' if r.cumple_blindaje else 'warning' }}); background: color-mix(in oklch, var({{ 'success' if r.cumple_blindaje else 'warning' }}) 8%, transparent);">
+    <div class="flex items-start gap-3">
+      <i data-lucide="{% if r.cumple_blindaje %}shield-check{% else %}shield-alert{% endif %}" class="size-5 shrink-0 mt-0.5"
+         style="color: var({{ 'success' if r.cumple_blindaje else 'warning' }});"></i>
+      <div>
+        <div class="font-semibold text-foreground">
+          Ángulo de protección: {{ "%.1f"|format(r.angulo_proteccion_grados) }}°
+          {% if r.cumple_blindaje %} ✓ ≤ 30°{% else %} ⚠ &gt; 30°{% endif %}
+        </div>
+        <p class="text-xs text-muted-foreground mt-1">
+          {% if r.cumple_blindaje %}
+            Blindaje contra rayos correcto.
+          {% else %}
+            Considera reducir la separación horizontal del cable de guarda.
+          {% endif %}
+        </p>
+      </div>
+    </div>
+  </div>
+
+  {# Estructuras totales #}
+  <div class="rounded-lg p-5 text-center"
+       style="background: color-mix(in oklch, var(--primary) 8%, transparent);">
+    <div class="text-xs uppercase tracking-wider mb-1" style="color: var(--primary);">
+      Estructuras para la línea de {{ "%.0f"|format(r.longitud_linea_km) }} km
+    </div>
+    <div class="font-mono font-bold text-4xl text-foreground">{{ r.n_estructuras }}</div>
+    <div class="text-xs text-muted-foreground mt-1">torres con vano de {{ "%.0f"|format(r.vano_diseno_m) }} m</div>
+  </div>
+</div>

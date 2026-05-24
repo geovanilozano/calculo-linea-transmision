@@ -1,33 +1,192 @@
 {% extends "base.html" %}
 
 {% block panel_parametros %}
-<div class="space-y-4">
-  <p class="text-sm text-muted-foreground">
-    Las distancias de seguridad RETIE para 500 kV y el ángulo de protección del cable de guarda se calcularán en la Fase 2.
-  </p>
-  <button class="btn-primary w-full" disabled>
-    <i data-lucide="calculator" class="size-4"></i>
-    Calcular (próximamente)
-  </button>
-</div>
+<form hx-post="{{ url_for('api_modulo_9_calcular') }}"
+      hx-target="#modulo-9-resultado"
+      hx-swap="innerHTML"
+      hx-trigger="load, input delay:400ms from:input"
+      class="space-y-4">
+
+  <div>
+    <label for="tension_kv" class="block text-sm font-medium mb-1.5">Tensión nominal (kV)</label>
+    <input id="tension_kv" name="tension_kv" type="number" step="1" min="50" max="800"
+           value="{{ PROYECTO.tension_nominal_kv }}" class="input font-mono">
+  </div>
+
+  <div>
+    <label for="altitud_msnm" class="block text-sm font-medium mb-1.5">Altitud (msnm)</label>
+    <input id="altitud_msnm" name="altitud_msnm" type="number" step="1" min="0" max="6000"
+           value="{{ PROYECTO.altitud_msnm }}" class="input font-mono">
+  </div>
+
+  <div>
+    <label for="flecha_max_m" class="block text-sm font-medium mb-1.5">Flecha máx conductor (m)</label>
+    <input id="flecha_max_m" name="flecha_max_m" type="number" step="0.1" min="1"
+           value="12.94" class="input font-mono">
+    <p class="text-xs text-muted-foreground mt-1">Del módulo 6 (Hip D)</p>
+  </div>
+
+  <div>
+    <label for="longitud_cadena_m" class="block text-sm font-medium mb-1.5">Longitud cadena (m)</label>
+    <input id="longitud_cadena_m" name="longitud_cadena_m" type="number" step="0.01" min="0.5"
+           value="6.39" class="input font-mono">
+    <p class="text-xs text-muted-foreground mt-1">Del módulo 8</p>
+  </div>
+
+  <div>
+    <label for="longitud_km" class="block text-sm font-medium mb-1.5">Longitud línea (km)</label>
+    <input id="longitud_km" name="longitud_km" type="number" step="1"
+           value="{{ PROYECTO.longitud_km }}" class="input font-mono">
+  </div>
+
+  <div>
+    <label for="vano_m" class="block text-sm font-medium mb-1.5">Vano de diseño (m)</label>
+    <input id="vano_m" name="vano_m" type="number" step="1"
+           value="{{ PROYECTO.vano_diseno_m }}" class="input font-mono">
+  </div>
+</form>
 {% endblock %}
 
 {% block panel_visualizacion %}
-<div class="aspect-video bg-muted rounded-lg grid place-items-center text-muted-foreground">
-  <div class="text-center p-6">
-    <i data-lucide="building-2" class="size-12 mx-auto mb-3 opacity-30"></i>
-    <p class="text-sm">Silueta de la torre con distancias</p>
-    <p class="text-xs">Disponible en Fase 2</p>
+<div id="modulo-9-resultado" class="min-h-[300px]">
+  <div class="aspect-video grid place-items-center text-muted-foreground">
+    <div class="text-center">
+      <i data-lucide="loader-circle" class="size-8 mx-auto mb-2 animate-spin"></i>
+      <p class="text-sm">Calculando...</p>
+    </div>
   </div>
 </div>
 {% endblock %}
 
 {% block panel_explicacion %}
-<div class="prose prose-sm max-w-none dark:prose-invert">
-  <h3>{{ modulo_info[2] }}</h3>
-  <p>{{ modulo_info[3] }}</p>
-  <p class="text-sm text-muted-foreground">
-    El contenido completo de este módulo se implementará en la Fase 2 (Cálculos) y Fase 3 (Figuras).
-  </p>
+<div class="space-y-5">
+  <div>
+    <h3 class="text-base font-semibold mb-2">¿Qué se calcula aquí?</h3>
+    <p class="text-sm text-muted-foreground leading-relaxed">
+      Las <strong class="text-foreground">distancias mínimas RETIE</strong>, la
+      <strong class="text-foreground">altura total de la torre</strong>, el
+      <strong class="text-foreground">ángulo de protección</strong> y el
+      <strong class="text-foreground">número total de estructuras</strong>.
+    </p>
+  </div>
+
+  {% from "_macros.html" import info_tooltip %}
+
+  <div>
+    <h3 class="text-base font-semibold mb-2">Distancia entre fases (RETIE)</h3>
+    <div class="space-y-3 text-sm bg-muted/50 rounded-lg p-4">
+      <div>
+        <span class="font-semibold text-primary">Dff (entre fases)</span>{{ info_tooltip("Distancia horizontal mínima entre fases en la torre (m). Evita el flameo (arco) entre conductores adyacentes por sobretensiones. Depende de la tensión nominal (kc·VLL) y de la oscilación de la cadena por viento (√(Lcad + fmáx)). Para 500 kV ≈ 9-10 m entre fases.") }}:
+        $$D_{ff} = k_c \cdot V_{LL} + \sqrt{L_{cadena} + f_{máx}}$$
+        <p class="text-xs text-muted-foreground mt-1">$k_c = 0{,}008$ m/kV para configuración horizontal</p>
+      </div>
+    </div>
+  </div>
+
+  <div>
+    <h3 class="text-base font-semibold mb-2">Distancia al terreno (corrección altitud)</h3>
+    <div class="space-y-3 text-sm bg-muted/50 rounded-lg p-4">
+      <div>
+        <span class="font-semibold text-primary">dterreno</span>{{ info_tooltip("Distancia mínima vertical entre el conductor más bajo y el suelo (m), considerando la flecha máxima. A mayor altitud, el aire es menos denso y su rigidez dieléctrica disminuye → se requiere MÁS distancia. RETIE exige +3% por cada 300 m sobre 1000 msnm. A nivel del mar: 9 m; a 3000 msnm: ~10,8 m.") }}:
+        $$d_{terreno} = d_{base} \cdot \left[1 + 0{,}03 \cdot \frac{h_{snm} - 1000}{300}\right]$$
+        <p class="text-xs text-muted-foreground mt-1">+3% por cada 300 m sobre 1000 msnm</p>
+      </div>
+    </div>
+  </div>
+
+  <div>
+    <h3 class="text-base font-semibold mb-2">Altura del apoyo y torre</h3>
+    <div class="space-y-3 text-sm bg-muted/50 rounded-lg p-4">
+      <div>
+        <span class="font-semibold text-primary">Happoyo</span>{{ info_tooltip("Altura desde el suelo hasta el punto de fijación del conductor (m). Suma la distancia mínima al terreno + la flecha + la longitud de la cadena + un margen de seguridad. Es la altura que define la TORRE básica.") }}:
+        $$H_{apoyo} = d_{terreno} + f_{máx} + L_{cadena} + h_{seg}$$
+      </div>
+      <div>
+        <span class="font-semibold text-primary">Htotal</span>{{ info_tooltip("Altura total de la torre incluyendo la parte superior donde va el cable de guarda y el remate (m). Para 500 kV horizontal: ~40-50 m. A mayor altura → mayor costo, mayor base, mayor cimentación.") }}:
+        $$H_{total} = H_{apoyo} + d_{guarda} + h_{remate}$$
+      </div>
+      <p class="text-xs text-muted-foreground mt-2">Típico 500 kV: d_guarda = 5,5 m, h_remate = 5 m</p>
+    </div>
+  </div>
+
+  <div>
+    <h3 class="text-base font-semibold mb-2">Ángulo de protección (blindaje)</h3>
+    <div class="space-y-3 text-sm bg-muted/50 rounded-lg p-4">
+      <div>
+        <span class="font-semibold text-primary">α (ángulo de protección)</span>{{ info_tooltip("Ángulo entre la vertical y la línea que une el cable de guarda con la fase más expuesta. Define la zona protegida contra rayos directos (cono de blindaje). RETIE / NTC 4552 exigen α ≤ 30° para 500 kV. Si es mayor, el rayo puede impactar directamente la fase causando flameo inverso.") }}:
+        $$\alpha = \arctan\left(\frac{d_h}{d_v}\right) \le 30°$$
+        <p class="text-xs text-muted-foreground mt-1">$d_h$, $d_v$: separación horizontal/vertical cable guarda vs fase</p>
+      </div>
+    </div>
+  </div>
+
+  <div>
+    <h3 class="text-base font-semibold mb-2">Número de estructuras</h3>
+    <div class="space-y-3 text-sm bg-muted/50 rounded-lg p-4">
+      <div>
+        <span class="font-semibold text-primary">Nestructuras</span>{{ info_tooltip("Número total de torres a fabricar e instalar en la línea. Se calcula dividiendo la longitud total por el vano de diseño y redondeando hacia arriba. Cada torre tiene costo (estructura + cimentación + montaje + servidumbre) → vano grande = menos torres pero más altas. Para 307 km con vano 400 m: ~768 torres.") }}:
+        $$N_{estructuras} = \left\lceil \frac{L_{línea} \cdot 1000}{a_{vano}} \right\rceil$$
+      </div>
+    </div>
+  </div>
+
+  <div class="rounded-lg border-2 p-4"
+       style="border-color: var(--accent); background: color-mix(in oklch, var(--accent) 6%, transparent);">
+    <h3 class="text-base font-semibold mb-2 flex items-center gap-2">
+      <i data-lucide="book-open-text" class="size-4" style="color: var(--accent);"></i>
+      Normativa RETIE — Tabla 13.1 (distancias mínimas 500 kV)
+    </h3>
+    <div class="text-xs space-y-1.5">
+      <div class="grid grid-cols-2 gap-2 py-1">
+        <span class="text-muted-foreground">A terreno NO transitable</span>
+        <span class="font-mono text-foreground">7,5 m</span>
+      </div>
+      <div class="grid grid-cols-2 gap-2 py-1">
+        <span class="text-muted-foreground">A terreno transitable vehicular</span>
+        <span class="font-mono text-foreground">9,0 m (base)</span>
+      </div>
+      <div class="grid grid-cols-2 gap-2 py-1">
+        <span class="text-muted-foreground">A vía de primer orden</span>
+        <span class="font-mono text-foreground">10,5 m</span>
+      </div>
+      <div class="grid grid-cols-2 gap-2 py-1">
+        <span class="text-muted-foreground">A estructura (cuerpo torre)</span>
+        <span class="font-mono text-foreground">3,5 m</span>
+      </div>
+      <div class="grid grid-cols-2 gap-2 py-1">
+        <span class="text-muted-foreground">Entre fases adyacentes (mín)</span>
+        <span class="font-mono text-foreground">Fórmula Dff</span>
+      </div>
+      <div class="pt-2 border-t border-border mt-2 text-muted-foreground">
+        ➕ Incremento por altitud: +3% por cada 300 m sobre 1000 msnm
+      </div>
+    </div>
+    <div class="mt-3 pt-3 border-t border-border text-xs text-muted-foreground space-y-2">
+      <div>
+        <a href="https://www.minenergia.gov.co/es/micrositios/retie/" target="_blank" rel="noopener noreferrer"
+           class="text-primary hover:underline font-semibold inline-flex items-center gap-1">
+          RETIE Art. 13
+          <i data-lucide="external-link" class="size-3"></i>
+        </a>
+        — Distancias mínimas de seguridad
+      </div>
+      <div>
+        <a href="https://tienda.icontec.org/gp-proteccion-contra-rayos-parte-1-principios-generales-ntc4552-1-2008.html" target="_blank" rel="noopener noreferrer"
+           class="text-primary hover:underline font-semibold inline-flex items-center gap-1">
+          NTC 4552
+          <i data-lucide="external-link" class="size-3"></i>
+        </a>
+        — Protección contra descargas atmosféricas
+      </div>
+      <div>
+        <a href="https://webstore.iec.ch/en/publication/595" target="_blank" rel="noopener noreferrer"
+           class="text-primary hover:underline font-semibold inline-flex items-center gap-1">
+          IEC 60071
+          <i data-lucide="external-link" class="size-3"></i>
+        </a>
+        — Coordinación de aislamiento
+      </div>
+    </div>
+  </div>
 </div>
 {% endblock %}

@@ -1,0 +1,51 @@
+{# Partial módulo 10 - plantillado #}
+<div class="animate-fade-in space-y-4">
+
+  {% from "_macros.html" import figura_expandible %}
+  {{ figura_expandible(figura_b64, "Las 4 curvas patrón sobre el perfil topográfico") }}
+
+  <div class="grid grid-cols-2 md:grid-cols-4 gap-2">
+    <div class="bg-muted/50 rounded-lg p-3">
+      <div class="text-xs text-muted-foreground mb-0.5">Vano</div>
+      <div class="font-mono font-bold text-foreground">{{ "%.0f"|format(r.vano_diseno_m) }} m</div>
+    </div>
+    <div class="bg-muted/50 rounded-lg p-3">
+      <div class="text-xs text-muted-foreground mb-0.5">f máx (caliente)</div>
+      <div class="font-mono font-bold text-foreground" style="color: #dc2626;">{{ "%.2f"|format(r.flecha_max_m) }} m</div>
+    </div>
+    <div class="bg-muted/50 rounded-lg p-3">
+      <div class="text-xs text-muted-foreground mb-0.5">f mín (frío)</div>
+      <div class="font-mono font-bold text-foreground" style="color: #2563eb;">{{ "%.2f"|format(r.flecha_min_m) }} m</div>
+    </div>
+    <div class="bg-muted/50 rounded-lg p-3">
+      <div class="text-xs text-muted-foreground mb-0.5">H apoyo</div>
+      <div class="font-mono font-bold text-foreground">{{ "%.1f"|format(r.altura_apoyo_conductor_m) }} m</div>
+    </div>
+  </div>
+
+  {# Parámetros catenaria #}
+  <div class="rounded-lg p-4"
+       style="background: color-mix(in oklch, var(--primary) 5%, transparent);">
+    <div class="text-xs uppercase tracking-wider mb-2" style="color: var(--primary);">Parámetros de catenaria</div>
+    <div class="grid grid-cols-2 gap-3 text-sm">
+      <div>
+        <span class="text-muted-foreground">C caliente:</span>
+        <span class="font-mono font-semibold ml-2">{{ "%.0f"|format(r.curvas[0].parametro_c_m) }} m</span>
+      </div>
+      <div>
+        <span class="text-muted-foreground">C frío:</span>
+        <span class="font-mono font-semibold ml-2">{{ "%.0f"|format(r.curvas[3].parametro_c_m) }} m</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="rounded-lg p-4 text-center"
+       style="background: color-mix(in oklch, var(--success) 8%, transparent);">
+    <i data-lucide="check-circle-2" class="size-5 mx-auto mb-2" style="color: var(--success);"></i>
+    <div class="font-semibold text-foreground">Plantilla generada</div>
+    <p class="text-xs text-muted-foreground mt-1">
+      Esta plantilla se superpone al perfil topográfico real a escala 1:2000 H / 1:500 V
+      para ubicar las torres del trazado.
+    </p>
+  </div>
+</div>

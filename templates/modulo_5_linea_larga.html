@@ -1,33 +1,154 @@
 {% extends "base.html" %}
 
 {% block panel_parametros %}
-<div class="space-y-4">
-  <p class="text-sm text-muted-foreground">
-    El modelo de línea larga (parámetros ABCD) y los cálculos de regulación, pérdidas y eficiencia se implementarán en la Fase 2.
-  </p>
-  <button class="btn-primary w-full" disabled>
-    <i data-lucide="calculator" class="size-4"></i>
-    Calcular (próximamente)
-  </button>
+<div class="text-xs text-muted-foreground mb-3 pb-3 border-b border-border">
+  <i data-lucide="cable" class="size-3.5 inline -mt-0.5"></i>
+  Conductor activo: <strong class="text-foreground">{{ CONDUCTOR.designacion }}</strong>
+  <a href="{{ url_for('modulo', modulo_id=3) }}" class="text-primary hover:underline ml-1">cambiar</a>
 </div>
+
+<form hx-post="{{ url_for('api_modulo_5_calcular') }}"
+      hx-target="#modulo-5-resultado"
+      hx-swap="innerHTML"
+      hx-trigger="load, input delay:400ms from:input"
+      class="space-y-4">
+
+  <div>
+    <label for="tension_kv" class="block text-sm font-medium mb-1.5">Tensión nominal (kV)</label>
+    <input id="tension_kv" name="tension_kv" type="number" step="1" min="50" max="800"
+           value="{{ PROYECTO.tension_nominal_kv }}" class="input font-mono">
+  </div>
+
+  <div>
+    <label for="potencia_mw" class="block text-sm font-medium mb-1.5">Potencia (MW)</label>
+    <input id="potencia_mw" name="potencia_mw" type="number" step="1" min="1"
+           value="{{ PROYECTO.potencia_mw }}" class="input font-mono">
+  </div>
+
+  <div>
+    <label for="longitud_km" class="block text-sm font-medium mb-1.5">Longitud (km)</label>
+    <input id="longitud_km" name="longitud_km" type="number" step="1" min="1"
+           value="{{ PROYECTO.longitud_km }}" class="input font-mono">
+  </div>
+
+  <div>
+    <label for="factor_potencia" class="block text-sm font-medium mb-1.5">Factor de potencia</label>
+    <input id="factor_potencia" name="factor_potencia" type="number" step="0.01" min="0.5" max="1"
+           value="{{ PROYECTO.factor_potencia }}" class="input font-mono">
+    <p class="text-xs text-muted-foreground mt-1">1.0 = carga resistiva pura</p>
+  </div>
+</form>
 {% endblock %}
 
 {% block panel_visualizacion %}
-<div class="aspect-video bg-muted rounded-lg grid place-items-center text-muted-foreground">
-  <div class="text-center p-6">
-    <i data-lucide="git-branch" class="size-12 mx-auto mb-3 opacity-30"></i>
-    <p class="text-sm">Cuadripolo ABCD + diagrama fasorial</p>
-    <p class="text-xs">Disponible en Fase 2</p>
+<div id="modulo-5-resultado" class="min-h-[300px]">
+  <div class="aspect-video grid place-items-center text-muted-foreground">
+    <div class="text-center">
+      <i data-lucide="loader-circle" class="size-8 mx-auto mb-2 animate-spin"></i>
+      <p class="text-sm">Calculando...</p>
+    </div>
   </div>
 </div>
 {% endblock %}
 
 {% block panel_explicacion %}
-<div class="prose prose-sm max-w-none dark:prose-invert">
-  <h3>{{ modulo_info[2] }}</h3>
-  <p>{{ modulo_info[3] }}</p>
-  <p class="text-sm text-muted-foreground">
-    El contenido completo de este módulo se implementará en la Fase 2 (Cálculos) y Fase 3 (Figuras).
-  </p>
+<div class="space-y-5">
+  <div>
+    <h3 class="text-base font-semibold mb-2">¿Por qué línea larga?</h3>
+    <p class="text-sm text-muted-foreground leading-relaxed">
+      Para <strong class="text-foreground">L > 240 km</strong>, la capacitancia distribuida ya no
+      es despreciable. El modelo distribuido revela el <strong class="text-foreground">efecto Ferranti</strong>:
+      con factor de potencia unitario o cargas livianas, $V_R$ puede ser MAYOR que $V_G$.
+    </p>
+  </div>
+
+  {% from "_macros.html" import info_tooltip %}
+
+  <div>
+    <h3 class="text-base font-semibold mb-2">Impedancia característica y propagación</h3>
+    <div class="space-y-3 text-sm bg-muted/50 rounded-lg p-4">
+      <div>
+        <span class="font-semibold text-primary">Impedancia característica Zc</span>{{ info_tooltip("Impedancia 'natural' de la línea (Ω). Si la línea se cargara con una carga igual a Zc, no habría reflexiones ni efecto Ferranti. Para líneas aéreas de 500 kV: Zc ≈ 250-400 Ω. La 'potencia natural' SIL = V²/Zc define el punto óptimo de operación.") }}:
+        $$Z_c = \sqrt{\frac{z}{y}}$$
+      </div>
+      <div>
+        <span class="font-semibold text-primary">Constante de propagación γ</span>{{ info_tooltip("Número complejo (1/km) que describe cómo se atenúa y desfasa la onda de tensión/corriente a lo largo de la línea. Parte real α = atenuación (pérdidas), parte imaginaria β = desfase. Para 60 Hz en líneas aéreas: β ≈ 0,0013 rad/km.") }}:
+        $$\gamma = \sqrt{z \cdot y}$$
+      </div>
+      <p class="text-xs text-muted-foreground mt-1">$z$, $y$ por unidad de longitud (complejos)</p>
+    </div>
+  </div>
+
+  <div>
+    <h3 class="text-base font-semibold mb-2">Parámetros ABCD (cuadripolo)</h3>
+    <div class="space-y-3 text-sm bg-muted/50 rounded-lg p-4">
+      <div>
+        <span class="font-semibold text-primary">A = D</span>{{ info_tooltip("Coeficientes adimensionales del modelo de cuadripolo. Representan la relación entre tensión/corriente del generador y del receptor en vacío o cortocircuito. Para línea ideal: A=D=1 (línea sin pérdidas y corta). Para línea larga real: |A|<1 indica caída de tensión.") }}:
+        $$A = D = \cosh(\gamma L)$$
+      </div>
+      <div>
+        <span class="font-semibold text-primary">B</span>{{ info_tooltip("Coeficiente con unidades de impedancia (Ω). Equivale a la impedancia total vista desde el generador cuando el receptor está en cortocircuito. Determina la caída de tensión por corriente: VG_carga = B·IR cuando VR=0.") }}:
+        $$B = Z_c \cdot \sinh(\gamma L) \text{ [}\Omega\text{]}$$
+      </div>
+      <div>
+        <span class="font-semibold text-primary">C</span>{{ info_tooltip("Coeficiente con unidades de admitancia (S = 1/Ω). Representa la corriente capacitiva que circula entre fases y tierra cuando la línea está en vacío (receptor abierto). Es el responsable principal del efecto Ferranti en líneas largas.") }}:
+        $$C = \frac{\sinh(\gamma L)}{Z_c} \text{ [S]}$$
+      </div>
+    </div>
+  </div>
+
+  <div>
+    <h3 class="text-base font-semibold mb-2">Tensión y corriente</h3>
+    <div class="space-y-3 text-sm bg-muted/50 rounded-lg p-4">
+      <div>
+        <span class="font-semibold text-primary">Corriente receptor IR</span>{{ info_tooltip("Corriente fasorial (A) que la carga demanda en el extremo receptor. Se calcula de la potencia trifásica P, la tensión de línea VL y el factor de potencia cos φ. Es el dato de entrada para resolver el cuadripolo hacia atrás (del receptor al generador).") }}:
+        $$I_R = \frac{P}{\sqrt{3} \cdot V_L \cdot \cos\varphi}$$
+      </div>
+      <div>
+        <span class="font-semibold text-primary">Tensión fase-neutro receptor VR(f-n)</span>{{ info_tooltip("Tensión por fase respecto al neutro en el extremo receptor (V). Es la tensión que ve la carga. En sistemas trifásicos: VL = √3 · Vfn. Para 500 kV de línea: Vfn ≈ 288,7 kV.") }}:
+        $$V_{R(f-n)} = \frac{V_{R(L)}}{\sqrt{3}}$$
+      </div>
+      <div>
+        <span class="font-semibold text-primary">Tensión generador VG</span>{{ info_tooltip("Tensión fase-neutro que el generador debe entregar (V) para que el receptor reciba VR. Generalmente VG > VR por la caída resistiva-inductiva, pero en líneas largas con baja carga VG < VR (efecto Ferranti).") }}:
+        $$V_G = A \cdot V_R + B \cdot I_R$$
+      </div>
+      <div>
+        <span class="font-semibold text-primary">Corriente generador IG</span>{{ info_tooltip("Corriente que el generador inyecta en la línea (A). Combina la corriente útil de carga (D·IR) más la corriente capacitiva de la línea (C·VR). Su parte real determina la potencia activa generada.") }}:
+        $$I_G = C \cdot V_R + D \cdot I_R$$
+      </div>
+    </div>
+  </div>
+
+  <div>
+    <h3 class="text-base font-semibold mb-2">Indicadores de desempeño</h3>
+    <div class="space-y-3 text-sm bg-muted/50 rounded-lg p-4">
+      <div>
+        <span class="font-semibold text-primary">Regulación Reg%</span>{{ info_tooltip("Variación porcentual de tensión entre carga máxima y vacío. Mide qué tan estable es la tensión en el receptor cuando varía la demanda. RETIE exige Reg ≤ 10% en líneas de transmisión. Si Reg < 0: tensión del receptor SUBE con poca carga (efecto Ferranti).") }}:
+        $$Reg = \frac{V_{GL} - V_{RL}}{V_{RL}} \cdot 100$$
+        <p class="text-xs text-muted-foreground mt-0.5">Signo negativo = efecto Ferranti</p>
+      </div>
+      <div>
+        <span class="font-semibold text-primary">Potencia generada PG</span>{{ info_tooltip("Potencia activa trifásica (MW) que el generador debe entregar para que la carga reciba PR. PG = PR + pérdidas. Se calcula tomando la parte real del producto fasorial V·I*. El asterisco * indica el conjugado complejo.") }}:
+        $$P_G = \mathrm{Re}\left(\sqrt{3} \cdot V_{GL} \cdot I_G^{*}\right)$$
+      </div>
+      <div>
+        <span class="font-semibold text-primary">Pérdidas ΔP%</span>{{ info_tooltip("Porcentaje de potencia que se pierde como calor en la resistencia de los conductores (efecto Joule). UPME recomienda ΔP ≤ 5% para líneas de transmisión. Disminuye con mayor sección, más subconductores o menor corriente (más kV).") }}:
+        $$\Delta P = \frac{P_G - P_R}{P_R} \cdot 100$$
+      </div>
+      <div>
+        <span class="font-semibold text-primary">Eficiencia η</span>{{ info_tooltip("Cociente entre potencia entregada al receptor y potencia inyectada por el generador. Para una línea bien diseñada: η > 95%. Indicador inverso de las pérdidas.") }}:
+        $$\eta = \frac{P_R}{P_G} \cdot 100$$
+      </div>
+    </div>
+  </div>
+
+  <div>
+    <h3 class="text-base font-semibold mb-2">Umbrales del proyecto</h3>
+    <ul class="space-y-1 text-sm text-muted-foreground">
+      <li>• Regulación &lt; <strong class="text-foreground">{{ PROYECTO.regulacion_max_pct }} %</strong></li>
+      <li>• Pérdidas &lt; <strong class="text-foreground">{{ PROYECTO.perdidas_max_pct }} %</strong></li>
+      <li>• Eficiencia &gt; 95 % (deseado)</li>
+    </ul>
+  </div>
 </div>
 {% endblock %}

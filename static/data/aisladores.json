@@ -1,0 +1,70 @@
+{
+  "default_id": "ansi_52_3",
+  "aisladores": [
+    {
+      "id": "ansi_52_3",
+      "designacion": "ANSI 52-3 Porcelana estándar",
+      "material": "Porcelana",
+      "diametro_mm": 254,
+      "altura_unitaria_mm": 146,
+      "tension_disruptiva_seco_kv": 80,
+      "tension_disruptiva_lluvia_kv": 50,
+      "linea_fuga_unitaria_mm": 305,
+      "carga_rotura_kgf": 16800,
+      "peso_kg": 5.6,
+      "uso_tipico": "Estándar para zonas con contaminación baja-media"
+    },
+    {
+      "id": "ansi_52_5",
+      "designacion": "ANSI 52-5 Porcelana antifog",
+      "material": "Porcelana antifog",
+      "diametro_mm": 254,
+      "altura_unitaria_mm": 146,
+      "tension_disruptiva_seco_kv": 80,
+      "tension_disruptiva_lluvia_kv": 50,
+      "linea_fuga_unitaria_mm": 445,
+      "carga_rotura_kgf": 11340,
+      "peso_kg": 6.0,
+      "uso_tipico": "Zonas con alta contaminación industrial o salina"
+    },
+    {
+      "id": "ansi_52_8",
+      "designacion": "ANSI 52-8 Porcelana heavy-duty",
+      "material": "Porcelana extra-pesada",
+      "diametro_mm": 280,
+      "altura_unitaria_mm": 170,
+      "tension_disruptiva_seco_kv": 95,
+      "tension_disruptiva_lluvia_kv": 60,
+      "linea_fuga_unitaria_mm": 380,
+      "carga_rotura_kgf": 22680,
+      "peso_kg": 7.5,
+      "uso_tipico": "Líneas con cargas mecánicas elevadas"
+    },
+    {
+      "id": "iec_305_u120bs",
+      "designacion": "IEC 305 U120BS Vidrio templado",
+      "material": "Vidrio templado",
+      "diametro_mm": 255,
+      "altura_unitaria_mm": 146,
+      "tension_disruptiva_seco_kv": 75,
+      "tension_disruptiva_lluvia_kv": 45,
+      "linea_fuga_unitaria_mm": 380,
+      "carga_rotura_kgf": 12000,
+      "peso_kg": 5.4,
+      "uso_tipico": "Inspección visual fácil (se rompe limpio si falla)"
+    },
+    {
+      "id": "iec_305_u160bp",
+      "designacion": "IEC 305 U160BP Vidrio antifog",
+      "material": "Vidrio templado antifog",
+      "diametro_mm": 280,
+      "altura_unitaria_mm": 170,
+      "tension_disruptiva_seco_kv": 85,
+      "tension_disruptiva_lluvia_kv": 55,
+      "linea_fuga_unitaria_mm": 545,
+      "carga_rotura_kgf": 16000,
+      "peso_kg": 6.5,
+      "uso_tipico": "Costera o industrial pesada con alta carga mecánica"
+    }
+  ]
+}

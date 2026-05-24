@@ -1,33 +1,108 @@
 {% extends "base.html" %}
 
 {% block panel_parametros %}
-<div class="space-y-4">
-  <p class="text-sm text-muted-foreground">
-    El análisis mecánico del cable de guarda EHS 7/16″ con las 4 hipótesis se implementará en la Fase 2.
-  </p>
-  <button class="btn-primary w-full" disabled>
-    <i data-lucide="calculator" class="size-4"></i>
-    Calcular (próximamente)
-  </button>
+{% from "_macros.html" import info_tooltip %}
+
+<form hx-post="{{ url_for('api_modulo_7_calcular') }}"
+      hx-target="#modulo-7-resultado"
+      hx-swap="innerHTML"
+      hx-trigger="load, input delay:400ms from:input, change delay:200ms from:select"
+      class="space-y-4">
+
+  <div>
+    <label for="cable_guarda_id" class="block text-sm font-medium mb-1.5">
+      Cable de guarda{{ info_tooltip("El cable de guarda (o cable de tierra) va en la cúspide de la torre, por encima de los conductores de fase. Su función PRINCIPAL es proteger la línea contra impactos directos de rayo, interceptándolos antes de que alcancen las fases. Se selecciona según: (1) corriente de cortocircuito esperada → acero EHS para zonas de alto nivel cerá­unico; (2) necesidad de comunicaciones → OPGW (fibra óptica integrada) en líneas troncales; (3) baja resistencia eléctrica → alumoweld (Al + acero) cuando se requiere conducción adicional. RETIE exige ángulo de protección ≤30° respecto a las fases.") }}
+      <span class="text-xs text-muted-foreground font-normal">(4 opciones)</span>
+    </label>
+    <select id="cable_guarda_id" name="cable_guarda_id" class="input">
+      {% for c in CATALOGO_CABLES_GUARDA %}
+        <option value="{{ c.id }}" {% if c.id == CABLE_GUARDA.id %}selected{% endif %}>
+          {{ c.designacion }}
+        </option>
+      {% endfor %}
+    </select>
+  </div>
+
+  <div>
+    <label for="vano_m" class="block text-sm font-medium mb-1.5">Vano de diseño (m)</label>
+    <input id="vano_m" name="vano_m" type="number" step="1" min="100" max="800"
+           value="{{ PROYECTO.vano_diseno_m }}" class="input font-mono">
+  </div>
+</form>
+
+<div class="mt-5 pt-4 border-t border-border space-y-2 text-xs">
+  <div class="font-semibold text-muted-foreground uppercase tracking-wider mb-2">Ficha del cable</div>
+  <div class="flex justify-between"><span class="text-muted-foreground">Material</span><span class="font-mono text-foreground">{{ CABLE_GUARDA.material }}</span></div>
+  <div class="flex justify-between"><span class="text-muted-foreground">Diámetro</span><span class="font-mono">{{ CABLE_GUARDA.diametro_mm }} mm</span></div>
+  <div class="flex justify-between"><span class="text-muted-foreground">Sección</span><span class="font-mono">{{ CABLE_GUARDA.seccion_mm2 }} mm²</span></div>
+  <div class="flex justify-between"><span class="text-muted-foreground">Masa</span><span class="font-mono">{{ CABLE_GUARDA.masa_kg_m }} kg/m</span></div>
+  <div class="flex justify-between"><span class="text-muted-foreground">Carga rotura</span><span class="font-mono">{{ CABLE_GUARDA.carga_rotura_kgf }} kgf</span></div>
+  <div class="flex justify-between"><span class="text-muted-foreground">α dilatación</span><span class="font-mono">{{ "%.2e"|format(CABLE_GUARDA.coef_dilatacion_invc) }} /°C</span></div>
+  <div class="text-xs text-muted-foreground italic mt-2 pt-2 border-t border-border">{{ CABLE_GUARDA.uso_tipico }}</div>
 </div>
 {% endblock %}
 
 {% block panel_visualizacion %}
-<div class="aspect-video bg-muted rounded-lg grid place-items-center text-muted-foreground">
-  <div class="text-center p-6">
-    <i data-lucide="shield" class="size-12 mx-auto mb-3 opacity-30"></i>
-    <p class="text-sm">Comparación blindaje cable-conductor</p>
-    <p class="text-xs">Disponible en Fase 2</p>
+<div id="modulo-7-resultado" class="min-h-[300px]">
+  <div class="aspect-video grid place-items-center text-muted-foreground">
+    <div class="text-center">
+      <i data-lucide="loader-circle" class="size-8 mx-auto mb-2 animate-spin"></i>
+      <p class="text-sm">Calculando...</p>
+    </div>
   </div>
 </div>
 {% endblock %}
 
 {% block panel_explicacion %}
-<div class="prose prose-sm max-w-none dark:prose-invert">
-  <h3>{{ modulo_info[2] }}</h3>
-  <p>{{ modulo_info[3] }}</p>
-  <p class="text-sm text-muted-foreground">
-    El contenido completo de este módulo se implementará en la Fase 2 (Cálculos) y Fase 3 (Figuras).
-  </p>
+{% from "_macros.html" import info_tooltip %}
+<div class="space-y-5">
+  <div>
+    <h3 class="text-base font-semibold mb-2">¿Qué se calcula aquí?</h3>
+    <p class="text-sm text-muted-foreground leading-relaxed">
+      Las mismas 4 hipótesis mecánicas pero aplicadas al <strong class="text-foreground">cable de guarda</strong>
+      (acero galvanizado, alumoweld o OPGW).
+    </p>
+  </div>
+
+  <div>
+    <h3 class="text-base font-semibold mb-2">Función del cable de guarda</h3>
+    <p class="text-sm text-muted-foreground leading-relaxed">
+      Protege la línea contra <strong class="text-foreground">descargas atmosféricas directas</strong>.
+      Va en la cúspide de la torre con un ángulo de protección α ≤ 30° respecto a las fases.
+      El OPGW además lleva fibra óptica para comunicaciones.
+    </p>
+  </div>
+
+  <div>
+    <h3 class="text-base font-semibold mb-2">Fórmulas (mismas que conductor)</h3>
+    <div class="space-y-3 text-sm bg-muted/50 rounded-lg p-4">
+      <div>
+        <span class="font-semibold text-primary">Carga viento Wv,g</span>{{ info_tooltip("Carga horizontal de viento sobre el cable de guarda (kgf/m). Misma fórmula que conductor pero con menor diámetro Φg → menor carga. El acero EHS resiste mucho más esfuerzo que el aluminio del conductor.") }}:
+        $$W_{v,g} = \frac{0{,}613 \cdot (V/3{,}6)^2 \cdot \Phi_g}{1000}$$
+      </div>
+      <div>
+        <span class="font-semibold text-primary">Carga resultante Wr,g</span>{{ info_tooltip("Suma vectorial del peso propio y la carga de viento sobre el cable de guarda. En el cable de guarda generalmente gobierna la Hipótesis A (máximo viento), opuesto al conductor donde gobierna la C (diaria, FS=5).") }}:
+        $$W_{r,g} = \sqrt{W_{c,g}^2 + W_{v,g}^2}$$
+      </div>
+      <div>
+        <span class="font-semibold text-primary">Flecha fg</span>{{ info_tooltip("Flecha del cable de guarda en cada hipótesis (m). CRÍTICO: debe ser MENOR que la flecha del conductor para que el ángulo de protección se mantenga ≤30° en todas las condiciones operativas.") }}:
+        $$f_g = \frac{W_{r,g} \cdot a^2}{8 \cdot T_g}$$
+      </div>
+      <div>
+        <span class="font-semibold text-primary">Verificación blindaje</span>{{ info_tooltip("Condición geométrica clave: si la flecha del cable de guarda es menor o igual a la del conductor, el cable de guarda 'cuelga más arriba' que las fases y mantiene el ángulo de protección. Si fg > f_conductor en alguna hipótesis (ej. a alta temperatura), las fases quedan EXPUESTAS al rayo.") }}:
+        $$f_g \le f_{conductor} \implies \text{Zona de protección OK}$$
+      </div>
+    </div>
+  </div>
+
+  <div>
+    <h3 class="text-base font-semibold mb-2">Diferencias clave con el conductor</h3>
+    <ul class="space-y-1.5 text-sm text-muted-foreground">
+      <li>• <strong class="text-foreground">Acero EHS</strong>: rotura ~1116 MPa (vs 299 MPa del ACSR)</li>
+      <li>• <strong class="text-foreground">Dilatación menor</strong>: α=11.5e-6 /°C (vs 18.9e-6 del Al)</li>
+      <li>• <strong class="text-foreground">Hip A gobierna</strong> (viento máx) — opuesto al conductor</li>
+      <li>• <strong class="text-foreground">OPGW</strong>: añade comunicaciones por fibra óptica</li>
+    </ul>
+  </div>
 </div>
 {% endblock %}

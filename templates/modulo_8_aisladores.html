@@ -1,37 +1,146 @@
 {% extends "base.html" %}
 
 {% block panel_parametros %}
-<div class="space-y-4">
+{% from "_macros.html" import info_tooltip %}
+
+<form hx-post="{{ url_for('api_modulo_8_calcular') }}"
+      hx-target="#modulo-8-resultado"
+      hx-swap="innerHTML"
+      hx-trigger="load, input delay:400ms from:input, change delay:200ms from:select"
+      class="space-y-4">
+
   <div>
-    <label class="block text-sm font-medium mb-1">Discos por cadena</label>
-    <input type="number" class="input" value="{{ PROYECTO.n_discos_aislador }}" readonly>
+    <label for="aislador_id" class="block text-sm font-medium mb-1.5">
+      Tipo de aislador{{ info_tooltip("Los aisladores sostienen mecánicamente el conductor desde la torre y al mismo tiempo lo separan eléctricamente. Se arman en CADENAS de discos según la tensión: a 500 kV se requieren 24-28 discos. Selección según: (1) ambiente — porcelana estándar (ANSI 52-3) tierra adentro; vidrio templado (U120BS) cuando se requiere inspección visual fácil; antifog/antiniebla (ANSI 52-5, U160BP) en zonas costeras o industriales con alta contaminación; (2) carga mecánica — heavy-duty (ANSI 52-8) para vanos grandes; (3) cumplimiento IEC 60815 sobre línea de fuga vs nivel de contaminación. RETIE exige FS≥2,0.") }}
+      <span class="text-xs text-muted-foreground font-normal">(5 opciones)</span>
+    </label>
+    <select id="aislador_id" name="aislador_id" class="input">
+      {% for a in CATALOGO_AISLADORES %}
+        <option value="{{ a.id }}" {% if a.id == AISLADOR.id %}selected{% endif %}>
+          {{ a.designacion }}
+        </option>
+      {% endfor %}
+    </select>
   </div>
-  <p class="text-sm text-muted-foreground">
-    El cálculo completo de aisladores (línea de fuga, BIL, fuerzas) se implementará en la Fase 2.
-  </p>
-  <button class="btn-primary w-full" disabled>
-    <i data-lucide="calculator" class="size-4"></i>
-    Calcular (próximamente)
-  </button>
+
+  <div>
+    <label for="tension_kv" class="block text-sm font-medium mb-1.5">Tensión nominal (kV)</label>
+    <input id="tension_kv" name="tension_kv" type="number" step="1" min="50" max="800"
+           value="{{ PROYECTO.tension_nominal_kv }}" class="input font-mono">
+  </div>
+
+  <div>
+    <label for="nivel_contaminacion" class="block text-sm font-medium mb-1.5">Nivel de contaminación</label>
+    <select id="nivel_contaminacion" name="nivel_contaminacion" class="input">
+      <option value="ligera">Ligera (16 mm/kV)</option>
+      <option value="media">Media (20 mm/kV)</option>
+      <option value="alta" selected>Alta (25 mm/kV)</option>
+      <option value="muy_alta">Muy alta (31 mm/kV)</option>
+      <option value="severa">Severa (44 mm/kV)</option>
+    </select>
+    <p class="text-xs text-muted-foreground mt-1">Según IEC 60815</p>
+  </div>
+</form>
+
+<div class="mt-5 pt-4 border-t border-border space-y-2 text-xs">
+  <div class="font-semibold text-muted-foreground uppercase tracking-wider mb-2">Ficha del aislador</div>
+  <div class="flex justify-between"><span class="text-muted-foreground">Material</span><span class="font-mono text-foreground">{{ AISLADOR.material }}</span></div>
+  <div class="flex justify-between"><span class="text-muted-foreground">Diámetro</span><span class="font-mono">{{ AISLADOR.diametro_mm }} mm</span></div>
+  <div class="flex justify-between"><span class="text-muted-foreground">Altura unitaria</span><span class="font-mono">{{ AISLADOR.altura_unitaria_mm }} mm</span></div>
+  <div class="flex justify-between"><span class="text-muted-foreground">Línea fuga</span><span class="font-mono">{{ AISLADOR.linea_fuga_unitaria_mm }} mm</span></div>
+  <div class="flex justify-between"><span class="text-muted-foreground">V disruptiva (lluvia)</span><span class="font-mono">{{ AISLADOR.tension_disruptiva_lluvia_kv }} kV</span></div>
+  <div class="flex justify-between"><span class="text-muted-foreground">Carga rotura</span><span class="font-mono">{{ AISLADOR.carga_rotura_kgf }} kgf</span></div>
+  <div class="text-xs text-muted-foreground italic mt-2 pt-2 border-t border-border">{{ AISLADOR.uso_tipico }}</div>
 </div>
 {% endblock %}
 
 {% block panel_visualizacion %}
-<div class="aspect-video bg-muted rounded-lg grid place-items-center text-muted-foreground">
-  <div class="text-center p-6">
-    <i data-lucide="link" class="size-12 mx-auto mb-3 opacity-30"></i>
-    <p class="text-sm">Cadena de 41 discos + diagrama fuerzas</p>
-    <p class="text-xs">Disponible en Fase 2</p>
+<div id="modulo-8-resultado" class="min-h-[300px]">
+  <div class="aspect-video grid place-items-center text-muted-foreground">
+    <div class="text-center">
+      <i data-lucide="loader-circle" class="size-8 mx-auto mb-2 animate-spin"></i>
+      <p class="text-sm">Calculando...</p>
+    </div>
   </div>
 </div>
 {% endblock %}
 
 {% block panel_explicacion %}
-<div class="prose prose-sm max-w-none dark:prose-invert">
-  <h3>{{ modulo_info[2] }}</h3>
-  <p>{{ modulo_info[3] }}</p>
-  <p class="text-sm text-muted-foreground">
-    El contenido completo de este módulo se implementará en la Fase 2 (Cálculos) y Fase 3 (Figuras).
-  </p>
+{% from "_macros.html" import info_tooltip %}
+<div class="space-y-5">
+  <div>
+    <h3 class="text-base font-semibold mb-2">¿Qué se calcula aquí?</h3>
+    <p class="text-sm text-muted-foreground leading-relaxed">
+      El <strong class="text-foreground">número de discos</strong> de la cadena de aisladores,
+      su <strong class="text-foreground">longitud y peso</strong>, y la verificación mecánica
+      con factor de seguridad.
+    </p>
+  </div>
+
+  <div>
+    <h3 class="text-base font-semibold mb-2">Selección por dos criterios</h3>
+    <div class="space-y-3 text-sm bg-muted/50 rounded-lg p-4">
+      <div>
+        <span class="font-semibold text-primary">1. Línea de fuga Nf (contaminación)</span>{{ info_tooltip("Número de discos requerido para evitar 'flashover' (descarga superficial) cuando hay contaminación (polvo, salinidad, polución industrial) más humedad. k = mm de línea de fuga por kV de tensión, definido por IEC 60815: 16 (ligera), 20 (media), 25 (alta), 31 (muy alta), 44 (severa). Zonas costeras o cerca de industrias requieren más discos.") }}:
+        $$N_f = \frac{k \cdot V_L}{L_{fuga\,unit}}$$
+        <p class="text-xs text-muted-foreground mt-1">k = mm/kV según nivel IEC 60815</p>
+      </div>
+      <div>
+        <span class="font-semibold text-primary">2. Tensión disruptiva NBIL</span>{{ info_tooltip("Número de discos requerido para resistir el BIL (Basic Insulation Level) — la sobretensión por impulso de rayo. El factor 1,2 es de seguridad sobre BIL. El 0,9 corrige por discos en serie (efecto cadena, no lineal). Para 500 kV, BIL = 1550 kV (IEC 60071). Este criterio gobierna en zonas de bajo nivel ceráunico.") }}:
+        $$N_{BIL} = \frac{1{,}2 \cdot BIL}{V_{disco,lluvia} \cdot 0{,}9}$$
+        <p class="text-xs text-muted-foreground mt-1">BIL = 1550 kV para 500 kV (IEC 60071)</p>
+      </div>
+      <p class="text-xs text-muted-foreground mt-2 pt-2 border-t border-border">
+        Se adopta $N = \max(N_f, N_{BIL})$ — el más exigente
+      </p>
+    </div>
+  </div>
+
+  <div>
+    <h3 class="text-base font-semibold mb-2">Longitud y peso de la cadena</h3>
+    <div class="space-y-3 text-sm bg-muted/50 rounded-lg p-4">
+      <div>
+        <span class="font-semibold text-primary">Longitud Lcadena</span>{{ info_tooltip("Longitud total de la cadena de aisladores colgante (m). Suma la altura de cada disco más los herrajes en cada extremo (rótulas, grilletes, yugos). Determina dónde se ubicará el conductor RESPECTO al brazo de la torre. Cadenas más largas requieren torres más altas.") }}:
+        $$L_{cadena} = N \cdot h + 2 \cdot L_{herrajes}$$
+      </div>
+      <div>
+        <span class="font-semibold text-primary">Peso Pcadena</span>{{ info_tooltip("Peso total de la cadena (kg). Se transmite a la torre como carga vertical y debe sumarse al peso del conductor para calcular esfuerzos en los brazos. Para 500 kV: ~150-200 kg por cadena.") }}:
+        $$P_{cadena} = N \cdot P_{disco} + P_{herrajes}$$
+      </div>
+      <p class="text-xs text-muted-foreground mt-2">L_herrajes ≈ 0,20 m por extremo. P_herrajes ≈ 25 kg estándar 500 kV</p>
+    </div>
+  </div>
+
+  <div>
+    <h3 class="text-base font-semibold mb-2">Verificación mecánica</h3>
+    <div class="space-y-3 text-sm bg-muted/50 rounded-lg p-4">
+      <div>
+        <span class="font-semibold text-primary">Tiro del haz Thaz</span>{{ info_tooltip("Tensión mecánica total del haz de conductores (kgf), igual al tiro de un subconductor multiplicado por n. Es la fuerza HORIZONTAL que la cadena debe soportar. En cadenas de suspensión es menor; en cadenas de tensión (anclaje) es mayor.") }}:
+        $$T_{haz} = n \cdot T_{subc}$$
+      </div>
+      <div>
+        <span class="font-semibold text-primary">Carga vertical Pvert</span>{{ info_tooltip("Peso total vertical sobre la cadena (kgf): peso del vano de conductor que cuelga de esa torre (n subconductores × masa × vano gravitacional) más el peso de la propia cadena. El 'vano gravitacional' a_grav puede ser distinto del vano horizontal si hay desniveles.") }}:
+        $$P_{vert} = n \cdot m \cdot a_{grav} + P_{cadena}$$
+      </div>
+      <div>
+        <span class="font-semibold text-primary">Resultante Rcadena</span>{{ info_tooltip("Fuerza total que tira de la cadena (kgf), combinación vectorial del tiro horizontal y la carga vertical. Esta fuerza no debe superar el límite mecánico del aislador (carga de rotura dividida por el factor de seguridad).") }}:
+        $$R_{cadena} = \sqrt{T_{haz}^2 + P_{vert}^2}$$
+      </div>
+      <div>
+        <span class="font-semibold text-primary">FS cadena simple/doble</span>{{ info_tooltip("Factor de Seguridad = carga de rotura del disco / carga real. RETIE exige FS ≥ 2,0. Si la cadena simple no cumple, se duplica la cadena en paralelo (cadena doble) lo que duplica la capacidad mecánica. Común en cadenas de retención de anclaje terminal.") }}:
+        $$FS_{simple} = \frac{T_{rot,disco}}{R_{cadena}}, \quad FS_{doble} = \frac{2 \cdot T_{rot,disco}}{R_{cadena}}$$
+        <p class="text-xs text-muted-foreground mt-1">RETIE exige FS ≥ 2,0 en aisladores</p>
+      </div>
+    </div>
+  </div>
+
+  <div>
+    <h3 class="text-base font-semibold mb-2">¿Cuándo usar otro aislador?</h3>
+    <ul class="space-y-1.5 text-sm text-muted-foreground">
+      <li>• <strong class="text-foreground">Zona costera/industrial</strong> → antifog (52-5, U160BP)</li>
+      <li>• <strong class="text-foreground">Cargas mecánicas altas</strong> → heavy-duty (52-8)</li>
+      <li>• <strong class="text-foreground">Inspección visual fácil</strong> → vidrio templado (U120BS)</li>
+    </ul>
+  </div>
 </div>
 {% endblock %}

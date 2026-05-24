@@ -1,0 +1,67 @@
+{# Partial: resumen visual de los parámetros actuales del proyecto.
+   Incluye un script JS final que actualiza el hero directamente (más robusto
+   que OOB swaps que pueden fallar por View Transitions u otros handlers). #}
+<div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3 animate-fade-in">
+  <div class="card p-4">
+    <div class="text-xs text-muted-foreground mb-1">Tensión</div>
+    <div class="font-mono font-bold text-lg text-primary">{{ "%.0f"|format(PROYECTO.tension_nominal_kv) }}</div>
+    <div class="text-xs text-muted-foreground">kV</div>
+  </div>
+  <div class="card p-4">
+    <div class="text-xs text-muted-foreground mb-1">Longitud</div>
+    <div class="font-mono font-bold text-lg text-foreground">{{ "%.0f"|format(PROYECTO.longitud_km) }}</div>
+    <div class="text-xs text-muted-foreground">km</div>
+  </div>
+  <div class="card p-4">
+    <div class="text-xs text-muted-foreground mb-1">Potencia</div>
+    <div class="font-mono font-bold text-lg text-foreground">{{ "%.0f"|format(PROYECTO.potencia_mw) }}</div>
+    <div class="text-xs text-muted-foreground">MW</div>
+  </div>
+  <div class="card p-4">
+    <div class="text-xs text-muted-foreground mb-1">Altitud</div>
+    <div class="font-mono font-bold text-lg text-foreground">{{ "%.0f"|format(PROYECTO.altitud_msnm) }}</div>
+    <div class="text-xs text-muted-foreground">msnm</div>
+  </div>
+  <div class="card p-4">
+    <div class="text-xs text-muted-foreground mb-1">Vano</div>
+    <div class="font-mono font-bold text-lg text-foreground">{{ "%.0f"|format(PROYECTO.vano_diseno_m) }}</div>
+    <div class="text-xs text-muted-foreground">m</div>
+  </div>
+  <div class="card p-4">
+    <div class="text-xs text-muted-foreground mb-1">cos φ</div>
+    <div class="font-mono font-bold text-lg text-foreground">{{ "%.2f"|format(PROYECTO.factor_potencia) }}</div>
+    <div class="text-xs text-muted-foreground">factor pot.</div>
+  </div>
+</div>
+
+{# Script de sincronización directa del hero — funciona sin depender de OOB #}
+<script>
+  (function() {
+    var n = document.getElementById('hero-nombre');
+    var t = document.getElementById('hero-tension');
+    var c = document.getElementById('hero-corredor');
+    if (n) n.textContent = {{ PROYECTO.nombre|tojson }};
+    if (t) t.textContent = {{ "%.0f"|format(PROYECTO.tension_nominal_kv)|tojson }};
+    if (c) c.textContent = {{ PROYECTO.corredor|tojson }};
+    // Toast de confirmación
+    var existing = document.getElementById('__save_toast');
+    if (existing) existing.remove();
+    var toast = document.createElement('div');
+    toast.id = '__save_toast';
+    toast.textContent = '✓ Parámetros guardados — afectan todos los módulos';
+    toast.style.cssText = 'position:fixed; bottom:24px; right:24px; z-index:99999; padding:12px 18px; border-radius:8px; background:var(--success); color:white; font-size:13px; font-weight:600; box-shadow:0 10px 30px rgba(0,0,0,0.3); animation: fadeInToast 0.25s ease-out;';
+    document.body.appendChild(toast);
+    if (!document.getElementById('__toast_kf')) {
+      var st = document.createElement('style');
+      st.id = '__toast_kf';
+      st.textContent = '@keyframes fadeInToast{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}';
+      document.head.appendChild(st);
+    }
+    setTimeout(function() {
+      toast.style.transition = 'opacity 0.3s ease-out, transform 0.3s ease-out';
+      toast.style.opacity = '0';
+      toast.style.transform = 'translateY(10px)';
+      setTimeout(function() { toast.remove(); }, 350);
+    }, 2200);
+  })();
+</script>

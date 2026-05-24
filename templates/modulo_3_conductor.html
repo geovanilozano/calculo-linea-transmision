@@ -1,44 +1,119 @@
 {% extends "base.html" %}
 
 {% block panel_parametros %}
-<div class="space-y-4">
+{% from "_macros.html" import info_tooltip %}
+
+<form hx-post="{{ url_for('api_modulo_3_calcular') }}"
+      hx-target="#modulo-3-resultado"
+      hx-swap="innerHTML"
+      hx-trigger="load, input delay:400ms from:input, change delay:200ms from:select"
+      class="space-y-4">
+
   <div>
-    <label class="block text-sm font-medium mb-1">Tipo de conductor</label>
-    <select class="input" disabled>
-      <option>{{ PROYECTO.conductor_tipo }}</option>
+    <label for="conductor_id" class="block text-sm font-medium mb-1.5">
+      Tipo de conductor{{ info_tooltip("El conductor es el cable que transporta la energía eléctrica entre subestaciones. Se selecciona según: (1) potencia a transmitir → mayor sección reduce pérdidas; (2) condiciones ambientales → ACAR/AAAC en zonas costeras por corrosión, ACSS para alta temperatura; (3) economía → balance entre costo del cable y costo de pérdidas a 30 años. Para 500 kV y 300 MW lo típico es ACSR Drake o Bluejay en haz triple.") }}
+      <span class="text-xs text-muted-foreground font-normal">(9 opciones)</span>
+    </label>
+    <select id="conductor_id" name="conductor_id" class="input">
+      {% for c in CATALOGO_CONDUCTORES %}
+        <option value="{{ c.id }}" {% if c.id == CONDUCTOR.id %}selected{% endif %}>
+          {{ c.designacion }}
+        </option>
+      {% endfor %}
+    </select>
+    <p class="text-xs text-muted-foreground mt-1">
+      Esta selección se usa en los módulos 4, 5, 6 y 10
+    </p>
+  </div>
+
+  <div>
+    <label for="n_subc" class="block text-sm font-medium mb-1.5">Subconductores por fase</label>
+    <select id="n_subc" name="n_subc" class="input">
+      <option value="1">1</option>
+      <option value="2">2</option>
+      <option value="3" selected>3 (haz triple)</option>
+      <option value="4">4</option>
     </select>
   </div>
+
   <div>
-    <label class="block text-sm font-medium mb-1">Subconductores por fase</label>
-    <input type="number" class="input" value="{{ PROYECTO.haz_subconductores }}" readonly>
+    <label for="longitud_km" class="block text-sm font-medium mb-1.5">Longitud línea (km)</label>
+    <input id="longitud_km" name="longitud_km" type="number" step="1" min="1"
+           value="{{ PROYECTO.longitud_km }}" class="input font-mono">
   </div>
+
   <div>
-    <label class="block text-sm font-medium mb-1">Separación del haz (m)</label>
-    <input type="number" step="0.01" class="input" value="{{ PROYECTO.haz_separacion_m }}" readonly>
+    <label for="temperatura_op_c" class="block text-sm font-medium mb-1.5">Temperatura operación (°C)</label>
+    <input id="temperatura_op_c" name="temperatura_op_c" type="number" step="1"
+           value="65" class="input font-mono">
   </div>
-  <button class="btn-primary w-full" disabled>
-    <i data-lucide="calculator" class="size-4"></i>
-    Ver características (próximamente)
-  </button>
-</div>
+</form>
 {% endblock %}
 
 {% block panel_visualizacion %}
-<div class="aspect-video bg-muted rounded-lg grid place-items-center text-muted-foreground">
-  <div class="text-center p-6">
-    <i data-lucide="cable" class="size-12 mx-auto mb-3 opacity-30"></i>
-    <p class="text-sm">Sección transversal del conductor</p>
-    <p class="text-xs">Disponible en Fase 2</p>
+<div id="modulo-3-resultado" class="min-h-[300px]">
+  <div class="aspect-video grid place-items-center text-muted-foreground">
+    <div class="text-center">
+      <i data-lucide="loader-circle" class="size-8 mx-auto mb-2 animate-spin"></i>
+      <p class="text-sm">Calculando...</p>
+    </div>
   </div>
 </div>
 {% endblock %}
 
 {% block panel_explicacion %}
-<div class="prose prose-sm max-w-none dark:prose-invert">
-  <h3>{{ modulo_info[2] }}</h3>
-  <p>{{ modulo_info[3] }}</p>
-  <p class="text-sm text-muted-foreground">
-    El contenido completo de este módulo se implementará en la Fase 2 (Cálculos) y Fase 3 (Figuras).
-  </p>
+{% from "_macros.html" import info_tooltip %}
+<div class="space-y-5">
+  <div>
+    <h3 class="text-base font-semibold mb-2">¿Qué se calcula aquí?</h3>
+    <p class="text-sm text-muted-foreground leading-relaxed">
+      La <strong class="text-foreground">resistencia equivalente</strong> del haz de subconductores
+      en paralelo, su <strong class="text-foreground">ampacidad total</strong>, y la corrección de
+      resistencia por temperatura de operación.
+    </p>
+  </div>
+
+  <div>
+    <h3 class="text-base font-semibold mb-2">Tipos de conductor disponibles</h3>
+    <div class="text-xs text-muted-foreground space-y-1.5">
+      <div><strong class="text-foreground">ACSR</strong>: aluminio + alma de acero. El más común.</div>
+      <div><strong class="text-foreground">AAAC</strong>: aleación de aluminio. Más liviano, mejor resistencia corrosión.</div>
+      <div><strong class="text-foreground">ACAR</strong>: alma de aleación + hilos Al puro. Ideal zonas costeras.</div>
+      <div><strong class="text-foreground">ACSS</strong>: tipo ACSR pero opera hasta 200°C. Repotenciación.</div>
+    </div>
+  </div>
+
+  <div>
+    <h3 class="text-base font-semibold mb-2">Fórmulas</h3>
+    <div class="space-y-3 text-sm bg-muted/50 rounded-lg p-4">
+      <div>
+        <span class="font-semibold text-primary">Resistencia del haz Rfase</span>{{ info_tooltip("Resistencia eléctrica de la fase completa (Ω/km) cuando hay n subconductores en paralelo. Al estar en paralelo, la resistencia disminuye proporcionalmente: 3 subconductores → 1/3 de la resistencia individual. Esto reduce drásticamente las pérdidas Joule.") }}:
+        $$R_{fase} = \frac{R_{sub}}{n}$$
+      </div>
+      <div>
+        <span class="font-semibold text-primary">Ampacidad del haz Ifase</span>{{ info_tooltip("Corriente máxima admisible por fase (A) sin sobrepasar la temperatura límite del conductor (típicamente 75-85°C ACSR estándar, 200°C ACSS). Con n subconductores, la capacidad de transporte se multiplica por n. Es el límite TÉRMICO de la línea.") }}:
+        $$I_{fase} = n \cdot I_{sub}$$
+      </div>
+      <div>
+        <span class="font-semibold text-primary">Corrección R por temperatura</span>{{ info_tooltip("La resistencia del aluminio aumenta con la temperatura (coef. α=0,00403/°C). El catálogo da R a 25°C, pero en operación real (65-85°C) la resistencia puede ser 15-25% mayor. Esto incrementa las pérdidas y debe considerarse en el diseño.") }}:
+        $$R(T) = R_{ref} \cdot \left[1 + \alpha (T - T_{ref})\right]$$
+        <p class="text-xs text-muted-foreground mt-1">α_Al = 0,00403 /°C  ·  T_ref = 65 °C</p>
+      </div>
+      <div>
+        <span class="font-semibold text-primary">Resistencia total línea Rtotal</span>{{ info_tooltip("Resistencia total de la línea por fase (Ω), igual a R por km multiplicada por la longitud. Se usa directamente en el cálculo de impedancia Z = R + jXL y en las pérdidas Joule totales P_perdidas = 3·I²·Rtotal.") }}:
+        $$R_{total} = R_{fase} \cdot L$$
+      </div>
+    </div>
+  </div>
+
+  <div>
+    <h3 class="text-base font-semibold mb-2">¿Cuándo cambiar de conductor?</h3>
+    <ul class="space-y-1.5 text-sm text-muted-foreground">
+      <li>• <strong class="text-foreground">Más potencia a transmitir</strong> → conductor de mayor sección (Bluejay, Bittern)</li>
+      <li>• <strong class="text-foreground">Zona costera/contaminada</strong> → ACAR o AAAC (anticorrosión)</li>
+      <li>• <strong class="text-foreground">Repotenciar línea existente</strong> → ACSS (opera a mayor temperatura sin cambiar torres)</li>
+      <li>• <strong class="text-foreground">Reducir pérdidas</strong> → mayor sección o mayor n_subconductores</li>
+    </ul>
+  </div>
 </div>
 {% endblock %}
