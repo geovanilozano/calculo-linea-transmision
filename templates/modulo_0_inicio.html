@@ -205,13 +205,19 @@
                    value="{{ PROYECTO.vano_diseno_m }}" class="input font-mono text-sm">
           </div>
 
+          {# Tensión nominal: NO editable — se CALCULA automáticamente con P y L #}
           <div>
-            <label for="tension_nominal_kv" class="block text-xs font-medium text-muted-foreground mb-1.5">
-              Tensión nominal <span class="text-foreground/70 font-mono">(kV)</span>
-              <span class="text-[10px] italic">— se calcula en M1</span>
+            <label class="block text-xs font-medium text-muted-foreground mb-1.5 flex items-center gap-1.5">
+              <i data-lucide="zap" class="size-3.5" style="color: var(--success);"></i>
+              Tensión nominal calculada <span class="text-foreground/70 font-mono">(kV)</span>
             </label>
-            <input id="tension_nominal_kv" name="tension_nominal_kv" type="number" step="1" min="50" max="800"
-                   value="{{ PROYECTO.tension_nominal_kv }}" class="input font-mono text-sm" style="background: color-mix(in oklch, var(--primary) 5%, var(--card));">
+            <div id="tension-calculada-display"
+                 class="input font-mono text-sm flex items-center gap-2"
+                 style="background: color-mix(in oklch, var(--success) 8%, var(--card)); border-color: var(--success); cursor: not-allowed; user-select: none;"
+                 title="Este valor se calcula automáticamente con la potencia y longitud. No es editable.">
+              <span class="font-bold text-base" style="color: var(--success);">{{ "%.0f"|format(PROYECTO.tension_nominal_kv) }}</span>
+              <span class="text-xs text-muted-foreground">kV (RETIE: 115·230·500)</span>
+            </div>
           </div>
 
         </div>

@@ -34,14 +34,20 @@
   </div>
 </div>
 
-{# Script de sincronización directa del hero — funciona sin depender de OOB.
-   hero-tension ya no se usa: la tensión se calcula en el módulo 1, no es input. #}
+{# Script de sincronización directa del hero + tensión calculada.
+   La tensión nominal se RECALCULA automáticamente al cambiar P o L. #}
 <script>
   (function() {
     var n = document.getElementById('hero-nombre');
     var c = document.getElementById('hero-corredor');
     if (n) n.textContent = {{ PROYECTO.nombre|tojson }};
     if (c) c.textContent = {{ PROYECTO.corredor|tojson }};
+    // Actualizar display de tensión nominal calculada (no editable)
+    var t = document.getElementById('tension-calculada-display');
+    if (t) {
+      var span = t.querySelector('span');
+      if (span) span.textContent = {{ ("%.0f"|format(PROYECTO.tension_nominal_kv))|tojson }};
+    }
     // Toast de confirmación
     var existing = document.getElementById('__save_toast');
     if (existing) existing.remove();

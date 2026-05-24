@@ -196,13 +196,18 @@ def create_app() -> Flask:
 
     @app.post("/api/proyecto/actualizar")
     def api_proyecto_actualizar():
-        """Guarda los parámetros principales en la sesión y devuelve el resumen actualizado."""
+        """Guarda los parámetros principales en la sesión y devuelve el resumen actualizado.
+
+        Recalcula automáticamente la tensión nominal cuando cambian P o L.
+        El usuario NO edita tension_nominal_kv directamente — es un cálculo.
+        """
         proyecto_session = session.get("proyecto", {})
 
         # Campos numéricos (eléctricos, geométricos y mecánicos)
+        # NOTA: tension_nominal_kv NO se acepta del form — siempre se calcula.
         campos_floats = [
             # Eléctricos
-            "tension_nominal_kv", "longitud_km", "potencia_mw",
+            "longitud_km", "potencia_mw",
             "factor_potencia", "frecuencia_hz",
             "altitud_msnm",
             "temperatura_max_conductor_c", "temperatura_min_ambiente_c",
@@ -239,6 +244,21 @@ def create_app() -> Flask:
             val = request.form.get(campo)
             if val is not None and val.strip():
                 proyecto_session[campo] = val.strip()[:200]
+
+        # AUTO-CÁLCULO DE TENSIÓN NOMINAL
+        # Si tenemos P y L, calculamos la tensión recomendada según RETIE
+        # (Hefner + Still + 1kV/km → escalón normalizado >= máximo)
+        p = proyecto_session.get("potencia_mw") or app.config["PROYECTO_DEFAULTS"]["potencia_mw"]
+        l_ = proyecto_session.get("longitud_km") or app.config["PROYECTO_DEFAULTS"]["longitud_km"]
+        try:
+            r_tension = tension.calcular(float(p), float(l_))
+            proyecto_session["tension_nominal_kv"] = float(r_tension.tension_recomendada_kv)
+            proyecto_session["_tension_justificacion"] = r_tension.justificacion
+            proyecto_session["_tension_hefner_kv"] = r_tension.hefner_kv
+            proyecto_session["_tension_still_kv"] = r_tension.still_kv
+            proyecto_session["_tension_1kvkm_kv"] = r_tension.regla_1kvkm_kv
+        except (ValueError, TypeError):
+            pass  # mantener el valor anterior si los inputs no son válidos
 
         session["proyecto"] = proyecto_session
         proy = _get_proyecto(app)
