@@ -78,12 +78,16 @@
           @keydown.escape.window="open = false"
           type="button"
           :style="open
-            ? 'background-color: var(--primary);'
+            ? 'background-color: color-mix(in oklch, var(--primary) 85%, transparent); box-shadow: 0 0 0 2px color-mix(in oklch, var(--primary) 20%, transparent);'
             : 'background-color: transparent;'"
-          class="inline-flex items-center justify-center size-5 rounded-full transition-colors align-middle cursor-help"
+          class="inline-flex items-center justify-center rounded-full transition-all align-middle cursor-help"
+          style="width:16px; height:16px;"
+          onmouseover="if(!this.style.boxShadow){this.style.backgroundColor='color-mix(in oklch, var(--primary) 12%, transparent)';}"
+          onmouseout="if(!this.style.boxShadow){this.style.backgroundColor='transparent';}"
           aria-label="Más información">
-    <i data-lucide="info" class="size-3.5"
-       :style="open ? 'color: white;' : 'color: var(--primary);'"></i>
+    <i data-lucide="info"
+       style="width:11px; height:11px;"
+       :style="open ? 'color: white; width:11px; height:11px;' : 'color: var(--primary); width:11px; height:11px;'"></i>
   </button>
   <template x-teleport="body">
     <div x-ref="pop"
