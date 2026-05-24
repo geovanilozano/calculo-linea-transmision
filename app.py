@@ -94,6 +94,15 @@ def _get_proyecto(app: Flask) -> dict:
     base = dict(app.config["PROYECTO_DEFAULTS"])
     # Sobrescribir con valores de sesión si existen
     overrides = session.get("proyecto", {})
+    # Migración: reemplazar nombres antiguos por el actual
+    nombres_obsoletos = {
+        "Línea de Transmisión 500 kV",
+        "Cálculo Línea de Transmisión",
+    }
+    if overrides.get("nombre") in nombres_obsoletos:
+        overrides = dict(overrides)
+        overrides["nombre"] = base["nombre"]
+        session["proyecto"] = overrides
     base.update(overrides)
     return base
 

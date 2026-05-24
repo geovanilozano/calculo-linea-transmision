@@ -14,7 +14,7 @@ class BaseConfig:
     # No es un parámetro de entrada — es un RESULTADO del análisis.
     PROYECTO_DEFAULTS = {
         # Identificación
-        "nombre": "Cálculo Línea de Transmisión",
+        "nombre": "Cálculo de Línea de Transmisión",
         "corredor": "Santander de Quilichao – Manizales",
 
         # ===== PARÁMETROS ELÉCTRICOS DE ENTRADA =====
