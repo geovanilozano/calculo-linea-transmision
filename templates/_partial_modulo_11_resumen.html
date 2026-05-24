@@ -1,0 +1,379 @@
+{# Partial del módulo 11 — resumen consolidado de TODOS los cálculos #}
+<div class="animate-fade-in space-y-5">
+
+  {# ===== 1. PARÁMETROS DEL PROYECTO ===== #}
+  <div class="card p-5">
+    <div class="flex items-center gap-2 mb-3">
+      <span class="size-6 rounded-md grid place-items-center text-xs font-bold font-mono"
+            style="background: color-mix(in oklch, var(--primary) 15%, transparent); color: var(--primary);">1</span>
+      <h3 class="text-base font-bold text-foreground">Parámetros del proyecto</h3>
+    </div>
+    <div class="text-xs text-muted-foreground mb-3">
+      <strong class="text-foreground">{{ proyecto.nombre }}</strong> · {{ proyecto.corredor }}
+    </div>
+    <div class="grid grid-cols-2 md:grid-cols-4 gap-2 text-xs">
+      {% set params = [
+        ('Longitud', '%.0f'|format(proyecto.longitud_km), 'km'),
+        ('Potencia', '%.0f'|format(proyecto.potencia_mw), 'MW'),
+        ('Factor pot.', '%.2f'|format(proyecto.factor_potencia), ''),
+        ('Altitud', '%.0f'|format(proyecto.altitud_msnm), 'msnm'),
+        ('Temp. máx cond.', '%.0f'|format(proyecto.temperatura_max_conductor_c), '°C'),
+        ('Viento máx', '%.0f'|format(proyecto.velocidad_viento_max_kmh), 'km/h'),
+        ('Temp. mín', '%.0f'|format(proyecto.temperatura_min_ambiente_c), '°C'),
+        ('Vano diseño', '%.0f'|format(proyecto.vano_diseno_m), 'm'),
+      ] %}
+      {% for nombre, valor, unidad in params %}
+        <div class="bg-muted/50 rounded-md p-2">
+          <div class="text-[10px] text-muted-foreground">{{ nombre }}</div>
+          <div class="font-mono font-bold text-foreground">{{ valor }} <span class="text-[10px] text-muted-foreground">{{ unidad }}</span></div>
+        </div>
+      {% endfor %}
+    </div>
+  </div>
+
+  {# ===== 2.1 TENSIÓN NOMINAL ===== #}
+  {% if tension %}
+  <div class="card p-5">
+    <div class="flex items-center gap-2 mb-3">
+      <span class="size-6 rounded-md grid place-items-center text-xs font-bold font-mono"
+            style="background: color-mix(in oklch, var(--primary) 15%, transparent); color: var(--primary);">2.1</span>
+      <h3 class="text-base font-bold text-foreground">Selección del nivel de tensión</h3>
+    </div>
+    <div class="grid grid-cols-2 md:grid-cols-4 gap-2 text-xs">
+      <div class="bg-muted/50 rounded-md p-2">
+        <div class="text-[10px] text-muted-foreground">Hefner</div>
+        <div class="font-mono font-bold text-foreground">{{ "%.0f"|format(tension.hefner_kv) }} <span class="text-[10px] text-muted-foreground">kV</span></div>
+      </div>
+      <div class="bg-muted/50 rounded-md p-2">
+        <div class="text-[10px] text-muted-foreground">Still</div>
+        <div class="font-mono font-bold text-foreground">{{ "%.0f"|format(tension.still_kv) }} <span class="text-[10px] text-muted-foreground">kV</span></div>
+      </div>
+      <div class="bg-muted/50 rounded-md p-2">
+        <div class="text-[10px] text-muted-foreground">1 kV/km</div>
+        <div class="font-mono font-bold text-foreground">{{ "%.0f"|format(tension.regla_1kvkm_kv) }} <span class="text-[10px] text-muted-foreground">kV</span></div>
+      </div>
+      <div class="rounded-md p-2" style="background: color-mix(in oklch, var(--success) 12%, transparent);">
+        <div class="text-[10px]" style="color: var(--success);">★ ADOPTADO</div>
+        <div class="font-mono font-bold text-foreground">{{ tension.tension_recomendada_kv }} <span class="text-[10px] text-muted-foreground">kV</span></div>
+      </div>
+    </div>
+  </div>
+  {% endif %}
+
+  {# ===== 2.2 CONFIGURACIÓN GEOMÉTRICA ===== #}
+  {% if geometria %}
+  <div class="card p-5">
+    <div class="flex items-center gap-2 mb-3">
+      <span class="size-6 rounded-md grid place-items-center text-xs font-bold font-mono"
+            style="background: color-mix(in oklch, var(--primary) 15%, transparent); color: var(--primary);">2.2</span>
+      <h3 class="text-base font-bold text-foreground">Configuración de la línea</h3>
+    </div>
+    <div class="grid grid-cols-2 md:grid-cols-4 gap-2 text-xs">
+      <div class="bg-muted/50 rounded-md p-2">
+        <div class="text-[10px] text-muted-foreground">GMD entre fases</div>
+        <div class="font-mono font-bold text-foreground">{{ "%.3f"|format(geometria.gmd_m) }} <span class="text-[10px] text-muted-foreground">m</span></div>
+      </div>
+      <div class="bg-muted/50 rounded-md p-2">
+        <div class="text-[10px] text-muted-foreground">GMR_L</div>
+        <div class="font-mono font-bold text-foreground">{{ "%.4f"|format(geometria.gmr_l_m) }} <span class="text-[10px] text-muted-foreground">m</span></div>
+      </div>
+      <div class="bg-muted/50 rounded-md p-2">
+        <div class="text-[10px] text-muted-foreground">GMR_C</div>
+        <div class="font-mono font-bold text-foreground">{{ "%.4f"|format(geometria.gmr_c_m) }} <span class="text-[10px] text-muted-foreground">m</span></div>
+      </div>
+      <div class="bg-muted/50 rounded-md p-2">
+        <div class="text-[10px] text-muted-foreground">R envolvente</div>
+        <div class="font-mono font-bold text-foreground">{{ "%.3f"|format(geometria.radio_circulo_envolvente_m) }} <span class="text-[10px] text-muted-foreground">m</span></div>
+      </div>
+    </div>
+  </div>
+  {% endif %}
+
+  {# ===== 2.3 CONDUCTOR SELECCIONADO ===== #}
+  <div class="card p-5">
+    <div class="flex items-center gap-2 mb-3">
+      <span class="size-6 rounded-md grid place-items-center text-xs font-bold font-mono"
+            style="background: color-mix(in oklch, var(--primary) 15%, transparent); color: var(--primary);">2.3</span>
+      <h3 class="text-base font-bold text-foreground">Datos del conductor</h3>
+    </div>
+    <div class="text-xs text-muted-foreground mb-2">
+      <strong class="text-foreground">{{ conductor.designacion }}</strong> · {{ conductor.tipo }}
+    </div>
+    <div class="grid grid-cols-2 md:grid-cols-4 gap-2 text-xs">
+      <div class="bg-muted/50 rounded-md p-2">
+        <div class="text-[10px] text-muted-foreground">Diámetro</div>
+        <div class="font-mono font-bold text-foreground">{{ conductor.diametro_exterior_mm }} <span class="text-[10px] text-muted-foreground">mm</span></div>
+      </div>
+      <div class="bg-muted/50 rounded-md p-2">
+        <div class="text-[10px] text-muted-foreground">Sección</div>
+        <div class="font-mono font-bold text-foreground">{{ conductor.seccion_total_mm2 }} <span class="text-[10px] text-muted-foreground">mm²</span></div>
+      </div>
+      <div class="bg-muted/50 rounded-md p-2">
+        <div class="text-[10px] text-muted-foreground">R AC 65°C</div>
+        <div class="font-mono font-bold text-foreground">{{ conductor.resistencia_ac_65c_ohm_km }} <span class="text-[10px] text-muted-foreground">Ω/km</span></div>
+      </div>
+      <div class="bg-muted/50 rounded-md p-2">
+        <div class="text-[10px] text-muted-foreground">Ampacidad</div>
+        <div class="font-mono font-bold text-foreground">{{ conductor.ampacidad_a }} <span class="text-[10px] text-muted-foreground">A</span></div>
+      </div>
+    </div>
+  </div>
+
+  {# ===== 2.4 PARÁMETROS R, L, C + CORONA ===== #}
+  {% if parametros %}
+  <div class="card p-5">
+    <div class="flex items-center gap-2 mb-3">
+      <span class="size-6 rounded-md grid place-items-center text-xs font-bold font-mono"
+            style="background: color-mix(in oklch, var(--primary) 15%, transparent); color: var(--primary);">2.4</span>
+      <h3 class="text-base font-bold text-foreground">Parámetros R, L, C + Corona</h3>
+    </div>
+    <div class="grid grid-cols-2 md:grid-cols-4 gap-2 text-xs mb-3">
+      <div class="bg-muted/50 rounded-md p-2">
+        <div class="text-[10px] text-muted-foreground">R fase</div>
+        <div class="font-mono font-bold text-foreground">{{ "%.4f"|format(parametros.r_fase_ohm_km) }} <span class="text-[10px] text-muted-foreground">Ω/km</span></div>
+      </div>
+      <div class="bg-muted/50 rounded-md p-2">
+        <div class="text-[10px] text-muted-foreground">XL</div>
+        <div class="font-mono font-bold text-foreground">{{ "%.4f"|format(parametros.xl_fase_ohm_km) }} <span class="text-[10px] text-muted-foreground">Ω/km</span></div>
+      </div>
+      <div class="bg-muted/50 rounded-md p-2">
+        <div class="text-[10px] text-muted-foreground">B (susceptancia)</div>
+        <div class="font-mono font-bold text-foreground">{{ "%.2e"|format(parametros.b_fase_s_km) }} <span class="text-[10px] text-muted-foreground">S/km</span></div>
+      </div>
+      <div class="bg-muted/50 rounded-md p-2">
+        <div class="text-[10px] text-muted-foreground">δ aire</div>
+        <div class="font-mono font-bold text-foreground">{{ "%.3f"|format(parametros.densidad_relativa) }}</div>
+      </div>
+    </div>
+    {# Resultado Corona #}
+    {% if parametros.corona_cumple %}
+      <div class="rounded-md p-2 text-xs flex items-center gap-2" style="background: color-mix(in oklch, var(--success) 10%, transparent);">
+        <i data-lucide="check-circle-2" class="size-4" style="color: var(--success);"></i>
+        <span><strong style="color: var(--success);">Corona OK</strong> — Cs = {{ "%.2f"|format(parametros.coef_seguridad_corona) }} (Esup &lt; Ec)</span>
+      </div>
+    {% else %}
+      <div class="rounded-md p-2 text-xs flex items-center gap-2" style="background: color-mix(in oklch, var(--danger) 10%, transparent);">
+        <i data-lucide="alert-triangle" class="size-4" style="color: var(--danger);"></i>
+        <span><strong style="color: var(--danger);">Corona NO cumple</strong> — Cs = {{ "%.2f"|format(parametros.coef_seguridad_corona) }}</span>
+      </div>
+    {% endif %}
+  </div>
+  {% endif %}
+
+  {# ===== 2.5 LÍNEA LARGA ABCD ===== #}
+  {% if linea_larga %}
+  <div class="card p-5">
+    <div class="flex items-center gap-2 mb-3">
+      <span class="size-6 rounded-md grid place-items-center text-xs font-bold font-mono"
+            style="background: color-mix(in oklch, var(--primary) 15%, transparent); color: var(--primary);">2.5</span>
+      <h3 class="text-base font-bold text-foreground">Línea larga (modelo ABCD)</h3>
+    </div>
+    <div class="grid grid-cols-2 md:grid-cols-4 gap-2 text-xs">
+      <div class="bg-muted/50 rounded-md p-2">
+        <div class="text-[10px] text-muted-foreground">|Zc|</div>
+        <div class="font-mono font-bold text-foreground">{{ "%.1f"|format((linea_larga.zc_re**2 + linea_larga.zc_im**2)**0.5) }} <span class="text-[10px] text-muted-foreground">Ω</span></div>
+      </div>
+      <div class="bg-muted/50 rounded-md p-2">
+        <div class="text-[10px] text-muted-foreground">VG (generador)</div>
+        <div class="font-mono font-bold text-foreground">{{ "%.1f"|format(linea_larga.vg_ll_kv) }} <span class="text-[10px] text-muted-foreground">kV</span></div>
+      </div>
+      <div class="rounded-md p-2" style="background: color-mix(in oklch, var(--{{ 'success' if linea_larga.regulacion_cumple else 'danger' }}) 12%, transparent);">
+        <div class="text-[10px]" style="color: var(--{{ 'success' if linea_larga.regulacion_cumple else 'danger' }});">Regulación</div>
+        <div class="font-mono font-bold text-foreground">{{ "%.2f"|format(linea_larga.regulacion_pct) }} <span class="text-[10px] text-muted-foreground">%</span></div>
+      </div>
+      <div class="rounded-md p-2" style="background: color-mix(in oklch, var(--{{ 'success' if linea_larga.perdidas_cumplen else 'danger' }}) 12%, transparent);">
+        <div class="text-[10px]" style="color: var(--{{ 'success' if linea_larga.perdidas_cumplen else 'danger' }});">Pérdidas</div>
+        <div class="font-mono font-bold text-foreground">{{ "%.2f"|format(linea_larga.perdidas_pct) }} <span class="text-[10px] text-muted-foreground">%</span></div>
+      </div>
+      <div class="bg-muted/50 rounded-md p-2 col-span-2">
+        <div class="text-[10px] text-muted-foreground">Eficiencia</div>
+        <div class="font-mono font-bold text-foreground">{{ "%.2f"|format(linea_larga.eficiencia_pct) }} <span class="text-[10px] text-muted-foreground">%</span></div>
+      </div>
+    </div>
+  </div>
+  {% endif %}
+
+  {# ===== 3 MECÁNICA DEL CONDUCTOR ===== #}
+  {% if mecanico %}
+  <div class="card p-5">
+    <div class="flex items-center gap-2 mb-3">
+      <span class="size-6 rounded-md grid place-items-center text-xs font-bold font-mono"
+            style="background: color-mix(in oklch, var(--primary) 15%, transparent); color: var(--primary);">3</span>
+      <h3 class="text-base font-bold text-foreground">Mecánica del conductor</h3>
+    </div>
+    <div class="grid grid-cols-2 md:grid-cols-4 gap-2 text-xs mb-3">
+      <div class="bg-muted/50 rounded-md p-2">
+        <div class="text-[10px] text-muted-foreground">Peso Wc</div>
+        <div class="font-mono font-bold text-foreground">{{ "%.2f"|format(mecanico.peso_aparente_n_m) }} <span class="text-[10px] text-muted-foreground">N/m</span></div>
+      </div>
+      <div class="bg-muted/50 rounded-md p-2">
+        <div class="text-[10px] text-muted-foreground">σ rotura</div>
+        <div class="font-mono font-bold text-foreground">{{ "%.0f"|format(mecanico.sigma_rotura_mpa) }} <span class="text-[10px] text-muted-foreground">MPa</span></div>
+      </div>
+      <div class="bg-muted/50 rounded-md p-2">
+        <div class="text-[10px] text-muted-foreground">Vano crítico</div>
+        <div class="font-mono font-bold text-foreground">{% if mecanico.vano_critico_ab_m > 0 %}{{ "%.0f"|format(mecanico.vano_critico_ab_m) }} m{% else %}—{% endif %}</div>
+      </div>
+      <div class="rounded-md p-2" style="background: color-mix(in oklch, var(--accent) 12%, transparent);">
+        <div class="text-[10px]" style="color: var(--accent);">★ Flecha máx</div>
+        <div class="font-mono font-bold text-foreground">{{ "%.2f"|format(mecanico.flecha_maxima_m) }} <span class="text-[10px] text-muted-foreground">m</span></div>
+      </div>
+    </div>
+    <div class="text-[11px] text-muted-foreground">
+      Hipótesis extrema: <strong class="text-foreground">Hip {{ mecanico.hipotesis_extrema }}</strong> ·
+      Gobernante FS: <strong class="text-foreground">Hip {{ mecanico.hipotesis_gobernante }}</strong>
+    </div>
+  </div>
+  {% endif %}
+
+  {# ===== 4 CABLE DE GUARDA ===== #}
+  {% if guarda %}
+  <div class="card p-5">
+    <div class="flex items-center gap-2 mb-3">
+      <span class="size-6 rounded-md grid place-items-center text-xs font-bold font-mono"
+            style="background: color-mix(in oklch, var(--primary) 15%, transparent); color: var(--primary);">4</span>
+      <h3 class="text-base font-bold text-foreground">Mecánica del cable de guarda</h3>
+    </div>
+    <div class="text-xs text-muted-foreground mb-2">
+      <strong class="text-foreground">{{ cable_guarda.designacion }}</strong>
+    </div>
+    <div class="grid grid-cols-2 md:grid-cols-3 gap-2 text-xs">
+      <div class="bg-muted/50 rounded-md p-2">
+        <div class="text-[10px] text-muted-foreground">σ rotura</div>
+        <div class="font-mono font-bold text-foreground">{{ "%.0f"|format(guarda.sigma_rotura_mpa) }} <span class="text-[10px] text-muted-foreground">MPa</span></div>
+      </div>
+      <div class="bg-muted/50 rounded-md p-2">
+        <div class="text-[10px] text-muted-foreground">Vano crítico</div>
+        <div class="font-mono font-bold text-foreground">{% if guarda.vano_critico_ab_m > 0 %}{{ "%.0f"|format(guarda.vano_critico_ab_m) }} m{% else %}—{% endif %}</div>
+      </div>
+      <div class="rounded-md p-2" style="background: color-mix(in oklch, var(--accent) 12%, transparent);">
+        <div class="text-[10px]" style="color: var(--accent);">★ Flecha máx</div>
+        <div class="font-mono font-bold text-foreground">{{ "%.2f"|format(guarda.flecha_maxima_m) }} <span class="text-[10px] text-muted-foreground">m</span></div>
+      </div>
+    </div>
+    {% if mecanico and guarda.flecha_maxima_m <= mecanico.flecha_maxima_m %}
+      <div class="mt-2 text-[11px] flex items-center gap-1.5" style="color: var(--success);">
+        <i data-lucide="shield-check" class="size-3.5"></i>
+        Blindaje OK · f_guarda ({{ "%.2f"|format(guarda.flecha_maxima_m) }} m) ≤ f_conductor ({{ "%.2f"|format(mecanico.flecha_maxima_m) }} m)
+      </div>
+    {% endif %}
+  </div>
+  {% endif %}
+
+  {# ===== 5 AISLADORES ===== #}
+  {% if aisladores %}
+  <div class="card p-5">
+    <div class="flex items-center gap-2 mb-3">
+      <span class="size-6 rounded-md grid place-items-center text-xs font-bold font-mono"
+            style="background: color-mix(in oklch, var(--primary) 15%, transparent); color: var(--primary);">5</span>
+      <h3 class="text-base font-bold text-foreground">Cálculo de los aisladores</h3>
+    </div>
+    <div class="text-xs text-muted-foreground mb-2">
+      <strong class="text-foreground">{{ aislador.designacion }}</strong>
+    </div>
+    <div class="grid grid-cols-2 md:grid-cols-4 gap-2 text-xs">
+      <div class="bg-muted/50 rounded-md p-2">
+        <div class="text-[10px] text-muted-foreground">N° discos</div>
+        <div class="font-mono font-bold text-foreground">{{ aisladores.n_discos_adoptado }}</div>
+      </div>
+      <div class="bg-muted/50 rounded-md p-2">
+        <div class="text-[10px] text-muted-foreground">Longitud cadena</div>
+        <div class="font-mono font-bold text-foreground">{{ "%.2f"|format(aisladores.longitud_cadena_m) }} <span class="text-[10px] text-muted-foreground">m</span></div>
+      </div>
+      <div class="bg-muted/50 rounded-md p-2">
+        <div class="text-[10px] text-muted-foreground">Peso cadena</div>
+        <div class="font-mono font-bold text-foreground">{{ "%.1f"|format(aisladores.peso_cadena_kg) }} <span class="text-[10px] text-muted-foreground">kg</span></div>
+      </div>
+      <div class="rounded-md p-2" style="background: color-mix(in oklch, var(--{{ 'warning' if aisladores.cadena_doble_requerida else 'success' }}) 12%, transparent);">
+        <div class="text-[10px]" style="color: var(--{{ 'warning' if aisladores.cadena_doble_requerida else 'success' }});">FS cadena</div>
+        <div class="font-mono font-bold text-foreground">{{ "%.2f"|format(aisladores.fs_cadena_simple) }}</div>
+      </div>
+    </div>
+  </div>
+  {% endif %}
+
+  {# ===== 6 TORRE ===== #}
+  {% if torre %}
+  <div class="card p-5">
+    <div class="flex items-center gap-2 mb-3">
+      <span class="size-6 rounded-md grid place-items-center text-xs font-bold font-mono"
+            style="background: color-mix(in oklch, var(--primary) 15%, transparent); color: var(--primary);">6</span>
+      <h3 class="text-base font-bold text-foreground">Diseño de la torre</h3>
+    </div>
+    <div class="grid grid-cols-2 md:grid-cols-4 gap-2 text-xs">
+      <div class="bg-muted/50 rounded-md p-2">
+        <div class="text-[10px] text-muted-foreground">H apoyo cond.</div>
+        <div class="font-mono font-bold text-foreground">{{ "%.1f"|format(torre.h_apoyo_conductor_m) }} <span class="text-[10px] text-muted-foreground">m</span></div>
+      </div>
+      <div class="bg-muted/50 rounded-md p-2">
+        <div class="text-[10px] text-muted-foreground">H total torre</div>
+        <div class="font-mono font-bold text-foreground">{{ "%.1f"|format(torre.h_total_torre_m) }} <span class="text-[10px] text-muted-foreground">m</span></div>
+      </div>
+      <div class="bg-muted/50 rounded-md p-2">
+        <div class="text-[10px] text-muted-foreground">D al terreno</div>
+        <div class="font-mono font-bold text-foreground">{{ "%.2f"|format(torre.d_terreno_m) }} <span class="text-[10px] text-muted-foreground">m</span></div>
+      </div>
+      <div class="rounded-md p-2" style="background: color-mix(in oklch, var(--primary) 12%, transparent);">
+        <div class="text-[10px]" style="color: var(--primary);">N° estructuras</div>
+        <div class="font-mono font-bold text-foreground">{{ torre.n_estructuras }}</div>
+      </div>
+    </div>
+    {% if torre.cumple_blindaje %}
+      <div class="mt-2 text-[11px] flex items-center gap-1.5" style="color: var(--success);">
+        <i data-lucide="shield-check" class="size-3.5"></i>
+        Blindaje OK · ángulo de protección {{ "%.1f"|format(torre.angulo_proteccion_grados) }}° ≤ 30°
+      </div>
+    {% endif %}
+  </div>
+  {% endif %}
+
+  {# ===== 7 PLANTILLADO ===== #}
+  {% if plantillado %}
+  <div class="card p-5">
+    <div class="flex items-center gap-2 mb-3">
+      <span class="size-6 rounded-md grid place-items-center text-xs font-bold font-mono"
+            style="background: color-mix(in oklch, var(--primary) 15%, transparent); color: var(--primary);">7</span>
+      <h3 class="text-base font-bold text-foreground">Plantillado</h3>
+    </div>
+    <div class="grid grid-cols-2 md:grid-cols-4 gap-2 text-xs">
+      <div class="bg-muted/50 rounded-md p-2">
+        <div class="text-[10px] text-muted-foreground">Vano de diseño</div>
+        <div class="font-mono font-bold text-foreground">{{ "%.0f"|format(plantillado.vano_diseno_m) }} <span class="text-[10px] text-muted-foreground">m</span></div>
+      </div>
+      <div class="bg-muted/50 rounded-md p-2">
+        <div class="text-[10px] text-muted-foreground">f máx (caliente)</div>
+        <div class="font-mono font-bold text-foreground" style="color: #dc2626;">{{ "%.2f"|format(plantillado.flecha_max_m) }} <span class="text-[10px] text-muted-foreground">m</span></div>
+      </div>
+      <div class="bg-muted/50 rounded-md p-2">
+        <div class="text-[10px] text-muted-foreground">f mín (frío)</div>
+        <div class="font-mono font-bold text-foreground" style="color: #2563eb;">{{ "%.2f"|format(plantillado.flecha_min_m) }} <span class="text-[10px] text-muted-foreground">m</span></div>
+      </div>
+      <div class="bg-muted/50 rounded-md p-2">
+        <div class="text-[10px] text-muted-foreground">C caliente</div>
+        <div class="font-mono font-bold text-foreground">{{ "%.0f"|format(plantillado.curvas[0].parametro_c_m) }} <span class="text-[10px] text-muted-foreground">m</span></div>
+      </div>
+    </div>
+  </div>
+  {% endif %}
+
+  {# ===== Verificación final ===== #}
+  <div class="rounded-2xl p-6 border-2" style="border-color: var(--success); background: color-mix(in oklch, var(--success) 6%, transparent);">
+    <div class="flex items-start gap-3">
+      <div class="size-10 rounded-full grid place-items-center" style="background: color-mix(in oklch, var(--success) 15%, transparent);">
+        <i data-lucide="award" class="size-5" style="color: var(--success);"></i>
+      </div>
+      <div class="flex-1">
+        <h3 class="text-lg font-bold text-foreground mb-1">Diseño consolidado</h3>
+        <p class="text-sm text-muted-foreground leading-relaxed">
+          Línea de transmisión <strong class="text-foreground">{{ tension.tension_recomendada_kv if tension else '—' }} kV</strong> ·
+          <strong class="text-foreground">{{ "%.0f"|format(proyecto.longitud_km) }} km</strong> ·
+          <strong class="text-foreground">{{ "%.0f"|format(proyecto.potencia_mw) }} MW</strong>
+          {% if torre %} con <strong class="text-foreground">{{ torre.n_estructuras }} estructuras</strong> de
+          <strong class="text-foreground">{{ "%.1f"|format(torre.h_total_torre_m) }} m</strong> de altura{% endif %}.
+          Esta memoria se actualiza automáticamente al modificar cualquier parámetro en el módulo 1.
+        </p>
+      </div>
+    </div>
+  </div>
+
+</div>

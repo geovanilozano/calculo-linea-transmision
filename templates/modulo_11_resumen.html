@@ -1,0 +1,52 @@
+{% extends "base.html" %}
+
+{% block module_content %}
+<div class="space-y-4 animate-fade-in">
+
+  {# Header del resumen #}
+  <div class="rounded-2xl border border-border bg-gradient-to-br from-card via-card to-primary/5 p-6 md:p-8">
+    <div class="flex items-start justify-between gap-4 flex-wrap">
+      <div>
+        <div class="flex items-center gap-2 mb-2">
+          <span class="badge" style="background: color-mix(in oklch, var(--success) 15%, transparent); color: var(--success);">
+            <i data-lucide="check-circle-2" class="size-3"></i>
+            Memoria de cálculo
+          </span>
+          <span class="badge" style="background: color-mix(in oklch, var(--primary) 15%, transparent); color: var(--primary);">
+            <i data-lucide="refresh-cw" class="size-3"></i>
+            Actualización automática
+          </span>
+        </div>
+        <h2 class="text-2xl md:text-3xl font-bold text-foreground mb-2">Resumen consolidado del diseño</h2>
+        <p class="text-sm text-muted-foreground max-w-2xl leading-relaxed">
+          Esta página recalcula todos los módulos con los parámetros actuales del proyecto.
+          Si cambias cualquier valor en el módulo 1 (Parámetros), todos los resultados se actualizan aquí.
+        </p>
+      </div>
+      <button type="button"
+              hx-post="{{ url_for('api_modulo_11_calcular') }}"
+              hx-target="#modulo-11-resultado"
+              hx-swap="innerHTML"
+              class="btn-primary text-sm">
+        <i data-lucide="refresh-cw" class="size-4"></i>
+        Recalcular todo
+      </button>
+    </div>
+  </div>
+
+  {# Contenedor que se actualiza vía HTMX #}
+  <div id="modulo-11-resultado"
+       hx-post="{{ url_for('api_modulo_11_calcular') }}"
+       hx-trigger="load"
+       hx-swap="innerHTML"
+       class="min-h-[400px]">
+    <div class="grid place-items-center py-20 text-muted-foreground">
+      <div class="text-center">
+        <i data-lucide="loader-circle" class="size-10 mx-auto mb-3 animate-spin"></i>
+        <p class="text-sm">Recalculando todos los módulos con los parámetros actuales...</p>
+      </div>
+    </div>
+  </div>
+
+</div>
+{% endblock %}

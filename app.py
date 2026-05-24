@@ -59,6 +59,8 @@ MODULOS: list[tuple[int, str, str, str, str, str]] = [
     (9, "torre", "Diseño de la torre", "Posicionamiento guarda, distancias RETIE, altura", "6. DISEÑO DE LA TORRE", "6"),
 
     (10, "plantillado", "Plantillado", "4 curvas patrón sobre perfil topográfico", "7. PLANTILLADO", "7"),
+
+    (11, "resumen", "Resumen del diseño", "Memoria de cálculo consolidada de todos los módulos", "8. RESUMEN FINAL", "8"),
 ]
 
 
@@ -552,6 +554,151 @@ def create_app() -> Flask:
             r=r, cond=cond,
             figura_b64=fig_plantillado.generar(r),
         )
+
+    @app.post("/api/modulo/11/calcular")
+    def api_modulo_11_calcular():
+        """Resumen: recalcula TODO con los parámetros actuales de sesión."""
+        proy = _get_proyecto(app)
+        cond = _get_conductor(session.get("conductor_id"))
+        aisl = _get_aislador(session.get("aislador_id"))
+        cable = _get_cable_guarda(session.get("cable_guarda_id"))
+
+        resumen = {"proyecto": proy, "conductor": cond, "aislador": aisl, "cable_guarda": cable}
+
+        # 2.1 Tensión nominal
+        try:
+            r_tension = tension.calcular(float(proy["potencia_mw"]), float(proy["longitud_km"]))
+            resumen["tension"] = r_tension
+        except Exception:
+            resumen["tension"] = None
+
+        # 2.2 Geometría (configuración estándar)
+        try:
+            r_geom = geometria.calcular(d12_m=9.0, d23_m=9.0, d13_m=18.0,
+                                         n_subconductores=3, db_m=0.40,
+                                         radio_conductor_mm=cond["radio_fisico_mm"],
+                                         gmr_conductor_mm=cond["gmr_mm"])
+            resumen["geometria"] = r_geom
+        except Exception:
+            resumen["geometria"] = None
+
+        # 2.3 Conductor (datos ya están en cond)
+        # 2.4 Parámetros R, L, C + Corona
+        try:
+            r_param = parametros.calcular(
+                tension_linea_kv=float(proy["tension_nominal_kv"]),
+                n_subconductores=3,
+                db_m=0.40,
+                altitud_msnm=float(proy["altitud_msnm"]),
+                longitud_km=float(proy["longitud_km"]),
+                radio_conductor_mm=cond["radio_fisico_mm"],
+                gmr_conductor_mm=cond["gmr_mm"],
+                resistencia_conductor_ohm_km=cond["resistencia_ac_65c_ohm_km"],
+            )
+            resumen["parametros"] = r_param
+        except Exception:
+            resumen["parametros"] = None
+
+        # 2.5 Línea larga ABCD
+        try:
+            r_ll = linea_larga.calcular(
+                tension_linea_kv=float(proy["tension_nominal_kv"]),
+                potencia_mw=float(proy["potencia_mw"]),
+                longitud_km=float(proy["longitud_km"]),
+                factor_potencia=float(proy["factor_potencia"]),
+                r_fase_ohm_km=cond["resistencia_ac_65c_ohm_km"],
+                xl_fase_ohm_km=resumen["parametros"].xl_fase_ohm_km if resumen["parametros"] else 0.4,
+                b_fase_s_km=resumen["parametros"].b_fase_s_km if resumen["parametros"] else 4e-6,
+                reg_max_pct=float(proy["regulacion_max_pct"]),
+                perdidas_max_pct=float(proy["perdidas_max_pct"]),
+            )
+            resumen["linea_larga"] = r_ll
+        except Exception:
+            resumen["linea_larga"] = None
+
+        # 3 Mecánica del conductor
+        try:
+            e_kgf = cond.get("modulo_elasticidad_n_mm2", 76900) / 9.81
+            alpha = cond.get("coef_dilatacion_invc", 18.9e-6)
+            r_mec = mecanico.calcular(
+                elemento="conductor",
+                diametro_mm=cond["diametro_exterior_mm"],
+                area_mm2=cond["seccion_total_mm2"],
+                masa_kg_m=cond["masa_kg_m"],
+                carga_rotura_kgf=cond["carga_rotura_kgf"],
+                vano_m=float(proy["vano_diseno_m"]),
+                modulo_elasticidad_kgf_mm2=e_kgf,
+                coef_dilatacion_invc=alpha,
+            )
+            resumen["mecanico"] = r_mec
+        except Exception:
+            resumen["mecanico"] = None
+
+        # 4 Cable de guarda
+        try:
+            e_kgf_g = cable.get("modulo_elasticidad_n_mm2", 196000) / 9.81
+            alpha_g = cable.get("coef_dilatacion_invc", 11.5e-6)
+            r_guarda = mecanico.calcular(
+                elemento="guarda",
+                diametro_mm=cable["diametro_mm"],
+                area_mm2=cable["seccion_mm2"],
+                masa_kg_m=cable["masa_kg_m"],
+                carga_rotura_kgf=cable["carga_rotura_kgf"],
+                vano_m=float(proy["vano_diseno_m"]),
+                modulo_elasticidad_kgf_mm2=e_kgf_g,
+                coef_dilatacion_invc=alpha_g,
+            )
+            resumen["guarda"] = r_guarda
+        except Exception:
+            resumen["guarda"] = None
+
+        # 5 Aisladores
+        try:
+            r_aisl = aisladores.calcular(
+                tension_linea_kv=float(proy["tension_nominal_kv"]),
+                aislador=aisl,
+                nivel_contaminacion="alta",
+                n_subconductores=3,
+                masa_conductor_kg_m=cond["masa_kg_m"],
+                vano_gravitacional_m=float(proy["vano_diseno_m"]) * 1.1,
+                tension_horizontal_conductor_n=resumen["mecanico"].hipotesis[0].tension_n if resumen["mecanico"] else 30000,
+            )
+            resumen["aisladores"] = r_aisl
+        except Exception:
+            resumen["aisladores"] = None
+
+        # 6 Torre
+        try:
+            r_torre = torre.calcular(
+                tension_linea_kv=float(proy["tension_nominal_kv"]),
+                altitud_msnm=float(proy["altitud_msnm"]),
+                flecha_max_conductor_m=resumen["mecanico"].flecha_maxima_m if resumen["mecanico"] else 12.0,
+                longitud_cadena_m=resumen["aisladores"].longitud_cadena_m if resumen["aisladores"] else 6.0,
+                longitud_linea_km=float(proy["longitud_km"]),
+                vano_diseno_m=float(proy["vano_diseno_m"]),
+            )
+            resumen["torre"] = r_torre
+        except Exception:
+            resumen["torre"] = None
+
+        # 7 Plantillado
+        try:
+            hip_d = next((h for h in resumen["mecanico"].hipotesis if h.nombre == "D"), None) if resumen["mecanico"] else None
+            hip_b = next((h for h in resumen["mecanico"].hipotesis if h.nombre == "B"), None) if resumen["mecanico"] else None
+            if hip_d and hip_b:
+                r_plant = plantillado.calcular(
+                    vano_m=float(proy["vano_diseno_m"]),
+                    tension_caliente_n=hip_d.tension_n,
+                    tension_frio_n=hip_b.tension_n,
+                    masa_kg_m=cond["masa_kg_m"],
+                )
+                resumen["plantillado"] = r_plant
+            else:
+                resumen["plantillado"] = None
+        except Exception:
+            resumen["plantillado"] = None
+
+        return render_template("_partial_modulo_11_resumen.html", **resumen)
 
     @app.errorhandler(404)
     def not_found(_e):
