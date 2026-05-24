@@ -100,17 +100,17 @@
       </div>
 
       {# Navegación de módulos — agrupados por sección igual que el documento #}
-      <nav class="flex-1 py-1.5 overflow-y-auto overflow-x-hidden px-2">
+      <nav class="flex-1 py-2 overflow-y-auto overflow-x-hidden px-3">
         {# Agrupar módulos por sección sin perder el orden original #}
         {% set ns = namespace(seccion_actual='') %}
         {% for mod_id, mod_slug, mod_nombre, mod_desc, mod_seccion, mod_numero in MODULOS %}
           {% if mod_seccion != ns.seccion_actual %}
             {% set ns.seccion_actual = mod_seccion %}
-            {# Header de sección — solo un poco más grande que los módulos #}
+            {# Header de sección #}
             <div x-show="sidebarExpanded" x-transition.opacity
-                 class="flex items-center gap-1.5 px-2 pt-2 pb-0 first:pt-0">
+                 class="flex items-center gap-1.5 px-3 pt-2.5 pb-1 first:pt-1">
               <span class="size-1 rounded-full" style="background: var(--primary);"></span>
-              <span class="font-bold uppercase" style="color: var(--primary); letter-spacing: 0.05em; line-height: 1.1; font-size: 10px;">
+              <span class="font-bold uppercase" style="color: var(--primary); letter-spacing: 0.05em; line-height: 1.1; font-size: 12px;">
                 {{ mod_seccion }}
               </span>
             </div>
@@ -120,13 +120,13 @@
             </div>
           {% endif %}
           <a href="{{ url_for('modulo', modulo_id=mod_id) }}"
-             :class="sidebarExpanded ? 'py-1 px-2 gap-2' : 'justify-center !px-0 !gap-0 py-1'"
+             :class="sidebarExpanded ? 'py-1.5 pl-3 pr-2 gap-2.5' : 'justify-center !px-0 !gap-0 py-1.5'"
              :title="sidebarExpanded ? '' : '{{ mod_numero }} · {{ mod_nombre }}'"
              class="{% if mod_id == modulo_id %}sidebar-link-active{% else %}sidebar-link{% endif %}"
-             style="font-size: 11.5px;">
+             style="font-size: 13.5px;">
             <span class="rounded font-mono font-bold grid place-items-center shrink-0"
                   :style="'{% if mod_id == modulo_id %}background: var(--primary); color: var(--primary-foreground);{% else %}background: color-mix(in oklch, var(--primary) 10%, transparent); color: var(--primary);{% endif %}'"
-                  style="min-width: 32px; width: 32px; height: 20px; font-size: 10px; padding: 0;">
+                  style="min-width: 34px; width: 34px; height: 22px; font-size: 11px; padding: 0;">
               {{ mod_numero }}
             </span>
             <span class="flex-1 truncate" x-show="sidebarExpanded" x-transition.opacity style="line-height: 1.3;">{{ mod_nombre }}</span>
