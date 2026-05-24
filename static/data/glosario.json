@@ -1,0 +1,729 @@
+{
+  "version": "1.0",
+  "actualizado": "2026-05-24",
+  "descripcion": "Glosario de términos técnicos usados en el diseño de líneas aéreas de transmisión de alta tensión.",
+  "categorias": [
+    {
+      "nombre": "Conceptos generales",
+      "icono": "book-open",
+      "color": "primary",
+      "terminos": [
+        {
+          "termino": "Línea de transmisión",
+          "alias": "LT",
+          "definicion": "Conjunto de conductores, estructuras y aisladores que transporta energía eléctrica a altos niveles de tensión entre subestaciones, normalmente cubriendo decenas o cientos de kilómetros.",
+          "ver_tambien": ["Alta tensión", "Vano", "Servidumbre"]
+        },
+        {
+          "termino": "Tensión nominal",
+          "alias": "Vn",
+          "definicion": "Valor de tensión eficaz línea–línea (entre fases) para el cual la línea está diseñada y opera de manera continua. En Colombia los escalones normalizados son 115, 230 y 500 kV.",
+          "formula": "V_n = \\sqrt{3} \\cdot V_{f}",
+          "modulo": 1,
+          "ver_tambien": ["Regla de Hefner", "Regla de Still", "RETIE"]
+        },
+        {
+          "termino": "Alta tensión (AT)",
+          "definicion": "Niveles de tensión nominal entre 57.5 kV y 230 kV. Por encima de 230 kV se habla de Extra Alta Tensión (EAT) y por encima de 800 kV de Ultra Alta Tensión (UAT). El proyecto de 500 kV pertenece a EAT.",
+          "ver_tambien": ["Tensión nominal", "RETIE"]
+        },
+        {
+          "termino": "Servidumbre",
+          "definicion": "Franja de terreno a lo largo de la línea sobre la cual existe una restricción legal de uso (no construir, no sembrar árboles altos, etc.) para garantizar las distancias mínimas de seguridad. Su ancho depende de la tensión nominal.",
+          "ver_tambien": ["RETIE", "Distancias mínimas"]
+        },
+        {
+          "termino": "Corredor",
+          "definicion": "Trayectoria geográfica definida entre dos subestaciones por la que se traza la línea. Define longitud, perfil topográfico y obstáculos a sortear.",
+          "modulo": 0
+        },
+        {
+          "termino": "RETIE",
+          "definicion": "Reglamento Técnico de Instalaciones Eléctricas (Colombia). Norma de obligatorio cumplimiento que fija distancias mínimas, niveles de aislamiento, factores de seguridad y demás requisitos para instalaciones eléctricas, incluidas las líneas de transmisión.",
+          "ver_tambien": ["Distancias mínimas", "Servidumbre"]
+        }
+      ]
+    },
+
+    {
+      "nombre": "Selección de tensión (Módulo 1)",
+      "icono": "zap",
+      "color": "primary",
+      "terminos": [
+        {
+          "termino": "Regla de Hefner",
+          "alias": "Fórmula de Hefner",
+          "definicion": "Fórmula empírica que estima la tensión económica de una línea en función de la potencia transportada y la distancia. Se usa como primer tanteo en el dimensionamiento.",
+          "formula": "V_{Hefner} = 5.5 \\cdot \\sqrt{\\dfrac{L \\cdot P}{150}}",
+          "donde": "V en kV, L en km, P en kW",
+          "modulo": 1,
+          "ver_tambien": ["Regla de Still", "Regla de 1 kV/km"]
+        },
+        {
+          "termino": "Regla de Still",
+          "definicion": "Variante de la regla de Hefner que tiende a dar tensiones ligeramente superiores. Usada como segundo criterio para acotar el escalón de tensión.",
+          "formula": "V_{Still} = 5.5 \\cdot \\sqrt{0.62 \\cdot L + \\dfrac{3 \\cdot P}{100}}",
+          "donde": "V en kV, L en km, P en kW",
+          "modulo": 1
+        },
+        {
+          "termino": "Regla de 1 kV/km",
+          "definicion": "Criterio práctico: la tensión nominal en kV debe ser, como mínimo, igual a la longitud de la línea en km. Útil para descartar tensiones muy bajas en líneas largas.",
+          "formula": "V_{1kV/km} \\geq L \\;[\\text{km}]",
+          "modulo": 1
+        },
+        {
+          "termino": "Escalones normalizados",
+          "definicion": "Valores discretos de tensión adoptados por la norma (RETIE/IEC): 13.2, 34.5, 66, 115, 138, 161, 230, 345, 500, 765 kV. Se elige el escalón inmediatamente superior al máximo de las tres reglas.",
+          "modulo": 1,
+          "ver_tambien": ["Tensión nominal"]
+        }
+      ]
+    },
+
+    {
+      "nombre": "Geometría y haz de conductores (Módulo 2)",
+      "icono": "triangle",
+      "color": "primary",
+      "terminos": [
+        {
+          "termino": "GMD",
+          "alias": "Distancia Media Geométrica (DMG)",
+          "definicion": "Promedio geométrico de las distancias entre las tres fases. Reemplaza la geometría real de la línea por una equivalente y permite calcular L y C con fórmulas simples (línea transpuesta).",
+          "formula": "GMD = \\sqrt[3]{d_{12} \\cdot d_{23} \\cdot d_{13}}",
+          "modulo": 2,
+          "ver_tambien": ["GMR", "Transposición", "Triángulo equilátero"]
+        },
+        {
+          "termino": "GMR",
+          "alias": "Radio Medio Geométrico (RMG)",
+          "definicion": "Radio ficticio que reemplaza a un conductor real (con efecto piel y flujo interno) por uno hueco equivalente. Se obtiene multiplicando el radio físico por e^(-1/4) ≈ 0.7788 para un conductor sólido.",
+          "formula": "GMR_{sol} = 0.7788 \\cdot r",
+          "modulo": 2,
+          "ver_tambien": ["GMD", "Efecto piel"]
+        },
+        {
+          "termino": "Haz de conductores",
+          "alias": "Bundle",
+          "definicion": "Agrupación de 2, 3 o 4 conductores por fase, separados por espaciadores, que se comportan eléctricamente como un solo conductor de mayor diámetro. Reduce la reactancia inductiva y el efecto Corona.",
+          "modulo": 2,
+          "ver_tambien": ["Subconductor", "Radio del haz", "Efecto Corona"]
+        },
+        {
+          "termino": "Subconductor",
+          "definicion": "Cada uno de los conductores individuales que conforman un haz. Por ejemplo, un haz de 3 está formado por 3 subconductores idénticos.",
+          "modulo": 2,
+          "ver_tambien": ["Haz de conductores"]
+        },
+        {
+          "termino": "Radio del haz",
+          "alias": "Radio equivalente del haz",
+          "definicion": "Radio del círculo sobre el que se ubican los subconductores. Para un haz de n subconductores separados una distancia d entre sí, R_h = d / (2·sen(π/n)).",
+          "formula": "R_h = \\dfrac{d}{2 \\sin(\\pi/n)}",
+          "modulo": 2
+        },
+        {
+          "termino": "Triángulo equilátero",
+          "definicion": "Disposición de las tres fases en los vértices de un triángulo equilátero. Su ventaja teórica es que L y C son iguales en las tres fases sin necesidad de transposición. Casi no se usa en EAT por restricciones mecánicas.",
+          "modulo": 2,
+          "ver_tambien": ["Disposición horizontal", "Transposición"]
+        },
+        {
+          "termino": "Disposición horizontal",
+          "definicion": "Las tres fases se ubican en el mismo plano horizontal sobre la cruceta. Es la configuración más común en EAT por simplicidad mecánica, pero requiere transposición.",
+          "modulo": 2,
+          "ver_tambien": ["Transposición", "Cruceta"]
+        },
+        {
+          "termino": "Transposición",
+          "definicion": "Rotación cíclica de la posición de las fases a lo largo de la línea para igualar L y C entre las tres. Típicamente se hace a 1/3 y 2/3 de la longitud total.",
+          "modulo": 2,
+          "ver_tambien": ["GMD", "Disposición horizontal"]
+        }
+      ]
+    },
+
+    {
+      "nombre": "Conductor (Módulo 3)",
+      "icono": "cable",
+      "color": "primary",
+      "terminos": [
+        {
+          "termino": "ACSR",
+          "alias": "Aluminum Conductor Steel Reinforced",
+          "definicion": "Conductor de aluminio reforzado con un núcleo de hilos de acero galvanizado. Combina la buena conductividad del aluminio con la alta resistencia mecánica del acero. Es el más usado en líneas de transmisión.",
+          "modulo": 3,
+          "ver_tambien": ["AAAC", "ACAR", "Cardinal"]
+        },
+        {
+          "termino": "AAAC",
+          "alias": "All Aluminum Alloy Conductor",
+          "definicion": "Conductor enteramente de aleación de aluminio, sin núcleo de acero. Más liviano y con mejor relación tensión/peso que ACSR, pero más caro. Usado en cruces largos.",
+          "modulo": 3
+        },
+        {
+          "termino": "ACAR",
+          "alias": "Aluminum Conductor Alloy Reinforced",
+          "definicion": "Conductor de hilos de aluminio puro reforzado con un núcleo de hilos de aleación de aluminio. Más liviano que ACSR y con mejor resistencia que AAC.",
+          "modulo": 3
+        },
+        {
+          "termino": "Ampacidad",
+          "alias": "Capacidad de corriente",
+          "definicion": "Corriente máxima permanente que un conductor puede transportar sin exceder su temperatura límite de operación (típicamente 75 °C o 90 °C), considerando viento, radiación solar y temperatura ambiente.",
+          "modulo": 3,
+          "ver_tambien": ["Corrección térmica"]
+        },
+        {
+          "termino": "Resistencia AC",
+          "alias": "Resistencia en corriente alterna",
+          "definicion": "Resistencia del conductor a frecuencia industrial (50/60 Hz). Es mayor que la resistencia DC debido al efecto piel y al efecto de proximidad entre subconductores.",
+          "formula": "R_{AC} = k_{skin} \\cdot R_{DC}",
+          "modulo": 3,
+          "ver_tambien": ["Efecto piel", "Resistencia DC"]
+        },
+        {
+          "termino": "Resistencia DC",
+          "definicion": "Resistencia del conductor en corriente continua, dependiente solo de la resistividad del material, la longitud y la sección.",
+          "formula": "R_{DC} = \\rho \\cdot \\dfrac{l}{A}"
+        },
+        {
+          "termino": "Efecto piel",
+          "alias": "Skin effect",
+          "definicion": "Fenómeno por el cual la corriente alterna se concentra en la superficie del conductor en vez de distribuirse uniformemente. Aumenta la resistencia efectiva a altas frecuencias.",
+          "ver_tambien": ["Resistencia AC", "GMR"]
+        },
+        {
+          "termino": "Corrección térmica",
+          "definicion": "Ajuste de la resistencia del conductor según su temperatura de operación. Para el aluminio: R_T = R_20 · [1 + α·(T − 20)], con α ≈ 0.00403 /°C.",
+          "formula": "R_T = R_{20} \\cdot [1 + \\alpha (T - 20)]",
+          "modulo": 3
+        },
+        {
+          "termino": "Cardinal / Bluejay / Pheasant",
+          "definicion": "Nombres comerciales de conductores ACSR estandarizados. Cardinal: 954 kcmil, 54/7 hilos. Son los más empleados en líneas de EAT.",
+          "modulo": 3
+        }
+      ]
+    },
+
+    {
+      "nombre": "Parámetros eléctricos y Corona (Módulo 4)",
+      "icono": "activity",
+      "color": "primary",
+      "terminos": [
+        {
+          "termino": "Resistencia (R)",
+          "definicion": "Parámetro óhmico que disipa potencia activa en forma de calor. Para cálculos de línea se expresa en Ω/km por fase.",
+          "modulo": 4
+        },
+        {
+          "termino": "Inductancia (L)",
+          "definicion": "Propiedad del conductor de oponerse a cambios de corriente debido al flujo magnético. Depende del GMD y el GMR. Se expresa en H/km o mH/km.",
+          "formula": "L = 2 \\times 10^{-7} \\cdot \\ln\\dfrac{GMD}{GMR}",
+          "donde": "L en H/m por fase",
+          "modulo": 4,
+          "ver_tambien": ["GMD", "GMR", "Reactancia inductiva"]
+        },
+        {
+          "termino": "Capacitancia (C)",
+          "definicion": "Capacidad del conductor de almacenar carga eléctrica respecto a tierra y a las otras fases. Depende del GMD y el radio físico (no del GMR).",
+          "formula": "C = \\dfrac{2 \\pi \\varepsilon_0}{\\ln(GMD/r)}",
+          "modulo": 4,
+          "ver_tambien": ["Susceptancia capacitiva"]
+        },
+        {
+          "termino": "Reactancia inductiva (XL)",
+          "definicion": "XL = 2πfL. Para 60 Hz y configuraciones típicas en EAT está alrededor de 0.30 a 0.45 Ω/km por fase.",
+          "formula": "X_L = 2 \\pi f L",
+          "modulo": 4
+        },
+        {
+          "termino": "Susceptancia capacitiva (B)",
+          "definicion": "B = 2πfC. Genera potencia reactiva capacitiva que en líneas largas y con carga ligera puede elevar la tensión en el extremo receptor (efecto Ferranti).",
+          "formula": "B = 2 \\pi f C",
+          "modulo": 4,
+          "ver_tambien": ["Efecto Ferranti"]
+        },
+        {
+          "termino": "Impedancia característica",
+          "alias": "Impedancia de onda (Zc)",
+          "definicion": "Z_c = √(L/C). Para una línea aérea típica vale entre 250 y 400 Ω. Si la carga es igual a Z_c, la línea no consume ni genera reactivos (SIL).",
+          "formula": "Z_c = \\sqrt{L/C}",
+          "ver_tambien": ["SIL"]
+        },
+        {
+          "termino": "Efecto Corona",
+          "alias": "Descarga corona",
+          "definicion": "Ionización del aire alrededor del conductor cuando el gradiente eléctrico superficial supera la rigidez dieléctrica del aire. Se manifiesta como un halo luminoso azulado, zumbido, ozono y pérdidas de potencia.",
+          "modulo": 4,
+          "ver_tambien": ["Gradiente superficial", "Tensión crítica disruptiva", "Pérdidas por Corona", "Radiointerferencia"]
+        },
+        {
+          "termino": "Gradiente superficial",
+          "alias": "Campo eléctrico en la superficie del conductor",
+          "definicion": "Intensidad del campo eléctrico (kV/cm) justo en la superficie del conductor. Si supera ~21.1 kV/cm (a nivel del mar, aire seco), comienza el efecto Corona.",
+          "formula": "g_{sup} = \\dfrac{V_f}{r \\cdot n \\cdot \\ln(D_{eq}/R_{eq})}",
+          "modulo": 4,
+          "ver_tambien": ["Efecto Corona", "Tensión crítica disruptiva"]
+        },
+        {
+          "termino": "Tensión crítica disruptiva",
+          "alias": "Vcd",
+          "definicion": "Tensión a la cual el gradiente superficial alcanza el valor crítico y se inicia la descarga Corona. Depende del radio del conductor, la geometría, la densidad relativa del aire y el coeficiente de superficie.",
+          "modulo": 4,
+          "ver_tambien": ["Efecto Corona", "Gradiente superficial"]
+        },
+        {
+          "termino": "Pérdidas por Corona",
+          "definicion": "Energía disipada por la ionización del aire alrededor del conductor. Aumenta drásticamente con la lluvia (factor 3 a 10×) y con la altitud. Se calcula con la fórmula de Peek.",
+          "modulo": 4,
+          "ver_tambien": ["Efecto Corona", "Fórmula de Peek"]
+        },
+        {
+          "termino": "Fórmula de Peek",
+          "definicion": "Expresión empírica que cuantifica las pérdidas por Corona en kW/km por fase en función de la frecuencia, densidad del aire, geometría y tensión.",
+          "modulo": 4
+        },
+        {
+          "termino": "Radiointerferencia (RI)",
+          "definicion": "Ruido electromagnético generado por las microdescargas Corona, que interfiere con señales de radio AM en la banda 0.5–1.6 MHz. Se mide en dB(µV/m) a una distancia normalizada del conductor.",
+          "modulo": 4
+        },
+        {
+          "termino": "Ruido audible",
+          "definicion": "Sonido tipo chisporroteo o zumbido (50/60 Hz y armónicos) generado por la descarga Corona, especialmente bajo lluvia. Se mide en dB(A) y la norma limita su valor en el borde de la servidumbre.",
+          "modulo": 4
+        }
+      ]
+    },
+
+    {
+      "nombre": "Línea larga y modelo ABCD (Módulo 5)",
+      "icono": "git-branch",
+      "color": "primary",
+      "terminos": [
+        {
+          "termino": "Modelo ABCD",
+          "alias": "Cuadripolo",
+          "definicion": "Representación de la línea como una caja de dos puertos donde V₁ = A·V₂ + B·I₂ e I₁ = C·V₂ + D·I₂. Las constantes A, B, C, D dependen de Z, Y y la longitud.",
+          "formula": "\\begin{bmatrix}V_1\\\\I_1\\end{bmatrix}=\\begin{bmatrix}A & B\\\\C & D\\end{bmatrix}\\begin{bmatrix}V_2\\\\I_2\\end{bmatrix}",
+          "modulo": 5
+        },
+        {
+          "termino": "Línea corta",
+          "definicion": "Línea de menos de ~80 km. Se desprecian C y G. Modelo: solo Z serie (R + jXL).",
+          "ver_tambien": ["Línea media", "Línea larga"]
+        },
+        {
+          "termino": "Línea media",
+          "definicion": "Línea entre 80 y 250 km. Se modela con Z serie y Y/2 derivada en cada extremo (modelo π nominal).",
+          "ver_tambien": ["Línea corta", "Línea larga", "Modelo π nominal"]
+        },
+        {
+          "termino": "Línea larga",
+          "definicion": "Línea de más de 250 km. Los parámetros se distribuyen a lo largo de la línea y se modela con funciones hiperbólicas: γ (constante de propagación) y Zc (impedancia característica).",
+          "modulo": 5,
+          "ver_tambien": ["Modelo ABCD", "Impedancia característica"]
+        },
+        {
+          "termino": "Modelo π nominal",
+          "definicion": "Aproximación para líneas medias: toda la impedancia Z = R + jXL en serie en el centro, y la admitancia Y = G + jB partida en dos mitades en los extremos.",
+          "modulo": 5
+        },
+        {
+          "termino": "Regulación de tensión",
+          "alias": "Reg %",
+          "definicion": "Diferencia porcentual entre la tensión en vacío y la tensión en plena carga en el extremo receptor, referida a la tensión en plena carga. RETIE exige Reg ≤ 5 % en líneas de transmisión.",
+          "formula": "Reg\\,\\% = \\dfrac{V_{R,vacío} - V_{R,carga}}{V_{R,carga}} \\cdot 100",
+          "modulo": 5
+        },
+        {
+          "termino": "Pérdidas de potencia",
+          "alias": "Pérdidas Joule",
+          "definicion": "Potencia activa disipada por la resistencia de la línea: P_pérd = 3·I²·R por fase. Se expresa también como porcentaje de la potencia transmitida. Para líneas largas, el límite habitual de diseño es ≤ 5 %.",
+          "formula": "P_{pérd} = 3 \\cdot I^2 \\cdot R",
+          "modulo": 5
+        },
+        {
+          "termino": "Eficiencia",
+          "alias": "η",
+          "definicion": "Cociente entre la potencia entregada al extremo receptor y la potencia inyectada en el extremo transmisor: η = P_R / P_S × 100 %.",
+          "modulo": 5
+        },
+        {
+          "termino": "SIL",
+          "alias": "Surge Impedance Loading",
+          "definicion": "Potencia que la línea transporta cuando la carga es exactamente igual a su impedancia característica. En esa condición no hay generación ni consumo de reactivos a lo largo de la línea.",
+          "formula": "SIL = \\dfrac{V_{LL}^2}{Z_c}",
+          "ver_tambien": ["Impedancia característica"]
+        },
+        {
+          "termino": "Efecto Ferranti",
+          "definicion": "Aumento de la tensión en el extremo receptor por encima de la del transmisor en líneas largas operando con poca carga o en vacío. Lo causa la corriente capacitiva.",
+          "ver_tambien": ["Capacitancia", "SIL"]
+        },
+        {
+          "termino": "Factor de potencia",
+          "alias": "fp, cos φ",
+          "definicion": "Cociente entre potencia activa (W) y potencia aparente (VA). Indica qué fracción de la corriente se traduce en potencia útil. Valor típico de diseño en transmisión: 0.95 inductivo a 1.0.",
+          "modulo": 5
+        }
+      ]
+    },
+
+    {
+      "nombre": "Mecánica del conductor (Módulo 6)",
+      "icono": "trending-down",
+      "color": "primary",
+      "terminos": [
+        {
+          "termino": "Vano",
+          "alias": "Span",
+          "definicion": "Distancia horizontal entre dos torres consecutivas que soportan el conductor. Vano típico en EAT: 350 a 500 m.",
+          "modulo": 6
+        },
+        {
+          "termino": "Flecha",
+          "alias": "Sag, sagitta",
+          "definicion": "Distancia vertical máxima entre la línea recta que une los dos puntos de sujeción y el punto más bajo del conductor suspendido. Crece con el vano y con la temperatura del conductor.",
+          "formula": "f \\approx \\dfrac{w \\cdot a^2}{8 \\cdot T_h}",
+          "donde": "w: peso por metro, a: vano, T_h: tensión horizontal",
+          "modulo": 6,
+          "ver_tambien": ["Catenaria", "Vano", "Tensión mecánica"]
+        },
+        {
+          "termino": "Catenaria",
+          "definicion": "Curva geométrica real que adopta un cable de peso uniforme suspendido entre dos puntos. Su ecuación es y = c·cosh(x/c) con c = T_h/w (parámetro de la catenaria).",
+          "formula": "y = c \\cdot \\cosh\\dfrac{x}{c}",
+          "modulo": 6,
+          "ver_tambien": ["Flecha", "Parábola", "Parámetro de catenaria"]
+        },
+        {
+          "termino": "Parámetro de catenaria",
+          "alias": "c",
+          "definicion": "Cociente entre la tensión horizontal del conductor y su peso por unidad de longitud (c = T_h / w). Define la 'apertura' de la catenaria — a mayor c, conductor más tenso y flecha menor.",
+          "modulo": 6
+        },
+        {
+          "termino": "Parábola",
+          "definicion": "Aproximación de la catenaria válida cuando la flecha es pequeña frente al vano (f/a < 1/10). Permite cálculos cerrados de flecha y longitud del conductor.",
+          "formula": "y \\approx \\dfrac{w \\cdot x^2}{2 \\cdot T_h}",
+          "modulo": 6,
+          "ver_tambien": ["Catenaria"]
+        },
+        {
+          "termino": "Tensión mecánica",
+          "alias": "T, T_h",
+          "definicion": "Fuerza axial a la que está sometido el conductor, expresada en N o kgf. La componente horizontal T_h es constante a lo largo del vano y define la flecha.",
+          "modulo": 6,
+          "ver_tambien": ["Carga de rotura", "Factor de seguridad"]
+        },
+        {
+          "termino": "Carga de rotura",
+          "alias": "RTS, Rated Tensile Strength",
+          "definicion": "Fuerza máxima de tracción que el conductor puede soportar antes de romperse. Es un dato del fabricante. Para Cardinal ACSR es de aproximadamente 15500 kgf.",
+          "modulo": 6,
+          "ver_tambien": ["Factor de seguridad", "Tensión mecánica"]
+        },
+        {
+          "termino": "Factor de seguridad",
+          "alias": "FS",
+          "definicion": "Cociente entre la carga de rotura y la tensión de trabajo del conductor (FS = RTS / T). RETIE exige FS ≥ 2.5 en hipótesis normales y FS ≥ 2.0 en hipótesis extremas.",
+          "modulo": 6,
+          "ver_tambien": ["Carga de rotura"]
+        },
+        {
+          "termino": "Vano crítico",
+          "alias": "ac",
+          "definicion": "Vano para el cual dos hipótesis de carga producen la misma tensión mecánica en el conductor. Sirve para decidir cuál hipótesis es la dimensionante.",
+          "modulo": 6,
+          "ver_tambien": ["Hipótesis de carga"]
+        },
+        {
+          "termino": "Hipótesis de carga",
+          "definicion": "Conjunto de condiciones climáticas (temperatura, viento, hielo) bajo las cuales se debe verificar el comportamiento mecánico del conductor. En Colombia típicamente se usan 4: A (EDS), B (frío), C (viento máx) y D (caliente).",
+          "modulo": 6,
+          "ver_tambien": ["EDS", "Ecuación de cambio de estado"]
+        },
+        {
+          "termino": "EDS",
+          "alias": "Every Day Stress, hipótesis A",
+          "definicion": "Esfuerzo diario promedio que soporta el conductor a temperatura media anual y sin viento. Para evitar vibraciones eólicas, el conductor no debe trabajar a más del 20–22 % de su RTS en EDS.",
+          "modulo": 6,
+          "ver_tambien": ["Hipótesis de carga", "Factor de seguridad"]
+        },
+        {
+          "termino": "Ecuación de cambio de estado",
+          "alias": "ECE",
+          "definicion": "Ecuación cúbica que relaciona la tensión mecánica del conductor entre dos estados climáticos distintos, considerando elasticidad y dilatación térmica. Permite obtener T en cualquier hipótesis a partir de un estado inicial.",
+          "modulo": 6,
+          "ver_tambien": ["Hipótesis de carga", "Módulo de elasticidad", "Coeficiente de dilatación"]
+        },
+        {
+          "termino": "Módulo de elasticidad",
+          "alias": "E",
+          "definicion": "Constante del material que relaciona el esfuerzo aplicado con la deformación unitaria (Ley de Hooke). Para aluminio ≈ 7000 kgf/mm², para acero ≈ 20000 kgf/mm².",
+          "modulo": 6
+        },
+        {
+          "termino": "Coeficiente de dilatación",
+          "alias": "α",
+          "definicion": "Variación relativa de longitud del material por cada grado de cambio de temperatura. Aluminio: 23·10⁻⁶ /°C. Acero: 11.5·10⁻⁶ /°C. ACSR (compuesto): ~18.9·10⁻⁶ /°C.",
+          "modulo": 6
+        }
+      ]
+    },
+
+    {
+      "nombre": "Cable de guarda (Módulo 7)",
+      "icono": "shield",
+      "color": "primary",
+      "terminos": [
+        {
+          "termino": "Cable de guarda",
+          "alias": "Hilo de guarda, shield wire",
+          "definicion": "Conductor ubicado por encima de los conductores de fase, conectado a tierra en cada torre. Su función es interceptar los rayos atmosféricos para que no impacten directamente a las fases.",
+          "modulo": 7,
+          "ver_tambien": ["Ángulo de apantallamiento", "OPGW"]
+        },
+        {
+          "termino": "OPGW",
+          "alias": "Optical Ground Wire",
+          "definicion": "Cable de guarda con fibras ópticas integradas en su núcleo. Cumple dos funciones: protección contra rayos y comunicaciones (SCADA, teleprotección, datos comerciales).",
+          "modulo": 7,
+          "ver_tambien": ["Cable de guarda"]
+        },
+        {
+          "termino": "Acero EHS",
+          "alias": "Extra High Strength",
+          "definicion": "Cable de guarda de hilos de acero galvanizado de alta resistencia (RTS típica ≥ 6000 kgf). Es la opción más económica pero la más pesada.",
+          "modulo": 7
+        },
+        {
+          "termino": "Alumoweld",
+          "definicion": "Cable de guarda con hilos de acero recubiertos con una capa de aluminio (~25 % del área). Combina la resistencia del acero con la mejor conductividad y resistencia a la corrosión del aluminio.",
+          "modulo": 7
+        },
+        {
+          "termino": "Ángulo de apantallamiento",
+          "alias": "α",
+          "definicion": "Ángulo entre la vertical que pasa por el cable de guarda y la línea que va del cable de guarda al conductor de fase más expuesto. Valores típicos: 15° a 30°. Cuanto menor, mejor protección.",
+          "modulo": 7
+        }
+      ]
+    },
+
+    {
+      "nombre": "Aisladores (Módulo 8)",
+      "icono": "disc",
+      "color": "primary",
+      "terminos": [
+        {
+          "termino": "Aislador",
+          "definicion": "Elemento dieléctrico (vidrio, porcelana o polimérico) que separa eléctricamente el conductor de la estructura metálica de la torre, soportando al mismo tiempo el peso del conductor y los esfuerzos mecánicos.",
+          "modulo": 8,
+          "ver_tambien": ["Cadena de aisladores", "Línea de fuga"]
+        },
+        {
+          "termino": "Cadena de aisladores",
+          "definicion": "Conjunto de N discos aisladores ensamblados en serie. El número de discos se calcula con dos criterios: tensión soportada al impulso (BIL) y línea de fuga total según el nivel de contaminación.",
+          "modulo": 8,
+          "ver_tambien": ["BIL", "Línea de fuga", "Cadena simple"]
+        },
+        {
+          "termino": "Línea de fuga",
+          "alias": "Distancia de fuga, creepage",
+          "definicion": "Distancia más corta medida sobre la superficie del aislador entre las partes metálicas a tensión y a tierra. Crítica en zonas con contaminación (salina, industrial) por donde puede establecerse un arco superficial.",
+          "modulo": 8,
+          "ver_tambien": ["BIL", "Nivel de contaminación"]
+        },
+        {
+          "termino": "BIL",
+          "alias": "Basic Insulation Level, NBA",
+          "definicion": "Tensión soportada al impulso tipo rayo (forma de onda 1.2/50 µs). Define la rigidez dieléctrica del aislamiento frente a sobretensiones atmosféricas. Para 500 kV, BIL típico = 1550 a 1800 kV pico.",
+          "modulo": 8
+        },
+        {
+          "termino": "BSL",
+          "alias": "Basic Switching Level",
+          "definicion": "Tensión soportada al impulso tipo maniobra (onda lenta 250/2500 µs). Importante en sistemas de EAT donde las sobretensiones de maniobra (cierre/apertura de interruptores) son más severas que las atmosféricas.",
+          "modulo": 8
+        },
+        {
+          "termino": "Cadena simple",
+          "definicion": "Una sola cadena de aisladores por fase. Económica, suficiente para 115–230 kV en suspensión sin grandes cargas.",
+          "modulo": 8,
+          "ver_tambien": ["Cadena doble"]
+        },
+        {
+          "termino": "Cadena doble",
+          "definicion": "Dos cadenas paralelas por fase. Brindan redundancia mecánica (si una falla, la otra sostiene el conductor) y reparten la carga. Estándar en líneas de 500 kV y torres de retención.",
+          "modulo": 8,
+          "ver_tambien": ["Cadena simple", "Torre de retención"]
+        },
+        {
+          "termino": "Cadena de suspensión",
+          "definicion": "Cadena que cuelga verticalmente desde la cruceta. Soporta principalmente el peso del conductor. Usada en torres alineadas (sin cambio de dirección).",
+          "modulo": 8,
+          "ver_tambien": ["Cadena de amarre", "Torre de suspensión"]
+        },
+        {
+          "termino": "Cadena de amarre",
+          "alias": "Cadena de retención",
+          "definicion": "Cadena tendida horizontalmente que ancla mecánicamente el conductor. Usada en torres de remate, ángulos importantes y para limitar la longitud de los tramos.",
+          "modulo": 8,
+          "ver_tambien": ["Torre de retención"]
+        },
+        {
+          "termino": "Nivel de contaminación",
+          "definicion": "Clasificación IEC (ligero, medio, alto, muy alto) que define la línea de fuga específica mínima requerida (mm/kV). Mayor contaminación → más aisladores en la cadena.",
+          "modulo": 8,
+          "ver_tambien": ["Línea de fuga"]
+        }
+      ]
+    },
+
+    {
+      "nombre": "Torre (Módulo 9)",
+      "icono": "construction",
+      "color": "primary",
+      "terminos": [
+        {
+          "termino": "Torre de transmisión",
+          "alias": "Estructura, soporte",
+          "definicion": "Estructura metálica (típicamente celosía de ángulos de acero) que soporta los conductores y cables de guarda, manteniéndolos a las distancias eléctricas reglamentarias del suelo, vegetación y entre sí.",
+          "modulo": 9,
+          "ver_tambien": ["Cruceta", "Cuerpo de torre"]
+        },
+        {
+          "termino": "Cruceta",
+          "alias": "Crossarm",
+          "definicion": "Brazo horizontal de la torre que soporta las cadenas de aisladores con sus conductores. Su longitud define la separación entre fases.",
+          "modulo": 9
+        },
+        {
+          "termino": "Cuerpo de torre",
+          "definicion": "Parte central de la estructura (entre el suelo y la cruceta inferior). En torres autosoportadas se compone de cuerpo común (extensiones) y patas (con extensiones de altura para terrenos irregulares).",
+          "modulo": 9
+        },
+        {
+          "termino": "Torre de suspensión",
+          "alias": "Tipo S",
+          "definicion": "Torre alineada que solo soporta el peso vertical del conductor (no cargas longitudinales). Usa cadenas de suspensión. Tipo más común en una línea (~85 % de las torres).",
+          "modulo": 9,
+          "ver_tambien": ["Torre de retención", "Cadena de suspensión"]
+        },
+        {
+          "termino": "Torre de retención",
+          "alias": "Tipo A, B, C — torres de ángulo",
+          "definicion": "Torre que soporta cambios de dirección de la línea o cargas longitudinales. Usa cadenas de amarre. Más robusta y costosa que la de suspensión.",
+          "modulo": 9
+        },
+        {
+          "termino": "Torre de remate",
+          "alias": "Tipo R, dead-end",
+          "definicion": "Torre terminal que recibe toda la tracción de un lado de la línea (al inicio, al final o en cruces especiales). Es la estructura más cargada y robusta.",
+          "modulo": 9
+        },
+        {
+          "termino": "Distancias mínimas",
+          "definicion": "Separaciones reglamentarias (RETIE) entre conductor y tierra, entre fases, conductor–estructura y conductor–objetos. Dependen de la tensión nominal y la altitud (corrección por densidad del aire).",
+          "modulo": 9,
+          "ver_tambien": ["Servidumbre", "Ángulo de balanceo"]
+        },
+        {
+          "termino": "Altura útil",
+          "definicion": "Altura desde el punto más bajo del conductor (con flecha máxima) hasta el terreno. Debe ser siempre mayor que la distancia mínima al suelo establecida por RETIE.",
+          "modulo": 9
+        },
+        {
+          "termino": "Altura total de la torre",
+          "definicion": "Distancia vertical desde la base hasta el punto más alto (típicamente la cima del cable de guarda). En 500 kV está entre 40 y 60 m.",
+          "modulo": 9
+        },
+        {
+          "termino": "Ángulo de balanceo",
+          "definicion": "Inclinación de la cadena de suspensión por efecto del viento. Reduce la distancia conductor–estructura. Hay que verificar que las distancias mínimas se cumplan aun en condición de viento extremo.",
+          "modulo": 9,
+          "ver_tambien": ["Distancias mínimas"]
+        }
+      ]
+    },
+
+    {
+      "nombre": "Plantillado (Módulo 10)",
+      "icono": "line-chart",
+      "color": "primary",
+      "terminos": [
+        {
+          "termino": "Plantillado",
+          "alias": "Spotting",
+          "definicion": "Procedimiento gráfico de localización de torres sobre el perfil topográfico de la línea, utilizando curvas patrón (templete) que representan la posición del conductor en distintas condiciones.",
+          "modulo": 10,
+          "ver_tambien": ["Curva patrón", "Perfil topográfico"]
+        },
+        {
+          "termino": "Curva patrón",
+          "alias": "Templete, plantilla",
+          "definicion": "Conjunto de 3 o 4 curvas paralelas (catenarias escaladas) impresas sobre acetato o digitales, que se desplazan sobre el perfil para encontrar la posición de las torres.",
+          "modulo": 10
+        },
+        {
+          "termino": "Perfil topográfico",
+          "definicion": "Representación a escala del corte vertical del terreno a lo largo del eje de la línea, incluyendo cotas, vegetación y obstáculos.",
+          "modulo": 10
+        },
+        {
+          "termino": "Curva caliente",
+          "definicion": "Catenaria del conductor en su condición de mayor flecha (hipótesis D: T_max = 75–85 °C, sin viento). Define la distancia mínima al terreno y por tanto la altura de las torres.",
+          "modulo": 10,
+          "ver_tambien": ["Hipótesis de carga"]
+        },
+        {
+          "termino": "Curva fría",
+          "definicion": "Catenaria del conductor en condición de menor flecha (hipótesis B: T_min, sin viento). Define las máximas tracciones longitudinales sobre las torres.",
+          "modulo": 10
+        },
+        {
+          "termino": "Curva de pie de torre",
+          "alias": "Curva de cero esfuerzo vertical",
+          "definicion": "Curva que indica la mínima cota a la que puede ubicarse una torre sin que el conductor ejerza tracción hacia arriba (uplift). Crítica en terrenos quebrados.",
+          "modulo": 10
+        }
+      ]
+    },
+
+    {
+      "nombre": "Otros / abreviaturas",
+      "icono": "list",
+      "color": "muted",
+      "terminos": [
+        {
+          "termino": "ABCD",
+          "definicion": "Constantes del cuadripolo que modela la línea (ver Modelo ABCD)."
+        },
+        {
+          "termino": "EAT",
+          "definicion": "Extra Alta Tensión (230 < V ≤ 800 kV)."
+        },
+        {
+          "termino": "IEC",
+          "definicion": "International Electrotechnical Commission. Cuerpo normativo internacional de electrotecnia."
+        },
+        {
+          "termino": "IEEE",
+          "definicion": "Institute of Electrical and Electronics Engineers. Publica estándares ampliamente adoptados (IEEE 738 para ampacidad, IEEE 1410 para apantallamiento, etc.)."
+        },
+        {
+          "termino": "NTC",
+          "definicion": "Norma Técnica Colombiana, emitida por ICONTEC."
+        },
+        {
+          "termino": "kcmil",
+          "definicion": "Mil circular mils. Unidad imperial de sección de conductores. 1 kcmil = 0.5067 mm²."
+        }
+      ]
+    }
+  ]
+}

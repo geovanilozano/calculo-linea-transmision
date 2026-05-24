@@ -76,6 +76,7 @@ def _load_catalog(filename: str) -> dict:
 CATALOGO_CONDUCTORES = _load_catalog("conductores.json")
 CATALOGO_AISLADORES = _load_catalog("aisladores.json")
 CATALOGO_CABLES_GUARDA = _load_catalog("cables_guarda.json")
+GLOSARIO = _load_catalog("glosario.json")
 
 
 def _get_conductor(conductor_id: str | None = None) -> dict:
@@ -208,6 +209,24 @@ def create_app() -> Flask:
         nav = _build_navegacion(modulo_id)
         template_name = f"modulo_{modulo_id}_{nav['modulo_info'][1]}.html"
         return render_template(template_name, **nav)
+
+    @app.route("/glosario")
+    def glosario():
+        """Glosario de términos técnicos del diseño de líneas de transmisión.
+
+        No es un módulo de cálculo — es material de referencia que el estudiante
+        puede consultar en cualquier momento del tour.
+        """
+        # Defaults seguros para variables que base.html espera (sin numeración de módulo).
+        return render_template(
+            "glosario.html",
+            modulo_id=-1,
+            modulo_info=None,
+            anterior=None,
+            siguiente=None,
+            progreso_pct=100,
+            GLOSARIO=GLOSARIO,
+        )
 
     # ===== Endpoint para actualizar parámetros globales del proyecto =====
 
