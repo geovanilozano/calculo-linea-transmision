@@ -100,37 +100,36 @@
       </div>
 
       {# Navegación de módulos — agrupados por sección igual que el documento #}
-      <nav class="flex-1 py-3 overflow-y-auto overflow-x-hidden px-2">
+      <nav class="flex-1 py-2 overflow-y-auto overflow-x-hidden px-2">
         {# Agrupar módulos por sección sin perder el orden original #}
         {% set ns = namespace(seccion_actual='') %}
         {% for mod_id, mod_slug, mod_nombre, mod_desc, mod_seccion, mod_numero in MODULOS %}
           {% if mod_seccion != ns.seccion_actual %}
             {% set ns.seccion_actual = mod_seccion %}
-            {# Header de sección — más limpio, con barra lateral azul #}
+            {# Header de sección — compacto sin línea para no ocupar espacio extra #}
             <div x-show="sidebarExpanded" x-transition.opacity
-                 class="flex items-center gap-2 px-2 pt-3 pb-1.5 first:pt-1"
-                 style="border-bottom: 1px solid color-mix(in oklch, var(--primary) 15%, transparent);">
+                 class="flex items-center gap-1.5 px-2 pt-2 pb-0.5 first:pt-0.5">
               <span class="size-1 rounded-full" style="background: var(--primary);"></span>
-              <span class="text-[10px] font-bold uppercase" style="color: var(--primary); letter-spacing: 0.08em; line-height: 1.2;">
+              <span class="font-bold uppercase" style="color: var(--primary); letter-spacing: 0.06em; line-height: 1.1; font-size: 8.5px;">
                 {{ mod_seccion }}
               </span>
             </div>
             {# Separador minimalista cuando colapsado #}
-            <div x-show="!sidebarExpanded" x-transition.opacity class="my-2 mx-1">
+            <div x-show="!sidebarExpanded" x-transition.opacity class="my-1.5 mx-1">
               <div class="h-px" style="background: color-mix(in oklch, var(--primary) 30%, transparent);"></div>
             </div>
           {% endif %}
           <a href="{{ url_for('modulo', modulo_id=mod_id) }}"
-             :class="sidebarExpanded ? 'py-2 px-2 gap-2.5' : 'justify-center !px-0 !gap-0 py-2'"
+             :class="sidebarExpanded ? 'py-1.5 px-2 gap-2' : 'justify-center !px-0 !gap-0 py-1.5'"
              :title="sidebarExpanded ? '' : '{{ mod_numero }} · {{ mod_nombre }}'"
-             class="{% if mod_id == modulo_id %}sidebar-link-active{% else %}sidebar-link{% endif %} mt-1"
-             style="font-size: 12px;">
-            <span class="rounded-md text-[10px] font-mono font-bold grid place-items-center shrink-0"
+             class="{% if mod_id == modulo_id %}sidebar-link-active{% else %}sidebar-link{% endif %}"
+             style="font-size: 11.5px;">
+            <span class="rounded text-[9px] font-mono font-bold grid place-items-center shrink-0"
                   :style="'{% if mod_id == modulo_id %}background: var(--primary); color: var(--primary-foreground);{% else %}background: color-mix(in oklch, var(--primary) 10%, transparent); color: var(--primary);{% endif %}'"
-                  style="min-width: 30px; height: 22px; padding: 0 5px;">
+                  style="min-width: 26px; height: 18px; padding: 0 4px;">
               {{ mod_numero }}
             </span>
-            <span class="flex-1 truncate" x-show="sidebarExpanded" x-transition.opacity style="line-height: 1.35;">{{ mod_nombre }}</span>
+            <span class="flex-1 truncate" x-show="sidebarExpanded" x-transition.opacity style="line-height: 1.3;">{{ mod_nombre }}</span>
             {% if mod_id == modulo_id %}
               <i data-lucide="chevron-right" class="size-3.5 text-primary shrink-0" x-show="sidebarExpanded" x-transition.opacity></i>
             {% endif %}
