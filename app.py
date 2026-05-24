@@ -35,8 +35,9 @@ from figuras import (
 # Sección: agrupa los módulos en el sidebar igual que el documento del trabajo.
 #   1. PARÁMETROS (módulo 0)
 #   2. CÁLCULOS ELÉCTRICOS (módulos 1-5)
-#   3. CÁLCULOS MECÁNICOS (módulos 6-7)
-#   4. ESTRUCTURA Y PLANTILLADO (módulos 8-10)
+#   3. CÁLCULOS MECÁNICOS DEL CONDUCTOR (módulo 6)
+#   4. CÁLCULOS MECÁNICOS CABLE DE GUARDA (módulo 7)
+#   5. ESTRUCTURA Y PLANTILLADO (módulos 8-10)
 MODULOS: list[tuple[int, str, str, str, str, str]] = [
     # (id, slug, nombre, descripción, sección, numeración)
     (0, "inicio", "Parámetros del proyecto", "Datos eléctricos y mecánicos iniciales", "1. PARÁMETROS", "1"),
@@ -47,12 +48,13 @@ MODULOS: list[tuple[int, str, str, str, str, str]] = [
     (4, "parametros", "Parámetros R, L, C + Corona", "Inductancia, capacitancia y efecto Corona", "2. CÁLCULOS ELÉCTRICOS", "2.4"),
     (5, "linea_larga", "Línea larga (modelo ABCD)", "Regulación, pérdidas y eficiencia (cuadripolo)", "2. CÁLCULOS ELÉCTRICOS", "2.5"),
 
-    (6, "mecanico", "Mecánica del conductor", "4 hipótesis, vano crítico, ecuación de cambio de estado", "3. CÁLCULOS MECÁNICOS", "3.1"),
-    (7, "guarda", "Mecánica del cable de guarda", "Acero EHS/Alumoweld/OPGW, 4 hipótesis", "3. CÁLCULOS MECÁNICOS", "3.2"),
+    (6, "mecanico", "Mecánica del conductor", "4 hipótesis, vano crítico, ecuación de cambio de estado", "3. CÁLCULOS MECÁNICOS DEL CONDUCTOR", "3"),
 
-    (8, "aisladores", "Aisladores", "N discos por fuga y BIL, FS cadena", "4. ESTRUCTURA Y PLANTILLADO", "4.1"),
-    (9, "torre", "Torre", "Distancias RETIE, blindaje, N° estructuras", "4. ESTRUCTURA Y PLANTILLADO", "4.2"),
-    (10, "plantillado", "Plantillado", "4 curvas patrón sobre perfil topográfico", "4. ESTRUCTURA Y PLANTILLADO", "4.3"),
+    (7, "guarda", "Mecánica del cable de guarda", "Acero EHS / Alumoweld / OPGW, 4 hipótesis", "4. CÁLCULOS MECÁNICOS CABLE DE GUARDA", "4"),
+
+    (8, "aisladores", "Aisladores", "N discos por fuga y BIL, FS cadena", "5. ESTRUCTURA Y PLANTILLADO", "5.1"),
+    (9, "torre", "Torre", "Distancias RETIE, blindaje, N° estructuras", "5. ESTRUCTURA Y PLANTILLADO", "5.2"),
+    (10, "plantillado", "Plantillado", "4 curvas patrón sobre perfil topográfico", "5. ESTRUCTURA Y PLANTILLADO", "5.3"),
 ]
 
 

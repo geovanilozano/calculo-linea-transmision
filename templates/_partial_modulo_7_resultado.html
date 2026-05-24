@@ -23,40 +23,84 @@
   {% from "_macros.html" import figura_expandible %}
   {{ figura_expandible(figura_b64, "Análisis mecánico del cable de guarda") }}
 
-  <div class="rounded-lg overflow-hidden border border-border">
-    <table class="w-full text-sm">
-      <thead class="bg-muted/50 text-xs text-muted-foreground uppercase tracking-wider">
+  {# 4.2 Constantes calculadas — cards compactos #}
+  <div class="grid grid-cols-2 gap-2 text-[11px]">
+    <div class="bg-muted/50 rounded-lg p-2.5">
+      <div class="text-muted-foreground text-[10px] uppercase tracking-wide">4.2.1 · σ rotura</div>
+      <div class="font-mono font-bold text-foreground">{{ "%.0f"|format(r.sigma_rotura_mpa) }} <span class="text-[10px] text-muted-foreground">MPa</span></div>
+    </div>
+    <div class="bg-muted/50 rounded-lg p-2.5">
+      <div class="text-muted-foreground text-[10px] uppercase tracking-wide">4.2.2 · Peso Wc</div>
+      <div class="font-mono font-bold text-foreground">{{ "%.2f"|format(r.peso_aparente_n_m) }} <span class="text-[10px] text-muted-foreground">N/m</span></div>
+    </div>
+  </div>
+
+  {# 4.2.6 Vano crítico + 4.4 Hipótesis extrema #}
+  <div class="rounded-lg p-3 border" style="border-color: var(--accent); background: color-mix(in oklch, var(--accent) 5%, transparent);">
+    <div class="grid grid-cols-2 gap-3 text-xs">
+      <div>
+        <div class="text-muted-foreground text-[10px] uppercase tracking-wide mb-0.5">4.2.6 · Vano crítico (A-B)</div>
+        <div class="font-mono font-bold text-base text-foreground">
+          {% if r.vano_critico_ab_m > 0 %}{{ "%.0f"|format(r.vano_critico_ab_m) }} m{% else %}—{% endif %}
+        </div>
+      </div>
+      <div>
+        <div class="text-muted-foreground text-[10px] uppercase tracking-wide mb-0.5">4.4 · Hip. extrema</div>
+        <div class="font-mono font-bold text-base" style="color: var(--accent);">
+          Hip {{ r.hipotesis_extrema }}
+          <span class="text-[10px] text-muted-foreground font-normal">
+            (vano {{ "%.0f"|format(r.vano_m) }} {% if r.vano_critico_ab_m > 0 and r.vano_m > r.vano_critico_ab_m %}&gt;{% else %}&lt;{% endif %} ac)
+          </span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  {# 4.5 Tabla compacta de las 4 hipótesis del cable de guarda #}
+  <div class="rounded-lg border border-border overflow-hidden">
+    <table class="w-full text-[11px]" style="table-layout: fixed;">
+      <thead class="bg-muted/50 text-[10px] text-muted-foreground uppercase tracking-wider">
         <tr>
-          <th class="px-3 py-2 text-left">Hip</th>
-          <th class="px-3 py-2 text-right">V (km/h)</th>
-          <th class="px-3 py-2 text-right">Wr (N/m)</th>
-          <th class="px-3 py-2 text-right">σ (MPa)</th>
-          <th class="px-3 py-2 text-right">Flecha (m)</th>
+          <th class="px-1.5 py-1.5 text-left" style="width: 10%;">Hip</th>
+          <th class="px-1 py-1.5 text-right">V<br><span class="font-normal normal-case">km/h</span></th>
+          <th class="px-1 py-1.5 text-right">T<br><span class="font-normal normal-case">°C</span></th>
+          <th class="px-1 py-1.5 text-right">Wr<br><span class="font-normal normal-case">N/m</span></th>
+          <th class="px-1 py-1.5 text-right">σ<br><span class="font-normal normal-case">MPa</span></th>
+          <th class="px-1 py-1.5 text-right">f llano<br><span class="font-normal normal-case">m</span></th>
         </tr>
       </thead>
       <tbody>
         {% for h in r.hipotesis %}
-          <tr class="border-t border-border {% if h.nombre == r.hipotesis_gobernante %}bg-success/5{% endif %}">
-            <td class="px-3 py-2 font-mono font-semibold">{{ h.nombre }}{% if h.nombre == r.hipotesis_gobernante %} ★{% endif %}</td>
-            <td class="px-3 py-2 text-right font-mono">{{ "%.0f"|format(h.velocidad_viento_kmh) }}</td>
-            <td class="px-3 py-2 text-right font-mono">{{ "%.2f"|format(h.wr_n_m) }}</td>
-            <td class="px-3 py-2 text-right font-mono">{{ "%.0f"|format(h.sigma_calculado_mpa) }}</td>
-            <td class="px-3 py-2 text-right font-mono font-semibold">{{ "%.2f"|format(h.flecha_m) }}</td>
+          <tr class="border-t border-border {% if h.nombre == r.hipotesis_extrema %}bg-accent/5{% endif %}">
+            <td class="px-1.5 py-1.5 font-mono font-semibold">
+              4.5.{{ loop.index }} · {{ h.nombre }}{% if h.nombre == r.hipotesis_extrema %} ★{% endif %}
+            </td>
+            <td class="px-1 py-1.5 text-right font-mono">{{ "%.0f"|format(h.velocidad_viento_kmh) }}</td>
+            <td class="px-1 py-1.5 text-right font-mono">{{ "%.0f"|format(h.temperatura_c) }}</td>
+            <td class="px-1 py-1.5 text-right font-mono">{{ "%.1f"|format(h.wr_n_m) }}</td>
+            <td class="px-1 py-1.5 text-right font-mono">{{ "%.1f"|format(h.sigma_calculado_mpa) }}</td>
+            <td class="px-1 py-1.5 text-right font-mono font-semibold">{{ "%.2f"|format(h.flecha_m) }}</td>
           </tr>
         {% endfor %}
       </tbody>
     </table>
+    <div class="px-2 py-1 text-[10px] text-muted-foreground bg-muted/30 border-t border-border">
+      ★ = hipótesis extrema (4.4) · σ calculada con ec. cambio de estado (4.3)
+    </div>
   </div>
 
+  {# Verificación de blindaje (vs conductor) #}
   <div class="rounded-lg p-4"
        style="background: color-mix(in oklch, var(--primary) 8%, transparent);">
     <div class="flex items-start gap-3">
       <i data-lucide="shield" class="size-5 shrink-0 mt-0.5" style="color: var(--primary);"></i>
       <div>
-        <div class="font-semibold text-foreground">Flecha máxima cable: {{ "%.2f"|format(r.flecha_maxima_m) }} m</div>
+        <div class="font-semibold text-foreground">
+          4.6.1 · Flecha máxima del cable: {{ "%.2f"|format(r.flecha_maxima_m) }} m (terreno llano)
+        </div>
         <p class="text-xs text-muted-foreground mt-1">
-          Debe ser menor que la del conductor de fase para preservar el ángulo de protección
-          frente al rayo.
+          <strong class="text-foreground">Verificación de blindaje:</strong> esta flecha debe ser
+          MENOR que la del conductor de fase para preservar el ángulo de protección ≤ 30° frente al rayo.
         </p>
       </div>
     </div>
