@@ -116,21 +116,22 @@
            userSelect: dragging ? 'none' : 'auto',
            overflow: 'hidden'
          }">
-      {# Header DEDICADO con badge "INFO" + botón X — separado del contenido para
-         que NUNCA se solapen visualmente #}
+      {# Header con badge a la izquierda y X garantizada a la DERECHA via position:absolute #}
       <div @mousedown="if (!$event.target.closest('button')) startDrag($event)"
            :style="dragging ? 'cursor:grabbing;' : 'cursor:grab;'"
-           style="flex-shrink:0; display:flex; align-items:center; justify-content:space-between; padding: 0.6rem 0.75rem 0.6rem 1rem; background: color-mix(in oklch, var(--primary) 8%, transparent); border-bottom: 1px solid color-mix(in oklch, var(--primary) 20%, transparent); user-select:none; border-top-left-radius: 0.6rem; border-top-right-radius: 0.6rem;">
-        <div style="display:flex; align-items:center; gap:6px; pointer-events:none;">
-          <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style="color: var(--primary);">
+           style="flex-shrink:0; position:relative; padding: 0.55rem 3rem 0.55rem 1rem; background: color-mix(in oklch, var(--primary) 8%, transparent); border-bottom: 1px solid color-mix(in oklch, var(--primary) 20%, transparent); user-select:none; border-top-left-radius: 0.6rem; border-top-right-radius: 0.6rem; min-height: 38px;">
+        {# Badge a la izquierda — texto + ícono inline #}
+        <div style="display:inline-flex; align-items:center; gap:6px; pointer-events:none;">
+          <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style="color: var(--primary); flex-shrink:0;">
             <circle cx="12" cy="12" r="10"></circle><line x1="12" y1="16" x2="12" y2="12"></line><line x1="12" y1="8" x2="12.01" y2="8"></line>
           </svg>
-          <span style="font-size:11px; font-weight:700; color: var(--primary); text-transform:uppercase; letter-spacing:0.06em;">Explicación</span>
+          <span style="font-size:11px; font-weight:700; color: var(--primary); text-transform:uppercase; letter-spacing:0.06em; line-height:1;">Explicación</span>
         </div>
+        {# X SIEMPRE absolute en esquina superior derecha del header #}
         <button type="button"
                 @click.stop="open = false"
                 @mousedown.stop
-                style="width:28px; height:28px; display:inline-flex; align-items:center; justify-content:center; border-radius:50%; background-color: var(--card); border:1px solid var(--border); cursor:pointer; padding:0; color: var(--muted-foreground); flex-shrink:0;"
+                style="position:absolute; top:50%; right:8px; transform:translateY(-50%); width:28px; height:28px; display:inline-flex; align-items:center; justify-content:center; border-radius:50%; background-color: var(--card); border:1px solid var(--border); cursor:pointer; padding:0; color: var(--muted-foreground);"
                 onmouseover="this.style.backgroundColor='var(--danger)';this.style.color='white';this.style.borderColor='var(--danger)';"
                 onmouseout="this.style.backgroundColor='var(--card)';this.style.color='var(--muted-foreground)';this.style.borderColor='var(--border)';"
                 aria-label="Cerrar">
