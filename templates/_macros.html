@@ -93,30 +93,28 @@
            backdropFilter: 'none',
            userSelect: dragging ? 'none' : 'auto'
          }">
-      {# Barra superior minimalista: solo cursor grab + botón cerrar #}
+      {# Zona de arrastre INVISIBLE en el borde superior (12px alto) #}
       <div @mousedown="startDrag($event)"
            :style="dragging ? 'cursor:grabbing;' : 'cursor:grab;'"
-           style="display:flex; align-items:center; justify-content:space-between; padding:4px 6px 4px 10px; border-bottom: 1px solid var(--border); border-top-left-radius: 0.6rem; border-top-right-radius: 0.6rem; background: color-mix(in oklch, var(--primary) 5%, transparent); user-select:none;">
-        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="color: var(--muted-foreground); pointer-events:none;">
-          <circle cx="9" cy="6" r="1"></circle><circle cx="9" cy="12" r="1"></circle><circle cx="9" cy="18" r="1"></circle>
-          <circle cx="15" cy="6" r="1"></circle><circle cx="15" cy="12" r="1"></circle><circle cx="15" cy="18" r="1"></circle>
+           style="position:absolute; top:0; left:0; right:36px; height:12px; user-select:none; border-top-left-radius: 0.6rem; border-top-right-radius: 0.6rem;"></div>
+
+      {# Botón X — esquina superior derecha, flotante #}
+      <button type="button"
+              @click.stop="open = false"
+              @mousedown.stop
+              style="position:absolute; top:6px; right:6px; width:24px; height:24px; display:inline-flex; align-items:center; justify-content:center; border-radius:4px; background:transparent; border:none; cursor:pointer; padding:0; color: var(--muted-foreground); z-index:1;"
+              onmouseover="this.style.backgroundColor='var(--muted)';this.style.color='var(--foreground)';"
+              onmouseout="this.style.backgroundColor='transparent';this.style.color='var(--muted-foreground)';"
+              aria-label="Cerrar">
+        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+          <line x1="18" y1="6" x2="6" y2="18"></line>
+          <line x1="6" y1="6" x2="18" y2="18"></line>
         </svg>
-        <button type="button"
-                @click.stop="open = false"
-                @mousedown.stop
-                style="width:22px; height:22px; display:inline-flex; align-items:center; justify-content:center; border-radius:4px; background:transparent; border:none; cursor:pointer; padding:0; color: var(--muted-foreground);"
-                onmouseover="this.style.backgroundColor='var(--muted)';this.style.color='var(--foreground)';"
-                onmouseout="this.style.backgroundColor='transparent';this.style.color='var(--muted-foreground)';"
-                aria-label="Cerrar">
-          <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-            <line x1="18" y1="6" x2="6" y2="18"></line>
-            <line x1="6" y1="6" x2="18" y2="18"></line>
-          </svg>
-        </button>
-      </div>
-      {# Contenido del tooltip #}
-      <div style="padding: 0.875rem 1rem;">
-        <div style="display:flex; align-items:flex-start; gap:0.5rem;">
+      </button>
+
+      {# Contenido del tooltip — sin header, padding ajustado para dejar espacio a la X #}
+      <div style="padding: 0.75rem 1rem 0.875rem 1rem;">
+        <div style="display:flex; align-items:flex-start; gap:0.5rem; padding-right:24px;">
           <i data-lucide="info" class="size-4 shrink-0" style="color: var(--primary); margin-top: 2px;"></i>
           <div style="flex:1; color: var(--foreground);">{{ texto|safe }}</div>
         </div>
