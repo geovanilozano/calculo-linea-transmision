@@ -18,6 +18,16 @@
     <input id="vano_m" name="vano_m" type="number" step="1" min="100" max="800"
            value="{{ PROYECTO.vano_diseno_m }}" class="input font-mono">
   </div>
+
+  <div>
+    <label for="desnivel_m" class="block text-sm font-medium mb-1.5">
+      Desnivel entre apoyos (m)
+      <span class="text-xs text-muted-foreground font-normal">— terreno quebrado</span>
+    </label>
+    <input id="desnivel_m" name="desnivel_m" type="number" step="1" min="0" max="200"
+           value="0" class="input font-mono">
+    <p class="text-xs text-muted-foreground mt-1">0 = terreno llano · 50+ m = montañoso</p>
+  </div>
 </form>
 
 <div class="mt-5 pt-4 border-t border-border space-y-3 text-xs">

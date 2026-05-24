@@ -424,6 +424,11 @@ def create_app() -> Flask:
         _sync_form_to_session(request)
         cond = _get_conductor(session.get("conductor_id"))
         vano = _f(request.form.get("vano_m"), 400)
+        desnivel = _f(request.form.get("desnivel_m"), 0.0)
+        # Conversión del módulo de elasticidad N/mm² → kgf/mm² (÷9.81)
+        e_n_mm2 = cond.get("modulo_elasticidad_n_mm2", 76900)
+        e_kgf_mm2 = e_n_mm2 / 9.81
+        alpha = cond.get("coef_dilatacion_invc", 18.9e-6)
         r = mecanico.calcular(
             elemento="conductor",
             diametro_mm=cond["diametro_exterior_mm"],
@@ -431,6 +436,9 @@ def create_app() -> Flask:
             masa_kg_m=cond["masa_kg_m"],
             carga_rotura_kgf=cond["carga_rotura_kgf"],
             vano_m=vano,
+            modulo_elasticidad_kgf_mm2=e_kgf_mm2,
+            coef_dilatacion_invc=alpha,
+            desnivel_m=desnivel,
         )
         return render_template(
             "_partial_modulo_6_resultado.html",
@@ -448,6 +456,9 @@ def create_app() -> Flask:
         cable = _get_cable_guarda(cable_id)
 
         vano = _f(request.form.get("vano_m"), 400)
+        # Cable de guarda (acero): E ≈ 20000 kgf/mm², α ≈ 11.5e-6 /°C
+        e_kgf_mm2 = cable.get("modulo_elasticidad_n_mm2", 196000) / 9.81
+        alpha = cable.get("coef_dilatacion_invc", 11.5e-6)
         r = mecanico.calcular(
             elemento="guarda",
             diametro_mm=cable["diametro_mm"],
@@ -455,6 +466,8 @@ def create_app() -> Flask:
             masa_kg_m=cable["masa_kg_m"],
             carga_rotura_kgf=cable["carga_rotura_kgf"],
             vano_m=vano,
+            modulo_elasticidad_kgf_mm2=e_kgf_mm2,
+            coef_dilatacion_invc=alpha,
         )
         return render_template(
             "_partial_modulo_7_resultado.html",
