@@ -314,12 +314,12 @@
       Recorrido del tour
     </h2>
     <div class="card p-3">
-      {% for mod_id, mod_slug, mod_nombre, mod_desc in MODULOS %}
+      {% for mod_id, mod_slug, mod_nombre, mod_desc, mod_seccion, mod_numero in MODULOS %}
         {% if mod_id > 0 %}
           <a href="{{ url_for('modulo', modulo_id=mod_id) }}"
              class="flex items-start gap-4 p-3 rounded-lg hover:bg-muted transition-colors group">
             <div class="size-9 rounded-lg bg-primary/10 grid place-items-center group-hover:bg-primary/20 transition-colors shrink-0">
-              <span class="font-mono text-xs font-bold text-primary">{{ "%02d"|format(mod_id) }}</span>
+              <span class="font-mono text-xs font-bold text-primary">{{ mod_numero }}</span>
             </div>
             <div class="flex-1 min-w-0">
               <div class="font-semibold text-foreground text-sm">{{ mod_nombre }}</div>

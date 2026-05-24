@@ -31,19 +31,28 @@ from figuras import (
 )
 
 
-# Definición de los 11 módulos: (id, slug, nombre, descripción corta)
-MODULOS: list[tuple[int, str, str, str]] = [
-    (0, "inicio", "Inicio", "Objetivo del proyecto y parámetros generales"),
-    (1, "tension", "Tensión nominal", "Hefner, Still, 1 kV/km vs escalones normalizados"),
-    (2, "configuracion", "Configuración de la línea", "GMD, GMR, geometría de fases"),
-    (3, "conductor", "Conductor seleccionado", "ACSR Drake: características y ampacidad"),
-    (4, "parametros", "Parámetros R, L, C + Corona", "Cálculo eléctrico y efecto Corona"),
-    (5, "linea_larga", "Línea larga (ABCD)", "Modelo distribuido, regulación, pérdidas"),
-    (6, "mecanico", "Mecánica del conductor", "4 hipótesis, ecuación de cambio de estado"),
-    (7, "guarda", "Mecánica del cable de guarda", "EHS 7/16″, 4 hipótesis, blindaje"),
-    (8, "aisladores", "Aisladores", "41 discos, criterio fuga y BIL, fuerzas"),
-    (9, "torre", "Torre", "Distancias RETIE 500 kV, ángulo de protección"),
-    (10, "plantillado", "Plantillado", "4 curvas patrón sobre perfil topográfico"),
+# Definición de los 11 módulos: (id, slug, nombre, descripción corta, sección, numeración)
+# Sección: agrupa los módulos en el sidebar igual que el documento del trabajo.
+#   1. PARÁMETROS (módulo 0)
+#   2. CÁLCULOS ELÉCTRICOS (módulos 1-5)
+#   3. CÁLCULOS MECÁNICOS (módulos 6-7)
+#   4. ESTRUCTURA Y PLANTILLADO (módulos 8-10)
+MODULOS: list[tuple[int, str, str, str, str, str]] = [
+    # (id, slug, nombre, descripción, sección, numeración)
+    (0, "inicio", "Parámetros del proyecto", "Datos eléctricos y mecánicos iniciales", "1. PARÁMETROS", "1"),
+
+    (1, "tension", "Selección del nivel de tensión", "Hefner, Still, 1 kV/km vs escalones normalizados", "2. CÁLCULOS ELÉCTRICOS", "2.1"),
+    (2, "configuracion", "Configuración de la línea", "GMD, GMR, radio del haz y geometría de fases", "2. CÁLCULOS ELÉCTRICOS", "2.2"),
+    (3, "conductor", "Datos del conductor", "ACSR/AAAC/ACAR — R, ampacidad, corrección térmica", "2. CÁLCULOS ELÉCTRICOS", "2.3"),
+    (4, "parametros", "Parámetros R, L, C + Corona", "Inductancia, capacitancia y efecto Corona", "2. CÁLCULOS ELÉCTRICOS", "2.4"),
+    (5, "linea_larga", "Línea larga (modelo ABCD)", "Regulación, pérdidas y eficiencia (cuadripolo)", "2. CÁLCULOS ELÉCTRICOS", "2.5"),
+
+    (6, "mecanico", "Mecánica del conductor", "4 hipótesis, vano crítico, ecuación de cambio de estado", "3. CÁLCULOS MECÁNICOS", "3.1"),
+    (7, "guarda", "Mecánica del cable de guarda", "Acero EHS/Alumoweld/OPGW, 4 hipótesis", "3. CÁLCULOS MECÁNICOS", "3.2"),
+
+    (8, "aisladores", "Aisladores", "N discos por fuga y BIL, FS cadena", "4. ESTRUCTURA Y PLANTILLADO", "4.1"),
+    (9, "torre", "Torre", "Distancias RETIE, blindaje, N° estructuras", "4. ESTRUCTURA Y PLANTILLADO", "4.2"),
+    (10, "plantillado", "Plantillado", "4 curvas patrón sobre perfil topográfico", "4. ESTRUCTURA Y PLANTILLADO", "4.3"),
 ]
 
 
