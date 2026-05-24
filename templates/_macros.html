@@ -1,17 +1,15 @@
 {# Macros reutilizables del tour #}
 
 {# Tooltip clicable con icono ⓘ que muestra explicación al pulsar.
-   - Ancho 28rem (más espacio para textos largos)
-   - Arrastrable desde el header (drag handle)
-   - Botón con estado activo visual cuando el tooltip está abierto
+   - Ancho 28rem, arrastrable desde la barra superior
+   - Botón ⓘ con cambio sutil de color al estar activo (mantiene tamaño)
    - Aplica glosario automáticamente al abrirse (palabras clickeables)
-   - Usa portal con position:fixed para evitar problemas de z-index/overflow #}
+   - Drag usa addEventListener directo a document (más confiable que @window) #}
 {% macro info_tooltip(texto, posicion='left') %}
 <span x-data="{
         open: false,
         coords: { top: 0, left: 0 },
         dragging: false,
-        dragStart: { x: 0, y: 0, startTop: 0, startLeft: 0 },
         place() {
           const btn = this.$refs.btn.getBoundingClientRect();
           const margin = 12;
@@ -24,18 +22,25 @@
           this.coords = { top, left };
         },
         startDrag(e) {
-          this.dragging = true;
-          this.dragStart = { x: e.clientX, y: e.clientY, startTop: this.coords.top, startLeft: this.coords.left };
+          if (e.button !== 0) return;
           e.preventDefault();
-        },
-        doDrag(e) {
-          if (!this.dragging) return;
-          this.coords = {
-            top: this.dragStart.startTop + (e.clientY - this.dragStart.y),
-            left: this.dragStart.startLeft + (e.clientX - this.dragStart.x)
+          this.dragging = true;
+          const startX = e.clientX, startY = e.clientY;
+          const startLeft = this.coords.left, startTop = this.coords.top;
+          const onMove = (ev) => {
+            this.coords = {
+              top: startTop + (ev.clientY - startY),
+              left: startLeft + (ev.clientX - startX)
+            };
           };
+          const onUp = () => {
+            this.dragging = false;
+            document.removeEventListener('mousemove', onMove);
+            document.removeEventListener('mouseup', onUp);
+          };
+          document.addEventListener('mousemove', onMove);
+          document.addEventListener('mouseup', onUp);
         },
-        endDrag() { this.dragging = false; },
         toggle() {
           this.open = !this.open;
           if (this.open) this.$nextTick(() => {
@@ -47,8 +52,6 @@
       }"
       @scroll.window="if(open && !dragging) place()"
       @resize.window="if(open) place()"
-      @mousemove.window="doDrag($event)"
-      @mouseup.window="endDrag()"
       class="inline-block align-middle ml-1">
   <button x-ref="btn"
           @click.stop="toggle()"
@@ -56,11 +59,9 @@
           @keydown.escape.window="open = false"
           type="button"
           :style="open
-            ? 'background-color: var(--primary); transform: scale(1.15); box-shadow: 0 0 0 3px color-mix(in oklch, var(--primary) 25%, transparent);'
+            ? 'background-color: var(--primary);'
             : 'background-color: color-mix(in oklch, var(--primary) 15%, transparent);'"
-          class="inline-flex items-center justify-center size-5 rounded-full transition-all align-middle cursor-help"
-          onmouseover="if(!this.style.transform.includes('1.15')){this.style.backgroundColor='color-mix(in oklch, var(--primary) 30%, transparent)';}"
-          onmouseout="if(!this.style.transform.includes('1.15')){this.style.backgroundColor='color-mix(in oklch, var(--primary) 15%, transparent)';}"
+          class="inline-flex items-center justify-center size-5 rounded-full transition-colors align-middle cursor-help"
           aria-label="Más información">
     <i data-lucide="info" class="size-3.5"
        :style="open ? 'color: white;' : 'color: var(--primary);'"></i>
@@ -92,17 +93,14 @@
            backdropFilter: 'none',
            userSelect: dragging ? 'none' : 'auto'
          }">
-      {# Drag handle: barra arrastrable arriba (8px alto) #}
+      {# Barra superior minimalista: solo cursor grab + botón cerrar #}
       <div @mousedown="startDrag($event)"
            :style="dragging ? 'cursor:grabbing;' : 'cursor:grab;'"
-           style="display:flex; align-items:center; justify-content:space-between; gap:8px; padding:6px 8px 4px 12px; border-bottom: 1px solid var(--border); border-top-left-radius: 0.6rem; border-top-right-radius: 0.6rem; background: color-mix(in oklch, var(--primary) 5%, transparent);">
-        <div style="display:flex; align-items:center; gap:6px; pointer-events:none;">
-          <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="color: var(--muted-foreground);">
-            <circle cx="9" cy="6" r="1"></circle><circle cx="9" cy="12" r="1"></circle><circle cx="9" cy="18" r="1"></circle>
-            <circle cx="15" cy="6" r="1"></circle><circle cx="15" cy="12" r="1"></circle><circle cx="15" cy="18" r="1"></circle>
-          </svg>
-          <span style="font-size:10px; color: var(--muted-foreground); text-transform: uppercase; letter-spacing: 0.05em; font-weight: 600;">Arrastra para mover</span>
-        </div>
+           style="display:flex; align-items:center; justify-content:space-between; padding:4px 6px 4px 10px; border-bottom: 1px solid var(--border); border-top-left-radius: 0.6rem; border-top-right-radius: 0.6rem; background: color-mix(in oklch, var(--primary) 5%, transparent); user-select:none;">
+        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="color: var(--muted-foreground); pointer-events:none;">
+          <circle cx="9" cy="6" r="1"></circle><circle cx="9" cy="12" r="1"></circle><circle cx="9" cy="18" r="1"></circle>
+          <circle cx="15" cy="6" r="1"></circle><circle cx="15" cy="12" r="1"></circle><circle cx="15" cy="18" r="1"></circle>
+        </svg>
         <button type="button"
                 @click.stop="open = false"
                 @mousedown.stop
