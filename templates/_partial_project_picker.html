@@ -1,0 +1,138 @@
+{# Dropdown "Mi proyecto" con acciones: cambiar nombre, exportar, importar, reiniciar.
+   Se incluye desde base.html (esquina superior derecha del header). #}
+<div x-data="{
+       openMenu: false,
+       openNameModal: false,
+       openImportModal: false,
+       openResetModal: false,
+       nombre: '{{ ESTUDIANTE|e }}',
+     }"
+     class="relative shrink-0">
+
+  {# Botón principal: muestra el nombre + chevron #}
+  <button @click="openMenu = !openMenu"
+          @keydown.escape.window="openMenu = false"
+          @click.outside="openMenu = false"
+          type="button"
+          class="flex items-center gap-2 px-3 py-1.5 rounded-lg border border-border bg-card hover:bg-muted transition-colors text-sm">
+    <i data-lucide="user-circle" class="size-4 text-muted-foreground"></i>
+    <span class="hidden sm:inline text-[11px] text-muted-foreground uppercase tracking-wider">Mi proyecto</span>
+    <span id="estudiante-badge" class="text-sm">
+      {% include "_partial_estudiante_badge.html" %}
+    </span>
+    <i data-lucide="chevron-down" class="size-3.5 text-muted-foreground"
+       :class="openMenu ? 'rotate-180' : ''"
+       style="transition: transform 0.15s ease;"></i>
+  </button>
+
+  {# Menú desplegable #}
+  <div x-show="openMenu" x-cloak x-transition.opacity.duration.150
+       class="absolute right-0 top-full mt-1.5 w-64 rounded-lg border border-border bg-card shadow-lg overflow-hidden z-20">
+
+    <button @click="openMenu = false; openNameModal = true"
+            type="button"
+            class="w-full px-3 py-2.5 flex items-center gap-2.5 text-sm hover:bg-muted text-left transition-colors">
+      <i data-lucide="edit-3" class="size-4 text-muted-foreground"></i>
+      <span>Cambiar mi nombre</span>
+    </button>
+
+    <a href="{{ url_for('api_proyecto_exportar') }}"
+       @click="openMenu = false"
+       class="w-full px-3 py-2.5 flex items-center gap-2.5 text-sm hover:bg-muted transition-colors">
+      <i data-lucide="download" class="size-4 text-muted-foreground"></i>
+      <span>Exportar mi proyecto (.json)</span>
+    </a>
+
+    <button @click="openMenu = false; openImportModal = true"
+            type="button"
+            class="w-full px-3 py-2.5 flex items-center gap-2.5 text-sm hover:bg-muted text-left transition-colors">
+      <i data-lucide="upload" class="size-4 text-muted-foreground"></i>
+      <span>Importar proyecto (.json)</span>
+    </button>
+
+    <div class="border-t border-border"></div>
+
+    <button @click="openMenu = false; openResetModal = true"
+            type="button"
+            class="w-full px-3 py-2.5 flex items-center gap-2.5 text-sm hover:bg-muted text-left transition-colors text-muted-foreground">
+      <i data-lucide="rotate-ccw" class="size-4"></i>
+      <span>Reiniciar al proyecto demo</span>
+    </button>
+  </div>
+
+  {# ===== Modal: Cambiar nombre ===== #}
+  {# Usa POST tradicional (no HTMX) para garantizar recarga visible.
+     El endpoint redirige al referrer; la página se renderiza con el nuevo nombre. #}
+  <div x-show="openNameModal" x-cloak x-transition.opacity
+       @keydown.escape.window="openNameModal = false"
+       class="fixed inset-0 z-50 bg-background/90 backdrop-blur grid place-items-center p-4">
+    <div @click.outside="openNameModal = false"
+         class="w-full max-w-md rounded-2xl border border-border bg-card p-6 shadow-2xl"
+         x-transition.scale.95.opacity>
+      <h3 class="text-lg font-bold mb-1">¿Cuál es tu nombre?</h3>
+      <p class="text-sm text-muted-foreground mb-4">
+        Se mostrará en la parte superior y se incluirá al exportar tu proyecto. Sólo se guarda en tu navegador.
+      </p>
+      <form action="{{ url_for('api_proyecto_estudiante') }}" method="POST" class="space-y-3">
+        <input type="text" name="nombre" x-model="nombre" maxlength="60" autofocus required
+               placeholder="Ej. Juan Pérez"
+               class="w-full px-3 py-2 rounded-lg border border-border bg-background text-sm focus:outline-none focus:ring-2 focus:ring-primary/50">
+        <div class="flex gap-2 justify-end">
+          <button type="button" @click="openNameModal = false" class="btn-secondary text-sm">Cancelar</button>
+          <button type="submit" class="btn-primary text-sm">Guardar</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  {# ===== Modal: Importar ===== #}
+  <div x-show="openImportModal" x-cloak x-transition.opacity
+       @keydown.escape.window="openImportModal = false"
+       class="fixed inset-0 z-50 bg-background/90 backdrop-blur grid place-items-center p-4">
+    <div @click.outside="openImportModal = false"
+         class="w-full max-w-md rounded-2xl border border-border bg-card p-6 shadow-2xl"
+         x-transition.scale.95.opacity>
+      <h3 class="text-lg font-bold mb-1">Importar proyecto</h3>
+      <p class="text-sm text-muted-foreground mb-4">
+        Selecciona un archivo <code class="text-xs px-1 py-0.5 rounded bg-muted">.json</code> exportado previamente desde esta app. <strong class="text-foreground">Reemplazará tus datos actuales</strong>.
+      </p>
+      <form action="{{ url_for('api_proyecto_importar') }}"
+            method="POST"
+            enctype="multipart/form-data"
+            class="space-y-3">
+        <input type="file" name="archivo" accept=".json,application/json" required
+               class="w-full text-sm file:mr-3 file:px-3 file:py-1.5 file:rounded-md file:border-0 file:bg-primary file:text-primary-foreground file:cursor-pointer hover:file:bg-primary/90">
+        <div class="flex gap-2 justify-end">
+          <button type="button" @click="openImportModal = false" class="btn-secondary text-sm">Cancelar</button>
+          <button type="submit" class="btn-primary text-sm">
+            <i data-lucide="upload" class="size-3.5"></i>
+            Importar
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  {# ===== Modal: Reiniciar ===== #}
+  <div x-show="openResetModal" x-cloak x-transition.opacity
+       @keydown.escape.window="openResetModal = false"
+       class="fixed inset-0 z-50 bg-background/90 backdrop-blur grid place-items-center p-4">
+    <div @click.outside="openResetModal = false"
+         class="w-full max-w-md rounded-2xl border border-border bg-card p-6 shadow-2xl"
+         x-transition.scale.95.opacity>
+      <h3 class="text-lg font-bold mb-1">¿Reiniciar al proyecto demo?</h3>
+      <p class="text-sm text-muted-foreground mb-4">
+        Vas a perder tus parámetros actuales y volver al proyecto base (500 kV / 307 km / 300 MW).
+        <strong class="text-foreground">Si quieres conservarlos, exporta primero tu proyecto.</strong>
+      </p>
+      <form action="{{ url_for('api_proyecto_reiniciar') }}" method="POST" class="flex gap-2 justify-end">
+        <button type="button" @click="openResetModal = false" class="btn-secondary text-sm">Cancelar</button>
+        <button type="submit" class="btn-danger text-sm">
+          <i data-lucide="rotate-ccw" class="size-3.5"></i>
+          Sí, reiniciar
+        </button>
+      </form>
+    </div>
+  </div>
+
+</div>

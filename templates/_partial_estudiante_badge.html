@@ -1,0 +1,7 @@
+{# Etiqueta compacta con el nombre del estudiante.
+   Usado standalone (HTMX swap) y dentro del proyecto picker. #}
+{% if estudiante %}
+  <span class="font-medium text-foreground truncate max-w-[10rem]">{{ estudiante }}</span>
+{% else %}
+  <span class="text-muted-foreground italic">Sin nombre</span>
+{% endif %}

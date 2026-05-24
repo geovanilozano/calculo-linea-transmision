@@ -2,9 +2,13 @@
 from __future__ import annotations
 
 import json
+import re
+from datetime import datetime
 from pathlib import Path
 
-from flask import Flask, abort, redirect, render_template, request, session, url_for
+from flask import (
+    Flask, Response, abort, redirect, render_template, request, session, url_for,
+)
 
 from calculos import (
     aisladores,
@@ -199,6 +203,64 @@ def _carga_cadena_kgf_para_aisladores(
     return _math.sqrt(t_haz ** 2 + p_vert ** 2)
 
 
+# ===== Helpers de proyecto por estudiante =====
+
+# Versión del schema de proyecto exportado (subir si se hace cambio incompatible)
+PROYECTO_EXPORT_VERSION = 1
+PROYECTO_EXPORT_TIPO = "calculo_linea_transmision_proyecto"
+
+
+def _slug_archivo(texto: str, fallback: str = "proyecto") -> str:
+    """Convierte un texto a slug seguro para nombre de archivo."""
+    s = re.sub(r"[^a-zA-Z0-9._-]+", "_", (texto or "").strip()).strip("_")
+    return s.lower() or fallback
+
+
+def _construir_payload_export(app: Flask) -> dict:
+    """Empaqueta toda la sesión actual en un dict serializable."""
+    proy = _get_proyecto(app)
+    return {
+        "version": PROYECTO_EXPORT_VERSION,
+        "tipo": PROYECTO_EXPORT_TIPO,
+        "estudiante": session.get("estudiante", ""),
+        "fecha_exportacion": datetime.utcnow().isoformat(timespec="seconds") + "Z",
+        "proyecto": proy,
+        "conductor_id": session.get("conductor_id") or CATALOGO_CONDUCTORES["default_id"],
+        "aislador_id": session.get("aislador_id") or CATALOGO_AISLADORES["default_id"],
+        "cable_guarda_id": session.get("cable_guarda_id") or CATALOGO_CABLES_GUARDA["default_id"],
+    }
+
+
+def _aplicar_payload_a_sesion(data: dict) -> None:
+    """Carga un payload (de import o demo) en la sesión actual.
+    Valida tipo y estructura mínima. Lanza ValueError si es inválido."""
+    if not isinstance(data, dict):
+        raise ValueError("El archivo no contiene un objeto JSON válido")
+    if data.get("tipo") != PROYECTO_EXPORT_TIPO:
+        raise ValueError(
+            "El archivo no es un proyecto de línea de transmisión "
+            f"(tipo esperado '{PROYECTO_EXPORT_TIPO}')"
+        )
+    proy = data.get("proyecto")
+    if not isinstance(proy, dict):
+        raise ValueError("Falta la clave 'proyecto' o no es un objeto")
+
+    session["proyecto"] = proy
+    nombre = (data.get("estudiante") or "").strip()[:60]
+    if nombre:
+        session["estudiante"] = nombre
+    # Catálogos: aceptar sólo si existen en el catálogo cargado
+    cond_id = data.get("conductor_id")
+    if cond_id and any(c["id"] == cond_id for c in CATALOGO_CONDUCTORES["conductores"]):
+        session["conductor_id"] = cond_id
+    ais_id = data.get("aislador_id")
+    if ais_id and any(a["id"] == ais_id for a in CATALOGO_AISLADORES["aisladores"]):
+        session["aislador_id"] = ais_id
+    cab_id = data.get("cable_guarda_id")
+    if cab_id and any(c["id"] == cab_id for c in CATALOGO_CABLES_GUARDA["cables"]):
+        session["cable_guarda_id"] = cab_id
+
+
 def _sync_form_to_session(req) -> None:
     """Guarda en sesión cualquier campo del formulario que coincida con un parámetro global.
 
@@ -231,6 +293,7 @@ def create_app() -> Flask:
             "CATALOGO_CONDUCTORES": CATALOGO_CONDUCTORES["conductores"],
             "CATALOGO_AISLADORES": CATALOGO_AISLADORES["aisladores"],
             "CATALOGO_CABLES_GUARDA": CATALOGO_CABLES_GUARDA["cables"],
+            "ESTUDIANTE": session.get("estudiante", ""),
         }
 
     # ===== Rutas de páginas =====
@@ -771,6 +834,55 @@ def create_app() -> Flask:
             resumen["plantillado"] = None
 
         return render_template("_partial_modulo_11_resumen.html", **resumen)
+
+    # ===== Endpoints de proyecto por estudiante =====
+
+    @app.post("/api/proyecto/estudiante")
+    def api_proyecto_estudiante():
+        """Guarda el nombre del estudiante en la sesión."""
+        nombre = (request.form.get("nombre") or "").strip()[:60]
+        session["estudiante"] = nombre
+        # HTMX: devolvemos solo el badge actualizado
+        if request.headers.get("HX-Request"):
+            return render_template("_partial_estudiante_badge.html", estudiante=nombre)
+        return redirect(request.referrer or url_for("modulo", modulo_id=0))
+
+    @app.get("/api/proyecto/exportar")
+    def api_proyecto_exportar():
+        """Descarga el proyecto actual (sesión completa) como JSON."""
+        payload = _construir_payload_export(app)
+        nombre_archivo = _slug_archivo(payload["estudiante"], "proyecto")
+        filename = f"linea_transmision_{nombre_archivo}.json"
+        return Response(
+            json.dumps(payload, ensure_ascii=False, indent=2),
+            mimetype="application/json",
+            headers={"Content-Disposition": f'attachment; filename="{filename}"'},
+        )
+
+    @app.post("/api/proyecto/importar")
+    def api_proyecto_importar():
+        """Carga un proyecto desde un archivo JSON subido por el estudiante."""
+        archivo = request.files.get("archivo")
+        if not archivo or not archivo.filename:
+            return ("No se recibió ningún archivo", 400)
+        try:
+            contenido = archivo.read().decode("utf-8")
+            data = json.loads(contenido)
+            _aplicar_payload_a_sesion(data)
+        except UnicodeDecodeError:
+            return ("El archivo no es UTF-8", 400)
+        except json.JSONDecodeError as e:
+            return (f"JSON inválido: {e.msg}", 400)
+        except ValueError as e:
+            return (str(e), 400)
+        # Redirigir al inicio para que el usuario vea su proyecto cargado
+        return redirect(url_for("modulo", modulo_id=0))
+
+    @app.post("/api/proyecto/reiniciar")
+    def api_proyecto_reiniciar():
+        """Limpia la sesión completa (vuelve a los defaults del proyecto demo)."""
+        session.clear()
+        return redirect(url_for("modulo", modulo_id=0))
 
     @app.errorhandler(404)
     def not_found(_e):
