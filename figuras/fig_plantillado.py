@@ -56,8 +56,15 @@ def generar(r: ResultadoPlantillado, dark_mode: bool = False) -> str:
     ax.plot(x_perfil, perfil_y, color="#5d4037", linewidth=1.5, alpha=0.9, zorder=2,
             label="Perfil del terreno")
 
-    # Leyenda
-    ax.legend(loc="lower right", framealpha=0.95, fontsize=9, ncol=2)
+    # Leyenda DEBAJO del chart (fuera del área de las curvas) para no taparlas
+    ax.legend(
+        loc="upper center",
+        bbox_to_anchor=(0.5, -0.14),
+        framealpha=0.95,
+        fontsize=9,
+        ncol=3,
+        frameon=False,
+    )
 
     # Configuración
     ax.set_xlabel("Distancia desde centro del vano (m)", fontweight="600")
@@ -74,5 +81,8 @@ def generar(r: ResultadoPlantillado, dark_mode: bool = False) -> str:
 
     # Línea horizontal de referencia (cota del conductor caliente en el centro)
     ax.axhline(0, color="#94a3b8", linestyle=":", linewidth=0.8, alpha=0.5)
+
+    # Espacio inferior extra para la leyenda externa
+    plt.subplots_adjust(bottom=0.20)
 
     return figura_a_base64(fig)

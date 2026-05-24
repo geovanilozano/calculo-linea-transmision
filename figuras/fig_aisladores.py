@@ -39,13 +39,13 @@ def generar(r: ResultadoAisladores, dark_mode: bool = False) -> str:
         if (i + 1) % 5 == 0 or i == n - 1:
             ax1.text(0.55, y, f"{i + 1}", fontsize=7, va="center", color=color_metalico)
 
-    # Herraje inferior y "conductor"
-    ax1.plot([0, 0], [-0.5, -1], color=color_herraje, linewidth=2)
-    ax1.plot([-0.8, 0.8], [-1.3, -1.3], color=color_metalico, linewidth=4, solid_capstyle="round")
-    ax1.text(0, -1.7, "Conductor", ha="center", fontsize=9, color=color_metalico)
+    # Herraje inferior y "conductor" — con más separación para que NO se monte sobre el último disco
+    ax1.plot([0, 0], [-0.5, -2.0], color=color_herraje, linewidth=2)
+    ax1.plot([-0.8, 0.8], [-2.3, -2.3], color=color_metalico, linewidth=4, solid_capstyle="round")
+    ax1.text(0, -3.0, "Conductor", ha="center", fontsize=9, color=color_metalico, fontweight="600")
 
     ax1.set_xlim(-2, 2)
-    ax1.set_ylim(-2.5, n + 2)
+    ax1.set_ylim(-3.8, n + 2)
     ax1.set_aspect("equal")
     ax1.axis("off")
     ax1.set_title(f"Cadena de {n} discos\n(altura ≈ {r.longitud_cadena_m:.2f} m, peso ≈ {r.peso_cadena_kg:.0f} kg)",

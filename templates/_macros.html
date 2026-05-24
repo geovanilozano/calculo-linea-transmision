@@ -14,7 +14,7 @@
         place() {
           const btn = this.$refs.btn.getBoundingClientRect();
           const margin = 12;
-          const popW = 448;
+          const popW = 512;
           const pop = this.$refs.pop;
           const popH = pop ? pop.offsetHeight : 400;
           let left = btn.left;
@@ -95,7 +95,7 @@
            position: 'fixed',
            top: coords.top + 'px',
            left: coords.left + 'px',
-           width: '28rem',
+           width: '32rem',
            maxWidth: 'calc(100vw - 1.5rem)',
            maxHeight: 'calc(100vh - 1.5rem)',
            display: 'flex',
@@ -104,8 +104,8 @@
            color: 'var(--foreground)',
            border: '2px solid var(--primary)',
            borderRadius: '0.75rem',
-           fontSize: '0.8rem',
-           lineHeight: '1.6',
+           fontSize: '0.875rem',
+           lineHeight: '1.65',
            fontWeight: '400',
            textTransform: 'none',
            letterSpacing: 'normal',
