@@ -32,12 +32,14 @@ from figuras import (
 
 
 # Definición de los 11 módulos: (id, slug, nombre, descripción corta, sección, numeración)
-# Sección: agrupa los módulos en el sidebar igual que el documento del trabajo.
-#   1. PARÁMETROS (módulo 0)
-#   2. CÁLCULOS ELÉCTRICOS (módulos 1-5)
-#   3. CÁLCULOS MECÁNICOS DEL CONDUCTOR (módulo 6)
-#   4. CÁLCULOS MECÁNICOS CABLE DE GUARDA (módulo 7)
-#   5. ESTRUCTURA Y PLANTILLADO (módulos 8-10)
+# Estructura exacta del documento académico (7 secciones):
+#   1. PARÁMETROS                     → módulo 0
+#   2. CÁLCULOS ELÉCTRICOS            → módulos 1-5 (2.1-2.5)
+#   3. MECÁNICA DEL CONDUCTOR         → módulo 6
+#   4. MECÁNICA DEL CABLE DE GUARDA   → módulo 7
+#   5. SELECCIÓN DE LOS AISLADORES    → módulo 8
+#   6. DISEÑO DE LA TORRE             → módulo 9
+#   7. PLANTILLADO                    → módulo 10
 MODULOS: list[tuple[int, str, str, str, str, str]] = [
     # (id, slug, nombre, descripción, sección, numeración)
     (0, "inicio", "Parámetros del proyecto", "Datos eléctricos y mecánicos iniciales", "1. PARÁMETROS", "1"),
@@ -48,13 +50,15 @@ MODULOS: list[tuple[int, str, str, str, str, str]] = [
     (4, "parametros", "Parámetros R, L, C + Corona", "Inductancia, capacitancia y efecto Corona", "2. CÁLCULOS ELÉCTRICOS", "2.4"),
     (5, "linea_larga", "Línea larga (modelo ABCD)", "Regulación, pérdidas y eficiencia (cuadripolo)", "2. CÁLCULOS ELÉCTRICOS", "2.5"),
 
-    (6, "mecanico", "Mecánica del conductor", "4 hipótesis, vano crítico, ecuación de cambio de estado", "3. CÁLCULOS MECÁNICOS DEL CONDUCTOR", "3"),
+    (6, "mecanico", "Mecánica del conductor", "4 hipótesis, vano crítico, ecuación de cambio de estado", "3. MECÁNICA DEL CONDUCTOR", "3"),
 
-    (7, "guarda", "Mecánica del cable de guarda", "Acero EHS / Alumoweld / OPGW, 4 hipótesis", "4. CÁLCULOS MECÁNICOS CABLE DE GUARDA", "4"),
+    (7, "guarda", "Mecánica del cable de guarda", "Acero EHS / Alumoweld / OPGW, 4 hipótesis", "4. MECÁNICA DEL CABLE DE GUARDA", "4"),
 
-    (8, "aisladores", "Aisladores", "N discos por fuga y BIL, FS cadena", "5. ESTRUCTURA Y PLANTILLADO", "5.1"),
-    (9, "torre", "Torre", "Distancias RETIE, blindaje, N° estructuras", "5. ESTRUCTURA Y PLANTILLADO", "5.2"),
-    (10, "plantillado", "Plantillado", "4 curvas patrón sobre perfil topográfico", "5. ESTRUCTURA Y PLANTILLADO", "5.3"),
+    (8, "aisladores", "Cálculo de los aisladores", "N discos por fuga y BIL, longitud, peso, FS", "5. SELECCIÓN DE LOS AISLADORES", "5"),
+
+    (9, "torre", "Diseño de la torre", "Posicionamiento guarda, distancias RETIE, altura", "6. DISEÑO DE LA TORRE", "6"),
+
+    (10, "plantillado", "Plantillado", "4 curvas patrón sobre perfil topográfico", "7. PLANTILLADO", "7"),
 ]
 
 
