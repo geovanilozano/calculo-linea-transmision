@@ -68,11 +68,11 @@
     <h3 class="text-base font-semibold mb-2">Impedancia característica y propagación</h3>
     <div class="space-y-3 text-sm bg-muted/50 rounded-lg p-4">
       <div>
-        <span class="font-semibold text-primary">Impedancia característica Zc</span>{{ info_tooltip("Impedancia 'natural' de la línea (Ω). Si la línea se cargara con una carga igual a Zc, no habría reflexiones ni efecto Ferranti. Para líneas aéreas de 500 kV: Zc ≈ 250-400 Ω. La 'potencia natural' SIL = V²/Zc define el punto óptimo de operación.") }}:
+        <span class="font-semibold text-primary">Impedancia característica Zc</span>{{ info_tooltip("Impedancia 'natural' de la línea (Ω). Si la línea se cargara con una carga igual a Zc, no habría reflexiones ni efecto Ferranti. Para líneas aéreas de 500 kV: Zc 250-400 Ω. La 'potencia natural' SIL = V²/Zc define el punto óptimo de operación.") }}:
         $$Z_c = \sqrt{\frac{z}{y}}$$
       </div>
       <div>
-        <span class="font-semibold text-primary">Constante de propagación γ</span>{{ info_tooltip("Número complejo (1/km) que describe cómo se atenúa y desfasa la onda de tensión/corriente a lo largo de la línea. Parte real α = atenuación (pérdidas), parte imaginaria β = desfase. Para 60 Hz en líneas aéreas: β ≈ 0,0013 rad/km.") }}:
+        <span class="font-semibold text-primary">Constante de propagación γ</span>{{ info_tooltip("Número complejo (1/km) que describe cómo se atenúa y desfasa la onda de tensión/corriente a lo largo de la línea. Parte real α = atenuación (pérdidas), parte imaginaria β = desfase. Para 60 Hz en líneas aéreas: β 0,0013 rad/km.") }}:
         $$\gamma = \sqrt{z \cdot y}$$
       </div>
       <p class="text-xs text-muted-foreground mt-1">$z$, $y$ por unidad de longitud (complejos)</p>
@@ -105,7 +105,7 @@
         $$I_R = \frac{P}{\sqrt{3} \cdot V_L \cdot \cos\varphi}$$
       </div>
       <div>
-        <span class="font-semibold text-primary">Tensión fase-neutro receptor VR(f-n)</span>{{ info_tooltip("Tensión por fase respecto al neutro en el extremo receptor (V). Es la tensión que ve la carga. En sistemas trifásicos: VL = √3 · Vfn. Para 500 kV de línea: Vfn ≈ 288,7 kV.") }}:
+        <span class="font-semibold text-primary">Tensión fase-neutro receptor VR(f-n)</span>{{ info_tooltip("Tensión por fase respecto al neutro en el extremo receptor (V). Es la tensión que ve la carga. En sistemas trifásicos: VL = √3 · Vfn. Para 500 kV de línea: Vfn 288,7 kV.") }}:
         $$V_{R(f-n)} = \frac{V_{R(L)}}{\sqrt{3}}$$
       </div>
       <div>

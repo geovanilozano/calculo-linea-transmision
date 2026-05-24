@@ -68,9 +68,9 @@ def generar(r: ResultadoPlantillado, dark_mode: bool = False) -> str:
 
     # Configuración
     ax.set_xlabel("Distancia desde centro del vano (m)", fontweight="600")
-    ax.set_ylabel("Altura (m)  — referida al conductor caliente", fontweight="600")
+    ax.set_ylabel("Altura (m)  referida al conductor caliente", fontweight="600")
     ax.set_title(
-        f"Plantilla — vano {r.vano_diseno_m:.0f} m  ·  "
+        f"Plantilla vano {r.vano_diseno_m:.0f} m  ·  "
         f"f_máx = {r.flecha_max_m:.2f} m  ·  f_mín = {r.flecha_min_m:.2f} m",
         pad=12,
     )

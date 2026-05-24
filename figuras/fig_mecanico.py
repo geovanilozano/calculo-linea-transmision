@@ -48,7 +48,7 @@ def generar(r: ResultadoMecanico, dark_mode: bool = False) -> str:
         fontsize=8,
     )
     ax1.set_ylabel("Carga (N/m)", fontweight="600")
-    ax1.set_title(f"Cargas por hipótesis — {r.nombre_elemento}")
+    ax1.set_title(f"Cargas por hipótesis {r.nombre_elemento}")
     ax1.legend(loc="best", fontsize=9)
     ax1.grid(axis="y", alpha=0.3, zorder=0)
     ax1.set_axisbelow(True)

@@ -93,7 +93,7 @@ def calcular(
 
     Args:
         tension_linea_kv: Tensión nominal línea-línea (kV)
-        bil_kv: BIL del sistema (kV) — 1550 estándar para 500 kV
+        bil_kv: BIL del sistema (kV) 1550 estándar para 500 kV
         nivel_contaminacion: 'ligera', 'media', 'alta', 'muy_alta', 'severa'
         carga_total_kgf: Carga total que soporta la cadena (kgf)
         aislador: Datos del aislador unitario. None usa ANSI 52-3.

@@ -11,7 +11,7 @@
 
   <div>
     <label for="aislador_id" class="block text-sm font-medium mb-1.5">
-      Tipo de aislador{{ info_tooltip("Los aisladores sostienen mecánicamente el conductor desde la torre y al mismo tiempo lo separan eléctricamente. Se arman en CADENAS de discos según la tensión: a 500 kV se requieren 24-28 discos. Selección según: (1) ambiente — porcelana estándar (ANSI 52-3) tierra adentro; vidrio templado (U120BS) cuando se requiere inspección visual fácil; antifog/antiniebla (ANSI 52-5, U160BP) en zonas costeras o industriales con alta contaminación; (2) carga mecánica — heavy-duty (ANSI 52-8) para vanos grandes; (3) cumplimiento IEC 60815 sobre línea de fuga vs nivel de contaminación. RETIE exige FS≥2,0.") }}
+      Tipo de aislador{{ info_tooltip("Los aisladores sostienen mecánicamente el conductor desde la torre y al mismo tiempo lo separan eléctricamente. Se arman en CADENAS de discos según la tensión: a 500 kV se requieren 24-28 discos. Selección según: (1) ambiente porcelana estándar (ANSI 52-3) tierra adentro; vidrio templado (U120BS) cuando se requiere inspección visual fácil; antifog/antiniebla (ANSI 52-5, U160BP) en zonas costeras o industriales con alta contaminación; (2) carga mecánica heavy-duty (ANSI 52-8) para vanos grandes; (3) cumplimiento IEC 60815 sobre línea de fuga vs nivel de contaminación. RETIE exige FS≥2,0.") }}
       <span class="text-xs text-muted-foreground font-normal">(5 opciones)</span>
     </label>
     <select id="aislador_id" name="aislador_id" class="input">
@@ -86,12 +86,12 @@
         <p class="text-xs text-muted-foreground mt-1">k = mm/kV según nivel IEC 60815</p>
       </div>
       <div>
-        <span class="font-semibold text-primary">2. Tensión disruptiva NBIL</span>{{ info_tooltip("Número de discos requerido para resistir el BIL (Basic Insulation Level) — la sobretensión por impulso de rayo. El factor 1,2 es de seguridad sobre BIL. El 0,9 corrige por discos en serie (efecto cadena, no lineal). Para 500 kV, BIL = 1550 kV (IEC 60071). Este criterio gobierna en zonas de bajo nivel ceráunico.") }}:
+        <span class="font-semibold text-primary">2. Tensión disruptiva NBIL</span>{{ info_tooltip("Número de discos requerido para resistir el BIL (Basic Insulation Level) la sobretensión por impulso de rayo. El factor 1,2 es de seguridad sobre BIL. El 0,9 corrige por discos en serie (efecto cadena, no lineal). Para 500 kV, BIL = 1550 kV (IEC 60071). Este criterio gobierna en zonas de bajo nivel ceráunico.") }}:
         $$N_{BIL} = \frac{1{,}2 \cdot BIL}{V_{disco,lluvia} \cdot 0{,}9}$$
         <p class="text-xs text-muted-foreground mt-1">BIL = 1550 kV para 500 kV (IEC 60071)</p>
       </div>
       <p class="text-xs text-muted-foreground mt-2 pt-2 border-t border-border">
-        Se adopta $N = \max(N_f, N_{BIL})$ — el más exigente
+        Se adopta $N = \max(N_f, N_{BIL})$ el más exigente
       </p>
     </div>
   </div>
@@ -107,7 +107,7 @@
         <span class="font-semibold text-primary">Peso Pcadena</span>{{ info_tooltip("Peso total de la cadena (kg). Se transmite a la torre como carga vertical y debe sumarse al peso del conductor para calcular esfuerzos en los brazos. Para 500 kV: ~150-200 kg por cadena.") }}:
         $$P_{cadena} = N \cdot P_{disco} + P_{herrajes}$$
       </div>
-      <p class="text-xs text-muted-foreground mt-2">L_herrajes ≈ 0,20 m por extremo. P_herrajes ≈ 25 kg estándar 500 kV</p>
+      <p class="text-xs text-muted-foreground mt-2">L_herrajes 0,20 m por extremo. P_herrajes 25 kg estándar 500 kV</p>
     </div>
   </div>
 

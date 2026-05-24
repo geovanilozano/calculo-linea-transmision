@@ -152,7 +152,7 @@ def resolver_cambio_estado(
     a = vano_m * 1000.0  # mm
     a_area_24 = 24.0 * (area_mm2 ** 2)
 
-    # Lado derecho (constante) — convertimos Wr a N/mm
+    # Lado derecho (constante) convertimos Wr a N/mm
     wr_1_n_mm = wr_1_n_m / 1000.0
     wr_2_n_mm = wr_2_n_m / 1000.0
 
@@ -181,6 +181,73 @@ def resolver_cambio_estado(
         sigma = sigma_new
 
     return sigma
+
+
+def encontrar_gobernante(
+    hipotesis: list[Hipotesis],
+    cargas_wr: dict[str, float],
+    sigma_max_por_hip: dict[str, float],
+    vano_m: float,
+    area_mm2: float,
+    modulo_e_kgf_mm2: float,
+    coef_alpha: float,
+) -> str:
+    """Determina iterativamente la hipótesis GOBERNANTE del diseño mecánico.
+
+    La gobernante es aquella tal que, al tomarla como estado base con σ = σ_máx,
+    todas las demás hipótesis cumplen σⱼ ≤ σ_máx,j. Físicamente es la condición
+    de carga/temperatura que primero alcanza su límite admisible al tensar el
+    conductor; las demás quedan automáticamente por debajo.
+
+    Algoritmo (converge en ≤ N pasos, N = nº hipótesis):
+      1. Empezar con la hipótesis de mayor FS (la más restrictiva en σ_máx).
+      2. Tomarla como base (σ = σ_máx) y calcular σⱼ en las demás vía cambio
+         de estado.
+      3. Si alguna σⱼ > σ_máx,j → esa hipótesis es más restrictiva: cambiar el
+         candidato a ella y repetir.
+      4. Cuando ninguna otra viola su σ_máx → el candidato actual es la
+         gobernante.
+
+    En diseño típico de 500 kV con FS_C=5 esto converge a la hipótesis C
+    (operación diaria); pero la rutina es general y maneja cualquier
+    combinación de vano, material y hipótesis (p.ej. un guarda en vano corto
+    puede dar A como gobernante).
+    """
+    # Punto de partida: la hipótesis con mayor FS (σ_max más bajo = más restrictiva)
+    candidato = max(hipotesis, key=lambda h: h.factor_seguridad).nombre
+
+    for _ in range(len(hipotesis) + 1):
+        hip_base = next(h for h in hipotesis if h.nombre == candidato)
+        sigma_base = sigma_max_por_hip[candidato]
+        wr_base = cargas_wr[candidato]
+        temp_base = hip_base.temperatura_c
+
+        peor_ratio = 1.0 + 1e-9  # margen numérico
+        peor_hip = None
+        for h in hipotesis:
+            if h.nombre == candidato:
+                continue
+            sigma_j = resolver_cambio_estado(
+                sigma_1_mpa=sigma_base,
+                wr_1_n_m=wr_base,
+                temp_1_c=temp_base,
+                wr_2_n_m=cargas_wr[h.nombre],
+                temp_2_c=h.temperatura_c,
+                vano_m=vano_m,
+                area_mm2=area_mm2,
+                modulo_e_kgf_mm2=modulo_e_kgf_mm2,
+                coef_alpha=coef_alpha,
+            )
+            ratio = sigma_j / sigma_max_por_hip[h.nombre]
+            if ratio > peor_ratio:
+                peor_ratio = ratio
+                peor_hip = h.nombre
+
+        if peor_hip is None:
+            return candidato
+        candidato = peor_hip
+
+    return candidato
 
 
 def flecha_parabolica_m(carga_resultante_n_m: float, vano_m: float, tension_n: float) -> float:
@@ -218,12 +285,18 @@ def calcular(
     """Cálculo mecánico completo según secciones 3.1-3.6.
 
     Procedimiento:
-    1. Calcular constantes: Wc, Wv_i, Wr_i, σ_máx_i, ac
-    2. Determinar hipótesis EXTREMA: si vano > ac → A, si vano < ac → B
-    3. La hipótesis extrema fija el estado base (σ₁ = σ_máx en esa hipótesis)
-    4. Para las demás hipótesis: resolver ecuación de cambio de estado
-    5. Calcular flecha en cada hipótesis (terreno llano + quebrado)
-    6. La hipótesis gobernante es la de mayor FS (típicamente C, EDS)
+    1. Calcular constantes: Wc, Wv_i, Wr_i, σ_máx_i.
+    2. Vano crítico A-B (informativo: cuál entre A y B tiene mayor carga
+       combinada sólo determina cuál de las dos sería gobernante si
+       tuvieran el mismo FS).
+    3. Determinar la hipótesis GOBERNANTE iterativamente (ver
+       `encontrar_gobernante`): es aquella tal que, al tomarla como base
+       con σ = σ_máx, todas las demás cumplen σⱼ ≤ σ_máx,j. Para FS
+       típicos (A=B=D=2.5, C=5) la gobernante resulta C; pero el algoritmo
+       es general y maneja cualquier combinación.
+    4. Tomar la gobernante como estado base (σ = σ_máx en ella).
+    5. Para las demás hipótesis: resolver ecuación de cambio de estado.
+    6. Calcular flecha en cada hipótesis (terreno llano + quebrado).
     """
     if hipotesis is None:
         hipotesis = HIPOTESIS_ESTANDAR
@@ -247,7 +320,8 @@ def calcular(
         # 3.2.7 σ_max admisible para esta hipótesis
         sigma_max_por_hip[h.nombre] = sigma_rotura_mpa / h.factor_seguridad
 
-    # 3.2.8 Vano crítico entre A y B (usamos σ_máx de la hip A)
+    # 3.2.8 Vano crítico entre A y B (informativo: qué hipótesis impone más
+    # carga combinada entre A y B). NO se usa para elegir el estado base.
     hip_a = next((h for h in hipotesis if h.nombre == "A"), hipotesis[0])
     hip_b = next((h for h in hipotesis if h.nombre == "B"), hipotesis[1] if len(hipotesis) > 1 else hipotesis[0])
     ac = vano_critico_m(
@@ -259,36 +333,43 @@ def calcular(
         wr_a_n_m=cargas_wr["A"],
         wr_b_n_m=cargas_wr["B"],
     )
-
-    # 3.4 Hipótesis EXTREMA (la que gobierna entre A y B según vano vs ac)
     if ac > 0 and vano_m > ac:
         hip_extrema = "A"
     else:
         hip_extrema = "B"
 
-    # 3.3 Estado base: hipótesis extrema con σ = σ_máx (sin cambio de estado todavía)
-    hip_base_obj = next(h for h in hipotesis if h.nombre == hip_extrema)
-    sigma_base_mpa = sigma_max_por_hip[hip_extrema]
-    wr_base = cargas_wr[hip_extrema]
+    # 3.3-3.4 Hipótesis GOBERNANTE: la que primero alcanza su σ_máx al tensar.
+    # Se determina iterativamente para que el cumplimiento sea consistente
+    # en TODAS las hipótesis (no sólo en A o B).
+    hip_gobernante_nombre = encontrar_gobernante(
+        hipotesis=hipotesis,
+        cargas_wr=cargas_wr,
+        sigma_max_por_hip=sigma_max_por_hip,
+        vano_m=vano_m,
+        area_mm2=area_mm2,
+        modulo_e_kgf_mm2=modulo_elasticidad_kgf_mm2,
+        coef_alpha=coef_dilatacion_invc,
+    )
+    hip_base_obj = next(h for h in hipotesis if h.nombre == hip_gobernante_nombre)
+    sigma_base_mpa = sigma_max_por_hip[hip_gobernante_nombre]
+    wr_base = cargas_wr[hip_gobernante_nombre]
     temp_base = hip_base_obj.temperatura_c
 
-    # Calcular σ en cada hipótesis usando cambio de estado desde el base
+    # Calcular σ en cada hipótesis usando cambio de estado desde la gobernante
     resultados: list[ResultadoHipotesis] = []
     flecha_max = 0.0
     flecha_max_nombre = ""
-    gobernante = ""
-    max_fs = 0.0
 
     for h in hipotesis:
         wv = carga_viento_n_m(h.velocidad_viento_kmh, diametro_mm, factor_sombra)
         wr = cargas_wr[h.nombre]
         sigma_max = sigma_max_por_hip[h.nombre]
 
-        if h.nombre == hip_extrema:
-            # Estado base: σ ya conocido (σ_máx)
+        if h.nombre == hip_gobernante_nombre:
+            # Estado base: σ ya conocido (σ_máx de la gobernante)
             sigma_calc = sigma_base_mpa
         else:
-            # Resolver cambio de estado desde el base
+            # Resolver cambio de estado desde la gobernante
             sigma_calc = resolver_cambio_estado(
                 sigma_1_mpa=sigma_base_mpa,
                 wr_1_n_m=wr_base,
@@ -305,15 +386,9 @@ def calcular(
         flecha_llano = flecha_parabolica_m(wr, vano_m, tension_n)
         flecha_quebrado = flecha_terreno_quebrado_m(flecha_llano, vano_m, desnivel_m)
 
-        # Hipótesis con mayor flecha (típicamente Hip D)
         if flecha_llano > flecha_max:
             flecha_max = flecha_llano
             flecha_max_nombre = h.nombre
-
-        # Hipótesis gobernante mecánica: la de FS más exigente (mayor)
-        if h.factor_seguridad > max_fs:
-            max_fs = h.factor_seguridad
-            gobernante = h.nombre
 
         resultados.append(
             ResultadoHipotesis(
@@ -332,6 +407,8 @@ def calcular(
                 cumple=sigma_calc <= sigma_max * 1.001,  # margen numérico
             )
         )
+
+    gobernante = hip_gobernante_nombre
 
     # Ángulo de inclinación del terreno
     if vano_m > 0 and desnivel_m > 0:

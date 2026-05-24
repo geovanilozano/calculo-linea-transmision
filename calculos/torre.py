@@ -112,7 +112,7 @@ def calcular(
     Args:
         tension_linea_kv: Tensión nominal línea-línea (kV)
         altitud_msnm: Altitud (m)
-        flecha_max_m: Flecha máxima del conductor (m) — usualmente Hipótesis D
+        flecha_max_m: Flecha máxima del conductor (m) usualmente Hipótesis D
         longitud_cadena_m: Longitud total de la cadena de aisladores (m)
         longitud_linea_km: Longitud total de la línea (km)
         vano_diseno_m: Vano de diseño (m)

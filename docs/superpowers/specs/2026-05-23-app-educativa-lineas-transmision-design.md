@@ -1,4 +1,4 @@
-# Spec — App Educativa Interactiva: Diseño de Líneas de Transmisión 500 kV
+# Spec App Educativa Interactiva: Diseño de Líneas de Transmisión 500 kV
 
 **Fecha:** 2026-05-23
 **Autor:** Geovani (capacitador) + Claude (asistencia)
@@ -67,7 +67,7 @@ Construir una **aplicación web local interactiva** que sirva como **tour guiado
 
 | # | Módulo | Contenido principal | Figura |
 |---|---|---|---|
-| 0 | **Inicio** | Objetivo del proyecto, parámetros generales, mapa del corredor | — (texto + mapa) |
+| 0 | **Inicio** | Objetivo del proyecto, parámetros generales, mapa del corredor | (texto + mapa) |
 | 1 | **Tensión nominal** | Hefner / Still / 1 kV-km vs escalones colombianos | NUEVA |
 | 2 | **Configuración de la línea** | GMD, GMR_L, GMR_C, RMG corona | Reutiliza figura_1 |
 | 3 | **Conductor seleccionado** | ACSR Drake: sección transversal, ampacidad, datos | NUEVA |
@@ -81,7 +81,7 @@ Construir una **aplicación web local interactiva** que sirva como **tour guiado
 
 ## 6. Arquitectura técnica
 
-### Stack (modernizado — stack 2026)
+### Stack (modernizado stack 2026)
 
 | Capa | Tecnología | Razón |
 |---|---|---|
@@ -226,7 +226,7 @@ Cada módulo muestra resultados con un check visual contra criterios:
 
 ## 9. Roadmap de implementación
 
-**Fase 1 — Scaffold + repo (1 sesión)**
+**Fase 1 Scaffold + repo (1 sesión)**
 - Crear estructura de carpetas
 - `app.py` con las 11 rutas básicas (renderizan templates vacíos)
 - `base.html` con layout sidebar + 3 paneles
@@ -235,24 +235,24 @@ Cada módulo muestra resultados con un check visual contra criterios:
 - Inicializar git, primer commit, conectar con GitHub (público)
 - Verificar `python app.py` levanta el servidor local
 
-**Fase 2 — Lógica de cálculo (3 sesiones)**
+**Fase 2 Lógica de cálculo (3 sesiones)**
 - Sesión A: módulos 1-4 (eléctricos: tensión, geometría, conductor, parámetros)
 - Sesión B: módulos 5-7 (línea larga, mecánico conductor y guarda)
 - Sesión C: módulos 8-10 (aisladores, torre, plantillado)
 
-**Fase 3 — Figuras (2 sesiones)**
+**Fase 3 Figuras (2 sesiones)**
 - Sesión A: figuras nuevas (1, 3, 4, 5, 6, 7)
 - Sesión B: adaptación de figuras existentes (2, 8, 9, 10)
 
-**Fase 4 — UI y didáctica (2 sesiones)**
+**Fase 4 UI y didáctica (2 sesiones)**
 - Sesión A: explicaciones didácticas + fórmulas MathJax
 - Sesión B: validaciones, tour mode, pulido visual
 
-**Fase 5 — Documentación (1 sesión)**
+**Fase 5 Documentación (1 sesión)**
 - Manual del capacitador
 - README profesional con screenshots y demo link
 
-**Fase 6 — Despliegue (1 sesión)**
+**Fase 6 Despliegue (1 sesión)**
 - `render.yaml` + `Procfile` para Render
 - Deploy primera vez a Render
 - Verificar app funcionando en URL pública
@@ -263,19 +263,19 @@ Cada módulo muestra resultados con un check visual contra criterios:
 
 ## 8.5 Sistema de diseño (Design System)
 
-Esta es la "última tecnología de diseño" — patrones modernos 2025-2026 aplicados a una app educativa.
+Esta es la "última tecnología de diseño" patrones modernos 2025-2026 aplicados a una app educativa.
 
 ### Filosofía
 
-- **Claridad sobre adorno** — cada elemento visual debe ayudar a entender, no decorar.
-- **Densidad de información alta** sin saturación — fuente y espaciado calibrados para proyección en aula.
-- **Dark mode nativo** — no es agregado, es ciudadano de primera clase.
-- **Animaciones con propósito** — guían la atención del estudiante.
+- **Claridad sobre adorno** cada elemento visual debe ayudar a entender, no decorar.
+- **Densidad de información alta** sin saturación fuente y espaciado calibrados para proyección en aula.
+- **Dark mode nativo** no es agregado, es ciudadano de primera clase.
+- **Animaciones con propósito** guían la atención del estudiante.
 
 ### Paleta de colores (OKLCH-based, dark/light aware)
 
 ```css
-/* Tokens semánticos — se redefinen automáticamente en dark mode */
+/* Tokens semánticos se redefinen automáticamente en dark mode */
 :root {
   /* Base */
   --background: oklch(99% 0 0);            /* casi blanco */
@@ -284,18 +284,18 @@ Esta es la "última tecnología de diseño" — patrones modernos 2025-2026 apli
   --muted: oklch(96% 0.005 250);
   --border: oklch(91% 0.005 250);
 
-  /* Brand — azul eléctrico (industria energía) */
+  /* Brand azul eléctrico (industria energía) */
   --primary: oklch(55% 0.18 250);          /* azul vibrante */
   --primary-foreground: oklch(99% 0 0);
 
-  /* Accent — cobre (conductor eléctrico) */
+  /* Accent cobre (conductor eléctrico) */
   --accent: oklch(65% 0.15 50);            /* cobre cálido */
   --accent-foreground: oklch(99% 0 0);
 
   /* Semánticos */
-  --success: oklch(65% 0.15 145);          /* verde — cumple criterio */
-  --warning: oklch(75% 0.15 80);           /* amarillo — alerta */
-  --danger: oklch(60% 0.20 25);            /* rojo — no cumple */
+  --success: oklch(65% 0.15 145);          /* verde cumple criterio */
+  --warning: oklch(75% 0.15 80);           /* amarillo alerta */
+  --danger: oklch(60% 0.20 25);            /* rojo no cumple */
 
   /* Curvas técnicas (igual en light/dark, alto contraste sobre fondo) */
   --curve-caliente: oklch(60% 0.18 25);    /* rojo conductor caliente */
@@ -337,7 +337,7 @@ Tamaño base 16px. Escala tipográfica: 12 / 14 / 16 / 18 / 24 / 32 / 48 px.
 
 Todos construidos con HTML + Tailwind + Alpine.js para interactividad:
 
-1. **Card** — contenedor base con border + shadow + radius
+1. **Card** contenedor base con border + shadow + radius
 2. **Button** (variants: primary, secondary, ghost, destructive)
 3. **Input** con label flotante y validation state
 4. **Select / Combobox** con Alpine
@@ -400,7 +400,7 @@ Todos construidos con HTML + Tailwind + Alpine.js para interactividad:
 ### Por qué Render
 
 - **Soporta Flask nativamente** (Python runtime detection automática).
-- **Free tier** suficiente para uso educativo (limita: cold start de ~30s tras 15 min sin tráfico — aceptable para clase).
+- **Free tier** suficiente para uso educativo (limita: cold start de ~30s tras 15 min sin tráfico aceptable para clase).
 - **Deploy via git push** a rama `main` → auto-deploy.
 - **HTTPS gratis** y URL pública estable (`<nombre>.onrender.com`).
 - **No requiere autenticación** del usuario final (la app es educativa abierta).
@@ -413,7 +413,7 @@ web: gunicorn app:app --workers 2 --timeout 120
 ```
 
 ```yaml
-# render.yaml (opcional pero recomendado — Infrastructure as Code)
+# render.yaml (opcional pero recomendado Infrastructure as Code)
 services:
   - type: web
     name: lineas-transmision-edu
@@ -514,7 +514,7 @@ calculo-linea-transmision/
 ### README profesional (estructura)
 
 ```markdown
-# Diseño de Líneas de Transmisión 500 kV — App Educativa
+# Diseño de Líneas de Transmisión 500 kV App Educativa
 
 [![Deploy en Render](https://img.shields.io/badge/deploy-render-46E3B7)](https://lineas-transmision-edu.onrender.com)
 [![Python 3.11](https://img.shields.io/badge/python-3.11-blue.svg)](https://python.org)
@@ -674,19 +674,19 @@ Para construir esto al nivel "lo mejor de lo mejor" usaremos agentes especializa
 
 ### Ejemplos de paralelización
 
-**Fase 1 (Scaffold)** — secuencial (todo toca configuración base):
+**Fase 1 (Scaffold)** secuencial (todo toca configuración base):
 1. Crear estructura → 2. Setup git → 3. Setup Render → 4. Verificar build
 
-**Fase 2 (Cálculos)** — paralelo posible:
+**Fase 2 (Cálculos)** paralelo posible:
 - Agent A: módulos 1-3 (`tension.py`, `geometria.py`, `conductor.py`)
 - Agent B: módulos 4-5 (`parametros.py`, `linea_larga.py`)
 - Agent C: módulos 6-7 (`mecanico_conductor.py`, `mecanico_guarda.py`)
 - Agent D: módulos 8-10 (`aisladores.py`, `torre.py`, `plantillado.py`)
 
-**Fase 3 (Figuras)** — paralelo (cada figura es archivo distinto):
+**Fase 3 (Figuras)** paralelo (cada figura es archivo distinto):
 - 6 figuras nuevas pueden crearse simultáneamente
 
-**Fase 4 (UI)** — invocar `frontend-design` para diseño visual de:
+**Fase 4 (UI)** invocar `frontend-design` para diseño visual de:
 - Sidebar + navegación
 - Layout de 3 paneles
 - Componentes (cards, inputs, badges, etc.)

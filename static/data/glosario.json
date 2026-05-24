@@ -97,7 +97,7 @@
         {
           "termino": "GMR",
           "alias": "Radio Medio Geométrico (RMG)",
-          "definicion": "Radio ficticio que reemplaza a un conductor real (con efecto piel y flujo interno) por uno hueco equivalente. Se obtiene multiplicando el radio físico por e^(-1/4) ≈ 0.7788 para un conductor sólido.",
+          "definicion": "Radio ficticio que reemplaza a un conductor real (con efecto piel y flujo interno) por uno hueco equivalente. Se obtiene multiplicando el radio físico por e^(-1/4) 0.7788 para un conductor sólido.",
           "formula": "GMR_{sol} = 0.7788 \\cdot r",
           "modulo": 2,
           "ver_tambien": ["GMD", "Efecto piel"]
@@ -195,7 +195,7 @@
         },
         {
           "termino": "Corrección térmica",
-          "definicion": "Ajuste de la resistencia del conductor según su temperatura de operación. Para el aluminio: R_T = R_20 · [1 + α·(T − 20)], con α ≈ 0.00403 /°C.",
+          "definicion": "Ajuste de la resistencia del conductor según su temperatura de operación. Para el aluminio: R_T = R_20 · [1 + α·(T − 20)], con α 0.00403 /°C.",
           "formula": "R_T = R_{20} \\cdot [1 + \\alpha (T - 20)]",
           "modulo": 3
         },
@@ -402,7 +402,7 @@
         {
           "termino": "Parámetro de catenaria",
           "alias": "c",
-          "definicion": "Cociente entre la tensión horizontal del conductor y su peso por unidad de longitud (c = T_h / w). Define la 'apertura' de la catenaria — a mayor c, conductor más tenso y flecha menor.",
+          "definicion": "Cociente entre la tensión horizontal del conductor y su peso por unidad de longitud (c = T_h / w). Define la 'apertura' de la catenaria a mayor c, conductor más tenso y flecha menor.",
           "modulo": 6
         },
         {
@@ -463,7 +463,7 @@
         {
           "termino": "Módulo de elasticidad",
           "alias": "E",
-          "definicion": "Constante del material que relaciona el esfuerzo aplicado con la deformación unitaria (Ley de Hooke). Para aluminio ≈ 7000 kgf/mm², para acero ≈ 20000 kgf/mm².",
+          "definicion": "Constante del material que relaciona el esfuerzo aplicado con la deformación unitaria (Ley de Hooke). Para aluminio 7000 kgf/mm², para acero 20000 kgf/mm².",
           "modulo": 6
         },
         {
@@ -616,7 +616,7 @@
         },
         {
           "termino": "Torre de retención",
-          "alias": "Tipo A, B, C — torres de ángulo",
+          "alias": "Tipo A, B, C torres de ángulo",
           "definicion": "Torre que soporta cambios de dirección de la línea o cargas longitudinales. Usa cadenas de amarre. Más robusta y costosa que la de suspensión.",
           "modulo": 9
         },

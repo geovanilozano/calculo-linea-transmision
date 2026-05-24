@@ -4,25 +4,14 @@
 {% block module_title %}Glosario de términos técnicos{% endblock %}
 
 {% block module_content %}
-<div class="animate-fade-in"
-     x-data="{
-       query: '',
-       norm(s) { return (s || '').toString().toLowerCase()
-                  .normalize('NFD').replace(/[̀-ͯ]/g, ''); },
-       match(termino) {
-         if (!this.query.trim()) return true;
-         const q = this.norm(this.query);
-         const haystack = this.norm(
-           (termino.termino || '') + ' ' +
-           (termino.alias || '') + ' ' +
-           (termino.definicion || '')
-         );
-         return haystack.includes(q);
-       },
-       categoriaTieneMatches(cat) {
-         return cat.terminos.some(t => this.match(t));
-       }
-     }">
+{# Cuento el total de términos para mostrarlo en el badge #}
+{% set ns = namespace(total=0) %}
+{% for cat in GLOSARIO.categorias %}{% set ns.total = ns.total + cat.terminos|length %}{% endfor %}
+
+<div id="glosario-root"
+     class="animate-fade-in"
+     x-data="glosarioFilter()"
+     x-init="init()">
 
   {# ===== Hero ===== #}
   <div class="rounded-2xl border border-border bg-gradient-to-br from-card via-card to-primary/5 p-6 md:p-8 mb-6">
@@ -34,8 +23,7 @@
             Material de referencia
           </span>
           <span class="badge" style="background: color-mix(in oklch, var(--muted) 60%, transparent); color: var(--muted-foreground);">
-            <span x-text="$root.dataset.totalTerminos || ''"></span>
-            términos
+            {{ ns.total }} términos
           </span>
         </div>
         <h2 class="text-2xl md:text-3xl font-bold text-foreground mb-2">Glosario de términos técnicos</h2>
@@ -53,8 +41,10 @@
         <i data-lucide="search" class="size-4 text-muted-foreground"></i>
       </div>
       <input
+        id="glosario-search"
         type="search"
         x-model="query"
+        @input.debounce.120ms="apply()"
         placeholder="Buscar un término… (p. ej. catenaria, BIL, efecto Corona)"
         class="w-full pl-10 pr-10 py-2.5 rounded-lg border border-border bg-background text-foreground text-sm
                focus:outline-none focus:ring-2 focus:ring-primary/40 focus:border-primary/60 transition"
@@ -62,7 +52,7 @@
         spellcheck="false">
       <button x-show="query"
               x-cloak
-              @click="query = ''"
+              @click="query = ''; apply()"
               class="absolute right-2 top-1/2 -translate-y-1/2 size-7 rounded-md grid place-items-center hover:bg-muted text-muted-foreground"
               aria-label="Limpiar búsqueda">
         <i data-lucide="x" class="size-3.5"></i>
@@ -81,7 +71,7 @@
         <nav class="flex flex-col gap-0.5">
           {% for cat in GLOSARIO.categorias %}
             <a href="#cat-{{ loop.index }}"
-               x-show="categoriaTieneMatches({{ cat | tojson }})"
+               data-glosario-toc="cat-{{ loop.index }}"
                class="flex items-center gap-2 px-2.5 py-1.5 rounded-md text-xs text-muted-foreground
                       hover:bg-muted hover:text-foreground transition-colors">
               <i data-lucide="{{ cat.icono | default('chevron-right') }}" class="size-3.5 shrink-0"></i>
@@ -95,10 +85,9 @@
     {# ===== Contenido del glosario ===== #}
     <div class="space-y-8">
 
-      {# Mensaje cuando no hay matches #}
-      <div x-show="query.trim() && !{{ GLOSARIO.categorias | tojson | safe }}.some(c => c.terminos.some(t => match(t)))"
-           x-cloak
-           class="rounded-xl border border-dashed border-border bg-card/50 p-12 text-center">
+      {# Mensaje "sin resultados" — controlado por el filtro #}
+      <div id="glosario-no-results"
+           class="hidden rounded-xl border border-dashed border-border bg-card/50 p-12 text-center">
         <i data-lucide="search-x" class="size-10 mx-auto mb-3 text-muted-foreground"></i>
         <p class="text-sm text-muted-foreground">
           No se encontró ningún término que coincida con
@@ -108,7 +97,7 @@
 
       {% for cat in GLOSARIO.categorias %}
         <section id="cat-{{ loop.index }}"
-                 x-show="categoriaTieneMatches({{ cat | tojson }})"
+                 data-glosario-section
                  class="scroll-mt-4">
           {# Header de categoría #}
           <div class="flex items-center gap-3 mb-4 pb-2.5 border-b border-border">
@@ -125,8 +114,10 @@
           {# Lista de términos en grid responsivo #}
           <div class="grid grid-cols-1 md:grid-cols-2 gap-3.5">
             {% for t in cat.terminos %}
+              {# data-search = todo lo buscable concatenado (el JS normaliza el query y compara) #}
               <article
-                x-show="match({{ t | tojson }})"
+                data-glosario-card
+                data-search="{{ (t.termino ~ ' ' ~ (t.alias or '') ~ ' ' ~ (t.definicion or '')) | lower }}"
                 class="rounded-xl border border-border bg-card p-5 hover:border-primary/40 transition-colors">
 
                 {# Encabezado del término #}
@@ -178,20 +169,74 @@
         </section>
       {% endfor %}
 
-      {# Footer: versión + invitación a sugerir términos #}
-      <div class="rounded-xl border border-dashed border-border bg-card/40 p-5 text-center text-xs text-muted-foreground">
-        <p class="mb-1">
-          <i data-lucide="lightbulb" class="size-3.5 inline -mt-0.5 mr-1"></i>
-          Glosario v{{ GLOSARIO.version }} · actualizado {{ GLOSARIO.actualizado }}
-        </p>
-        <p>
-          ¿Falta un término que tus estudiantes necesitan? Agrégalo en
-          <span class="font-mono text-foreground/70">static/data/glosario.json</span>.
-        </p>
+      {# Footer: versión #}
+      <div class="text-center text-[11px] text-muted-foreground pt-2">
+        Glosario v{{ GLOSARIO.version }} · actualizado {{ GLOSARIO.actualizado }}
       </div>
 
     </div>
   </div>
 
 </div>
+
+{# ===== Filtro: JS plano, sin escapes JSON dentro de atributos ===== #}
+<script>
+  function glosarioFilter() {
+    return {
+      query: '',
+      // normaliza a minúsculas + sin diacríticos (NFD + strip combining marks U+0300–U+036F)
+      norm(s) {
+        return (s || '').toString().toLowerCase()
+          .normalize('NFD')
+          .replace(/[̀-ͯ]/g, '');
+      },
+      init() {
+        // primera aplicación al cargar (en caso de que el navegador restaure el query)
+        this.apply();
+      },
+      apply() {
+        const q = this.norm(this.query).trim();
+        const cards = document.querySelectorAll('[data-glosario-card]');
+        const sections = document.querySelectorAll('[data-glosario-section]');
+        const tocLinks = document.querySelectorAll('[data-glosario-toc]');
+        const noResults = document.getElementById('glosario-no-results');
+
+        let totalVisible = 0;
+
+        // 1. Filtrar tarjetas
+        cards.forEach(card => {
+          if (!q) {
+            card.classList.remove('hidden');
+            totalVisible++;
+            return;
+          }
+          const hay = this.norm(card.dataset.search || '');
+          const visible = hay.includes(q);
+          card.classList.toggle('hidden', !visible);
+          if (visible) totalVisible++;
+        });
+
+        // 2. Ocultar secciones sin tarjetas visibles
+        const seccionesOcultas = new Set();
+        sections.forEach(sec => {
+          const algunaVisible = sec.querySelector('[data-glosario-card]:not(.hidden)');
+          const ocultar = !algunaVisible;
+          sec.classList.toggle('hidden', ocultar);
+          if (ocultar) seccionesOcultas.add(sec.id);
+        });
+
+        // 3. Sincronizar TOC con secciones visibles
+        tocLinks.forEach(link => {
+          const targetId = link.dataset.glosarioToc;
+          link.classList.toggle('hidden', seccionesOcultas.has(targetId));
+        });
+
+        // 4. Mostrar "sin resultados" si no hubo matches
+        if (noResults) {
+          noResults.classList.toggle('hidden', totalVisible > 0 || !q);
+        }
+      }
+    };
+  }
+</script>
 {% endblock %}

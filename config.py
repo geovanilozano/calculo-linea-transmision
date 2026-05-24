@@ -11,7 +11,7 @@ class BaseConfig:
 
     # Parámetros por defecto del proyecto de línea de transmisión.
     # NOTA: la tensión nominal (kV) se CALCULA en el módulo 1 a partir de P, L.
-    # No es un parámetro de entrada — es un RESULTADO del análisis.
+    # No es un parámetro de entrada es un RESULTADO del análisis.
     PROYECTO_DEFAULTS = {
         # Identificación
         "nombre": "Cálculo de Línea de Transmisión",
@@ -33,7 +33,7 @@ class BaseConfig:
         # para los demás módulos. Default 500 kV (caso típico Colombia).
         "tension_nominal_kv": 500,
 
-        # ===== PARÁMETROS MECÁNICOS — 4 HIPÓTESIS CLIMÁTICAS =====
+        # ===== PARÁMETROS MECÁNICOS 4 HIPÓTESIS CLIMÁTICAS =====
         # Hipótesis A: máxima velocidad del viento
         "hip_a_viento_kmh": 140,
         "hip_a_temperatura_c": 15,

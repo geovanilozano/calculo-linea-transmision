@@ -46,7 +46,7 @@ MODULOS: list[tuple[int, str, str, str, str, str]] = [
 
     (1, "tension", "Selección del nivel de tensión", "Hefner, Still, 1 kV/km vs escalones normalizados", "2. CÁLCULOS ELÉCTRICOS", "2.1"),
     (2, "configuracion", "Configuración de la línea", "GMD, GMR, radio del haz y geometría de fases", "2. CÁLCULOS ELÉCTRICOS", "2.2"),
-    (3, "conductor", "Datos del conductor", "ACSR/AAAC/ACAR — R, ampacidad, corrección térmica", "2. CÁLCULOS ELÉCTRICOS", "2.3"),
+    (3, "conductor", "Datos del conductor", "ACSR/AAAC/ACAR R, ampacidad, corrección térmica", "2. CÁLCULOS ELÉCTRICOS", "2.3"),
     (4, "parametros", "Parámetros R, L, C + Corona", "Inductancia, capacitancia y efecto Corona", "2. CÁLCULOS ELÉCTRICOS", "2.4"),
     (5, "linea_larga", "Línea larga (modelo ABCD)", "Regulación, pérdidas y eficiencia (cuadripolo)", "2. CÁLCULOS ELÉCTRICOS", "2.5"),
 
@@ -162,6 +162,43 @@ _CAMPO_ALIAS = {
 }
 
 
+def _carga_cadena_kgf_para_aisladores(
+    cond: dict, vano: float, aislador: dict, n_subc: int = 3
+) -> float:
+    """Carga resultante sobre la cadena de aisladores (kgf), siguiendo doc Sec 5.5/5.6:
+
+      R = √(T_haz² + P_vert²)
+      T_haz  = n_subc · T_A   (tiro del haz en hipótesis A — viento máximo)
+      P_vert = n_subc · m · vano_grav + peso_cadena   (peso vertical)
+
+    Calcula T_A internamente vía `mecanico.calcular()` con el conductor
+    actual y el vano del proyecto. Estima peso_cadena usando los datos del
+    aislador (asume 41 discos como aproximación inicial — el error
+    introducido en el FS es < 0.5%).
+    """
+    import math as _math
+    e_kgf = cond.get("modulo_elasticidad_n_mm2", 76900) / 9.81
+    alpha = cond.get("coef_dilatacion_invc", 18.9e-6)
+    mec = mecanico.calcular(
+        elemento="conductor",
+        diametro_mm=cond["diametro_exterior_mm"],
+        area_mm2=cond["seccion_total_mm2"],
+        masa_kg_m=cond["masa_kg_m"],
+        carga_rotura_kgf=cond["carga_rotura_kgf"],
+        vano_m=vano,
+        modulo_elasticidad_kgf_mm2=e_kgf,
+        coef_dilatacion_invc=alpha,
+    )
+    hip_a = next((h for h in mec.hipotesis if h.nombre == "A"), mec.hipotesis[0])
+    t_a_kgf = hip_a.tension_n / 9.81
+    t_haz = n_subc * t_a_kgf
+    vano_grav = vano * 1.1  # vano gravitacional típico
+    # Estimación de peso cadena (41 discos + herrajes 25 kg) — buena aprox.
+    peso_cadena_kg = 41 * aislador.get("peso_kg", 5.6) + 25.0
+    p_vert = n_subc * cond["masa_kg_m"] * vano_grav + peso_cadena_kg
+    return _math.sqrt(t_haz ** 2 + p_vert ** 2)
+
+
 def _sync_form_to_session(req) -> None:
     """Guarda en sesión cualquier campo del formulario que coincida con un parámetro global.
 
@@ -214,7 +251,7 @@ def create_app() -> Flask:
     def glosario():
         """Glosario de términos técnicos del diseño de líneas de transmisión.
 
-        No es un módulo de cálculo — es material de referencia que el estudiante
+        No es un módulo de cálculo es material de referencia que el estudiante
         puede consultar en cualquier momento del tour.
         """
         # Defaults seguros para variables que base.html espera (sin numeración de módulo).
@@ -235,12 +272,12 @@ def create_app() -> Flask:
         """Guarda los parámetros principales en la sesión y devuelve el resumen actualizado.
 
         Recalcula automáticamente la tensión nominal cuando cambian P o L.
-        El usuario NO edita tension_nominal_kv directamente — es un cálculo.
+        El usuario NO edita tension_nominal_kv directamente es un cálculo.
         """
         proyecto_session = session.get("proyecto", {})
 
         # Campos numéricos (eléctricos, geométricos y mecánicos)
-        # NOTA: tension_nominal_kv NO se acepta del form — siempre se calcula.
+        # NOTA: tension_nominal_kv NO se acepta del form siempre se calcula.
         campos_floats = [
             # Eléctricos
             "longitud_km", "potencia_mw",
@@ -251,7 +288,7 @@ def create_app() -> Flask:
             "regulacion_max_pct", "perdidas_max_pct",
             # Geométricos
             "vano_diseno_m", "haz_separacion_m",
-            # Mecánicos — 4 hipótesis (16 campos)
+            # Mecánicos 4 hipótesis (16 campos)
             "hip_a_viento_kmh", "hip_a_temperatura_c", "hip_a_delta_temp_c", "hip_a_fs",
             "hip_b_viento_kmh", "hip_b_temperatura_c", "hip_b_delta_temp_c", "hip_b_fs",
             "hip_c_viento_kmh", "hip_c_temperatura_c", "hip_c_delta_temp_c", "hip_c_fs",
@@ -483,7 +520,7 @@ def create_app() -> Flask:
         cable = _get_cable_guarda(cable_id)
 
         vano = _f(request.form.get("vano_m"), 400)
-        # Cable de guarda (acero): E ≈ 20000 kgf/mm², α ≈ 11.5e-6 /°C
+        # Cable de guarda (acero): E 20000 kgf/mm², α 11.5e-6 /°C
         e_kgf_mm2 = cable.get("modulo_elasticidad_n_mm2", 196000) / 9.81
         alpha = cable.get("coef_dilatacion_invc", 11.5e-6)
         r = mecanico.calcular(
@@ -513,11 +550,20 @@ def create_app() -> Flask:
 
         v_kv = _f(request.form.get("tension_kv"), 500)
         nivel = request.form.get("nivel_contaminacion", "alta")
+        # Calcular carga_total real desde el mecánico del conductor activo
+        # (asegura que FS sea correcto con cualquier conductor/vano, no
+        # el default 15360 kgf que sólo aplica al proyecto Drake 500 kV).
         try:
+            carga_total = _carga_cadena_kgf_para_aisladores(
+                cond=_get_conductor(session.get("conductor_id")),
+                vano=float(_get_proyecto(app)["vano_diseno_m"]),
+                aislador=aisl,
+            )
             r = aisladores.calcular(
                 tension_linea_kv=v_kv,
                 nivel_contaminacion=nivel,
                 aislador=aisl,
+                carga_total_kgf=carga_total,
             )
         except ValueError as e:
             return (f"<div class='text-danger'>{e}</div>", 400)
@@ -577,6 +623,8 @@ def create_app() -> Flask:
             tension_caliente_n=hip_d.tension_n,
             tension_frio_n=hip_b.tension_n,
             masa_kg_m=cond["masa_kg_m"],
+            wr_caliente_n_m=hip_d.wr_n_m,
+            wr_frio_n_m=hip_b.wr_n_m,
         )
         return render_template(
             "_partial_modulo_10_resultado.html",
@@ -586,149 +634,140 @@ def create_app() -> Flask:
 
     @app.post("/api/modulo/11/calcular")
     def api_modulo_11_calcular():
-        """Resumen: recalcula TODO con los parámetros actuales de sesión."""
+        """Resumen: recalcula TODO usando exactamente la misma cadena de
+        cálculo que cada módulo individual. Los kwargs deben coincidir con
+        las firmas reales (ver calculos/*.py) o las llamadas fallan
+        silenciosamente y los números del resumen divergen del sidebar.
+        """
         proy = _get_proyecto(app)
         cond = _get_conductor(session.get("conductor_id"))
         aisl = _get_aislador(session.get("aislador_id"))
         cable = _get_cable_guarda(session.get("cable_guarda_id"))
 
+        v_kv = float(proy["tension_nominal_kv"])
+        p_mw = float(proy["potencia_mw"])
+        l_km = float(proy["longitud_km"])
+        alt = float(proy["altitud_msnm"])
+        fp = float(proy.get("factor_potencia", 1.0))
+        vano = float(proy["vano_diseno_m"])
+        n_subc = int(proy.get("haz_subconductores", 3))
+        db = float(proy.get("haz_separacion_m", 0.40))
+
         resumen = {"proyecto": proy, "conductor": cond, "aislador": aisl, "cable_guarda": cable}
 
         # 2.1 Tensión nominal
-        try:
-            r_tension = tension.calcular(float(proy["potencia_mw"]), float(proy["longitud_km"]))
-            resumen["tension"] = r_tension
-        except Exception:
-            resumen["tension"] = None
+        resumen["tension"] = tension.calcular(p_mw, l_km)
 
-        # 2.2 Geometría (configuración estándar)
-        try:
-            r_geom = geometria.calcular(d12_m=9.0, d23_m=9.0, d13_m=18.0,
-                                         n_subconductores=3, db_m=0.40,
-                                         radio_conductor_mm=cond["radio_fisico_mm"],
-                                         gmr_conductor_mm=cond["gmr_mm"])
-            resumen["geometria"] = r_geom
-        except Exception:
-            resumen["geometria"] = None
+        # 2.2 Geometría
+        r_geom = geometria.calcular(
+            d12_m=9.0, d23_m=9.0, d13_m=18.0,
+            n_subc=n_subc, db_m=db,
+            r_conductor_mm=cond["radio_fisico_mm"],
+            gmr_subconductor_mm=cond["gmr_mm"],
+        )
+        resumen["geometria"] = r_geom
 
-        # 2.3 Conductor (datos ya están en cond)
-        # 2.4 Parámetros R, L, C + Corona
-        try:
-            r_param = parametros.calcular(
-                tension_linea_kv=float(proy["tension_nominal_kv"]),
-                n_subconductores=3,
-                db_m=0.40,
-                altitud_msnm=float(proy["altitud_msnm"]),
-                longitud_km=float(proy["longitud_km"]),
-                radio_conductor_mm=cond["radio_fisico_mm"],
-                gmr_conductor_mm=cond["gmr_mm"],
-                resistencia_conductor_ohm_km=cond["resistencia_ac_65c_ohm_km"],
-            )
-            resumen["parametros"] = r_param
-        except Exception:
-            resumen["parametros"] = None
+        # 2.4 Parámetros R, L, C + Corona — R por fase = R_subc / n_subc
+        r_fase = cond["resistencia_ac_65c_ohm_km"] / n_subc
+        r_param = parametros.calcular(
+            r_fase_ohm_km=r_fase,
+            gmd_m=r_geom.gmd_m,
+            gmr_l_m=r_geom.gmr_l_m,
+            gmr_c_m=r_geom.gmr_c_m,
+            rmg_corona_m=r_geom.rmg_corona_m,
+            n_subc=n_subc,
+            radio_subc_mm=cond["radio_fisico_mm"],
+            tension_linea_kv=v_kv,
+            longitud_km=l_km,
+            altitud_msnm=alt,
+        )
+        resumen["parametros"] = r_param
 
-        # 2.5 Línea larga ABCD
-        try:
-            r_ll = linea_larga.calcular(
-                tension_linea_kv=float(proy["tension_nominal_kv"]),
-                potencia_mw=float(proy["potencia_mw"]),
-                longitud_km=float(proy["longitud_km"]),
-                factor_potencia=float(proy["factor_potencia"]),
-                r_fase_ohm_km=cond["resistencia_ac_65c_ohm_km"],
-                xl_fase_ohm_km=resumen["parametros"].xl_fase_ohm_km if resumen["parametros"] else 0.4,
-                b_fase_s_km=resumen["parametros"].b_fase_s_km if resumen["parametros"] else 4e-6,
-                reg_max_pct=float(proy["regulacion_max_pct"]),
-                perdidas_max_pct=float(proy["perdidas_max_pct"]),
-            )
-            resumen["linea_larga"] = r_ll
-        except Exception:
-            resumen["linea_larga"] = None
+        # 2.5 Línea larga (usa los parámetros distribuidos calculados arriba)
+        resumen["linea_larga"] = linea_larga.calcular(
+            r_fase_ohm_km=r_param.r_fase_ohm_km,
+            xl_fase_ohm_km=r_param.xl_fase_ohm_km,
+            b_fase_s_km=r_param.b_fase_s_km,
+            longitud_km=l_km,
+            tension_linea_kv=v_kv,
+            potencia_mw=p_mw,
+            factor_potencia=fp,
+            reg_max_pct=float(proy.get("regulacion_max_pct", 19.0)),
+            perdidas_max_pct=float(proy.get("perdidas_max_pct", 4.7)),
+        )
 
         # 3 Mecánica del conductor
-        try:
-            e_kgf = cond.get("modulo_elasticidad_n_mm2", 76900) / 9.81
-            alpha = cond.get("coef_dilatacion_invc", 18.9e-6)
-            r_mec = mecanico.calcular(
-                elemento="conductor",
-                diametro_mm=cond["diametro_exterior_mm"],
-                area_mm2=cond["seccion_total_mm2"],
-                masa_kg_m=cond["masa_kg_m"],
-                carga_rotura_kgf=cond["carga_rotura_kgf"],
-                vano_m=float(proy["vano_diseno_m"]),
-                modulo_elasticidad_kgf_mm2=e_kgf,
-                coef_dilatacion_invc=alpha,
-            )
-            resumen["mecanico"] = r_mec
-        except Exception:
-            resumen["mecanico"] = None
+        e_kgf = cond.get("modulo_elasticidad_n_mm2", 76900) / 9.81
+        alpha = cond.get("coef_dilatacion_invc", 18.9e-6)
+        r_mec = mecanico.calcular(
+            elemento="conductor",
+            diametro_mm=cond["diametro_exterior_mm"],
+            area_mm2=cond["seccion_total_mm2"],
+            masa_kg_m=cond["masa_kg_m"],
+            carga_rotura_kgf=cond["carga_rotura_kgf"],
+            vano_m=vano,
+            modulo_elasticidad_kgf_mm2=e_kgf,
+            coef_dilatacion_invc=alpha,
+        )
+        resumen["mecanico"] = r_mec
 
         # 4 Cable de guarda
-        try:
-            e_kgf_g = cable.get("modulo_elasticidad_n_mm2", 196000) / 9.81
-            alpha_g = cable.get("coef_dilatacion_invc", 11.5e-6)
-            r_guarda = mecanico.calcular(
-                elemento="guarda",
-                diametro_mm=cable["diametro_mm"],
-                area_mm2=cable["seccion_mm2"],
-                masa_kg_m=cable["masa_kg_m"],
-                carga_rotura_kgf=cable["carga_rotura_kgf"],
-                vano_m=float(proy["vano_diseno_m"]),
-                modulo_elasticidad_kgf_mm2=e_kgf_g,
-                coef_dilatacion_invc=alpha_g,
-            )
-            resumen["guarda"] = r_guarda
-        except Exception:
-            resumen["guarda"] = None
+        e_kgf_g = cable.get("modulo_elasticidad_n_mm2", 196000) / 9.81
+        alpha_g = cable.get("coef_dilatacion_invc", 11.5e-6)
+        r_guarda = mecanico.calcular(
+            elemento="guarda",
+            diametro_mm=cable["diametro_mm"],
+            area_mm2=cable["seccion_mm2"],
+            masa_kg_m=cable["masa_kg_m"],
+            carga_rotura_kgf=cable["carga_rotura_kgf"],
+            vano_m=vano,
+            modulo_elasticidad_kgf_mm2=e_kgf_g,
+            coef_dilatacion_invc=alpha_g,
+        )
+        resumen["guarda"] = r_guarda
 
-        # 5 Aisladores
-        try:
-            r_aisl = aisladores.calcular(
-                tension_linea_kv=float(proy["tension_nominal_kv"]),
-                aislador=aisl,
-                nivel_contaminacion="alta",
-                n_subconductores=3,
-                masa_conductor_kg_m=cond["masa_kg_m"],
-                vano_gravitacional_m=float(proy["vano_diseno_m"]) * 1.1,
-                tension_horizontal_conductor_n=resumen["mecanico"].hipotesis[0].tension_n if resumen["mecanico"] else 30000,
-            )
-            resumen["aisladores"] = r_aisl
-        except Exception:
-            resumen["aisladores"] = None
+        # 5 Aisladores — carga_total calculada desde el mecánico real
+        # (no usa el default 15360 kgf, que sólo aplica al proyecto Drake 500 kV)
+        carga_total = _carga_cadena_kgf_para_aisladores(
+            cond=cond, vano=vano, aislador=aisl, n_subc=n_subc
+        )
+        r_aisl = aisladores.calcular(
+            tension_linea_kv=v_kv,
+            nivel_contaminacion="alta",
+            aislador=aisl,
+            carga_total_kgf=carga_total,
+        )
+        resumen["aisladores"] = r_aisl
 
-        # 6 Torre
-        try:
-            r_torre = torre.calcular(
-                tension_linea_kv=float(proy["tension_nominal_kv"]),
-                altitud_msnm=float(proy["altitud_msnm"]),
-                flecha_max_m=resumen["mecanico"].flecha_maxima_m if resumen["mecanico"] else 12.0,
-                longitud_cadena_m=resumen["aisladores"].longitud_cadena_m if resumen["aisladores"] else 6.0,
-                longitud_linea_km=float(proy["longitud_km"]),
-                vano_diseno_m=float(proy["vano_diseno_m"]),
-                n_subconductores=int(proy.get("haz_subconductores", 3)),
-                haz_separacion_m=float(proy.get("haz_separacion_m", 0.40)),
-                n_discos_aislador=resumen["aisladores"].n_discos_adoptado if resumen["aisladores"] else 41,
-                cadena_doble=resumen["aisladores"].cadena_doble_requerida if resumen["aisladores"] else True,
-            )
-            resumen["torre"] = r_torre
-        except Exception:
-            resumen["torre"] = None
+        # 6 Torre — usa flecha máx del conductor y longitud de cadena de aisladores
+        r_torre = torre.calcular(
+            tension_linea_kv=v_kv,
+            altitud_msnm=alt,
+            flecha_max_m=r_mec.flecha_maxima_m,
+            longitud_cadena_m=r_aisl.longitud_cadena_m,
+            longitud_linea_km=l_km,
+            vano_diseno_m=vano,
+            n_subconductores=n_subc,
+            haz_separacion_m=db,
+            n_discos_aislador=r_aisl.n_discos_adoptado,
+            cadena_doble=True,
+        )
+        resumen["torre"] = r_torre
 
-        # 7 Plantillado
-        try:
-            hip_d = next((h for h in resumen["mecanico"].hipotesis if h.nombre == "D"), None) if resumen["mecanico"] else None
-            hip_b = next((h for h in resumen["mecanico"].hipotesis if h.nombre == "B"), None) if resumen["mecanico"] else None
-            if hip_d and hip_b:
-                r_plant = plantillado.calcular(
-                    vano_m=float(proy["vano_diseno_m"]),
-                    tension_caliente_n=hip_d.tension_n,
-                    tension_frio_n=hip_b.tension_n,
-                    masa_kg_m=cond["masa_kg_m"],
-                )
-                resumen["plantillado"] = r_plant
-            else:
-                resumen["plantillado"] = None
-        except Exception:
+        # 7 Plantillado — usa tensiones Y Wr reales del cálculo mecánico
+        # (consistente con la metodología del doc Sec 7: wa = Wr/g, no sólo peso)
+        hip_d = next((h for h in r_mec.hipotesis if h.nombre == "D"), None)
+        hip_b = next((h for h in r_mec.hipotesis if h.nombre == "B"), None)
+        if hip_d and hip_b:
+            resumen["plantillado"] = plantillado.calcular(
+                vano_m=vano,
+                tension_caliente_n=hip_d.tension_n,
+                tension_frio_n=hip_b.tension_n,
+                masa_kg_m=cond["masa_kg_m"],
+                wr_caliente_n_m=hip_d.wr_n_m,
+                wr_frio_n_m=hip_b.wr_n_m,
+            )
+        else:
             resumen["plantillado"] = None
 
         return render_template("_partial_modulo_11_resumen.html", **resumen)

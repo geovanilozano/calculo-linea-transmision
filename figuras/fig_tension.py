@@ -105,7 +105,7 @@ def generar(resultado: ResultadoTension, dark_mode: bool = False) -> str:
     # Configuración del eje
     ax.set_ylabel("Tensión (kV)", fontweight="600")
     ax.set_title(
-        f"Comparación de criterios — P = {resultado.potencia_mw:.0f} MW, "
+        f"Comparación de criterios P = {resultado.potencia_mw:.0f} MW, "
         f"L = {resultado.longitud_km:.0f} km",
         pad=15,
     )

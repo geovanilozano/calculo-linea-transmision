@@ -150,7 +150,7 @@ def calcular(
         n_subc: Número de subconductores en el haz
         db_m: Separación entre subconductores adyacentes (m)
         r_conductor_mm: Radio físico del subconductor (mm)
-        gmr_subconductor_mm: GMR de tabla del subconductor (mm) — ya incluye 0.7788
+        gmr_subconductor_mm: GMR de tabla del subconductor (mm) ya incluye 0.7788
 
     Returns:
         ResultadoGeometria con todos los cálculos

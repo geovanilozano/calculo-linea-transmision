@@ -153,11 +153,11 @@ def generar(resultado: ResultadoGeometria, dark_mode: bool = False) -> str:
 
     # Título y configuración
     ax.set_title(
-        f"Configuración de fases — Haz de {resultado.n_subconductores} "
+        f"Configuración de fases Haz de {resultado.n_subconductores} "
         f"subconductor{'es' if resultado.n_subconductores > 1 else ''} "
         f"(separación {resultado.db_m:.2f} m)"
         if resultado.n_subconductores > 1
-        else f"Configuración de fases — Conductor simple",
+        else f"Configuración de fases Conductor simple",
         pad=15,
     )
     ax.set_xlabel("Posición horizontal (m)")

@@ -22,7 +22,7 @@
   <div>
     <label for="desnivel_m" class="block text-sm font-medium mb-1.5">
       Desnivel entre apoyos (m)
-      <span class="text-xs text-muted-foreground font-normal">— terreno quebrado</span>
+      <span class="text-xs text-muted-foreground font-normal">terreno quebrado</span>
     </label>
     <input id="desnivel_m" name="desnivel_m" type="number" step="1" min="0" max="200"
            value="0" class="input font-mono">
@@ -90,7 +90,7 @@
       <div class="border-l-2 border-primary/40 pl-3">
         <div class="text-[11px] font-mono font-bold text-primary mb-1">3.2.1 · Módulo de Elasticidad E</div>
         <div class="text-xs text-muted-foreground">
-          Característica del material conductor (kgf/mm²). Para ACSR ≈ 7.500 kgf/mm².
+          Característica del material conductor (kgf/mm²). Para ACSR 7.500 kgf/mm².
           {{ info_tooltip("El módulo de Young (E) mide la rigidez elástica del conductor: cuánto se alarga por unidad de fuerza aplicada. A mayor E, menor alargamiento bajo el mismo esfuerzo. ACSR: ~7500 kgf/mm². AAAC: ~6300 kgf/mm². Es un dato del fabricante.") }}
         </div>
       </div>
@@ -98,7 +98,7 @@
       <div class="border-l-2 border-primary/40 pl-3">
         <div class="text-[11px] font-mono font-bold text-primary mb-1">3.2.2 · Coeficiente de Dilatación α</div>
         <div class="text-xs text-muted-foreground">
-          Alargamiento del cable por cada °C de incremento (1/°C). Para ACSR ≈ 18,9 × 10⁻⁶ /°C.
+          Alargamiento del cable por cada °C de incremento (1/°C). Para ACSR 18,9 × 10⁻⁶ /°C.
           {{ info_tooltip("Coeficiente de dilatación lineal: el cable se alarga ΔL = α·L·Δθ cuando aumenta su temperatura. Cobre: 17e-6. Aluminio puro: 23e-6. ACSR: 18,9e-6 (compromiso aluminio+acero). Acero: 11,5e-6 (cables de guarda).") }}
         </div>
       </div>
@@ -225,12 +225,12 @@
     </h3>
     <div class="space-y-3 text-sm bg-muted/50 rounded-lg p-4">
       <div class="border-l-2 border-primary/40 pl-3">
-        <div class="text-[11px] font-mono font-bold text-primary mb-1">3.6.1 · Flecha máxima — terreno llano</div>
+        <div class="text-[11px] font-mono font-bold text-primary mb-1">3.6.1 · Flecha máxima terreno llano</div>
         $$f_{llano} = \frac{W_r \cdot a^2}{8 \cdot T}$$
         <p class="text-xs text-muted-foreground mt-1">Apoyos a la misma altura. Fórmula clásica de catenaria.</p>
       </div>
       <div class="border-l-2 border-primary/40 pl-3">
-        <div class="text-[11px] font-mono font-bold text-primary mb-1">3.6.2 · Flecha máxima — terreno quebrado</div>
+        <div class="text-[11px] font-mono font-bold text-primary mb-1">3.6.2 · Flecha máxima terreno quebrado</div>
         $$f_{incl} = \frac{f_{llano}}{\cos^2 \psi}, \quad \tan\psi = \frac{h}{a}$$
         <p class="text-xs text-muted-foreground mt-1">
           Apoyos a diferente altura (desnivel h). Para ψ ≤ 5,7° la corrección es menor al 2%.

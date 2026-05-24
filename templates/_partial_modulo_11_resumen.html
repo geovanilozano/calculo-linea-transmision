@@ -1,4 +1,4 @@
-{# Partial del módulo 11 — resumen consolidado de TODOS los cálculos #}
+{# Partial del módulo 11 resumen consolidado de TODOS los cálculos #}
 <div class="animate-fade-in space-y-5">
 
   {# ===== 1. PARÁMETROS DEL PROYECTO ===== #}
@@ -149,12 +149,12 @@
     {% if parametros.corona_cumple %}
       <div class="rounded-md p-2 text-xs flex items-center gap-2" style="background: color-mix(in oklch, var(--success) 10%, transparent);">
         <i data-lucide="check-circle-2" class="size-4" style="color: var(--success);"></i>
-        <span><strong style="color: var(--success);">Corona OK</strong> — Cs = {{ "%.2f"|format(parametros.coef_seguridad_corona) }} (Esup &lt; Ec)</span>
+        <span><strong style="color: var(--success);">Corona OK</strong> Cs = {{ "%.2f"|format(parametros.coef_seguridad_corona) }} (Esup &lt; Ec)</span>
       </div>
     {% else %}
       <div class="rounded-md p-2 text-xs flex items-center gap-2" style="background: color-mix(in oklch, var(--danger) 10%, transparent);">
         <i data-lucide="alert-triangle" class="size-4" style="color: var(--danger);"></i>
-        <span><strong style="color: var(--danger);">Corona NO cumple</strong> — Cs = {{ "%.2f"|format(parametros.coef_seguridad_corona) }}</span>
+        <span><strong style="color: var(--danger);">Corona NO cumple</strong> Cs = {{ "%.2f"|format(parametros.coef_seguridad_corona) }}</span>
       </div>
     {% endif %}
   </div>
@@ -212,7 +212,7 @@
       </div>
       <div class="bg-muted/50 rounded-md p-2">
         <div class="text-[10px] text-muted-foreground">Vano crítico</div>
-        <div class="font-mono font-bold text-foreground">{% if mecanico.vano_critico_ab_m > 0 %}{{ "%.0f"|format(mecanico.vano_critico_ab_m) }} m{% else %}—{% endif %}</div>
+        <div class="font-mono font-bold text-foreground">{% if mecanico.vano_critico_ab_m > 0 %}{{ "%.0f"|format(mecanico.vano_critico_ab_m) }} m{% else %}{% endif %}</div>
       </div>
       <div class="rounded-md p-2" style="background: color-mix(in oklch, var(--accent) 12%, transparent);">
         <div class="text-[10px]" style="color: var(--accent);">★ Flecha máx</div>
@@ -244,7 +244,7 @@
       </div>
       <div class="bg-muted/50 rounded-md p-2">
         <div class="text-[10px] text-muted-foreground">Vano crítico</div>
-        <div class="font-mono font-bold text-foreground">{% if guarda.vano_critico_ab_m > 0 %}{{ "%.0f"|format(guarda.vano_critico_ab_m) }} m{% else %}—{% endif %}</div>
+        <div class="font-mono font-bold text-foreground">{% if guarda.vano_critico_ab_m > 0 %}{{ "%.0f"|format(guarda.vano_critico_ab_m) }} m{% else %}{% endif %}</div>
       </div>
       <div class="rounded-md p-2" style="background: color-mix(in oklch, var(--accent) 12%, transparent);">
         <div class="text-[10px]" style="color: var(--accent);">★ Flecha máx</div>
@@ -284,9 +284,15 @@
         <div class="text-[10px] text-muted-foreground">Peso cadena</div>
         <div class="font-mono font-bold text-foreground">{{ "%.1f"|format(aisladores.peso_cadena_kg) }} <span class="text-[10px] text-muted-foreground">kg</span></div>
       </div>
-      <div class="rounded-md p-2" style="background: color-mix(in oklch, var(--{{ 'warning' if aisladores.cadena_doble_requerida else 'success' }}) 12%, transparent);">
-        <div class="text-[10px]" style="color: var(--{{ 'warning' if aisladores.cadena_doble_requerida else 'success' }});">FS cadena</div>
-        <div class="font-mono font-bold text-foreground">{{ "%.2f"|format(aisladores.fs_cadena_simple) }}</div>
+      {# Si cadena doble es requerida, mostramos el FS efectivo (doble) en éxito;
+         de lo contrario el FS simple en éxito. Nunca mostramos FS<2 en warning
+         porque eso confunde: el diseño real adopta la cadena que cumpla. #}
+      {% set fs_efectivo = aisladores.fs_cadena_doble if aisladores.cadena_doble_requerida else aisladores.fs_cadena_simple %}
+      <div class="rounded-md p-2" style="background: color-mix(in oklch, var(--success) 12%, transparent);">
+        <div class="text-[10px]" style="color: var(--success);">
+          FS cadena {{ 'doble' if aisladores.cadena_doble_requerida else 'simple' }}
+        </div>
+        <div class="font-mono font-bold text-foreground">{{ "%.2f"|format(fs_efectivo) }}</div>
       </div>
     </div>
   </div>
@@ -365,7 +371,7 @@
       <div class="flex-1">
         <h3 class="text-lg font-bold text-foreground mb-1">Diseño consolidado</h3>
         <p class="text-sm text-muted-foreground leading-relaxed">
-          Línea de transmisión <strong class="text-foreground">{{ tension.tension_recomendada_kv if tension else '—' }} kV</strong> ·
+          Línea de transmisión <strong class="text-foreground">{{ tension.tension_recomendada_kv if tension else '' }} kV</strong> ·
           <strong class="text-foreground">{{ "%.0f"|format(proyecto.longitud_km) }} km</strong> ·
           <strong class="text-foreground">{{ "%.0f"|format(proyecto.potencia_mw) }} MW</strong>
           {% if torre %} con <strong class="text-foreground">{{ torre.n_estructuras }} estructuras</strong> de

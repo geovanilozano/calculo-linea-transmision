@@ -90,11 +90,11 @@
     <h3 class="text-base font-semibold mb-2">Las 3 fórmulas</h3>
     <div class="space-y-3 text-sm bg-muted/50 rounded-lg p-4">
       <div>
-        <span class="font-semibold text-primary">Hefner</span>{{ info_tooltip("Fórmula empírica europea que da una cota SUPERIOR del voltaje. Tiende a sobreestimar para potencias grandes. Útil para tener un techo conservador. Origen: Hefner-Alteneck, ingeniero alemán (s. XIX). Para 300 MW y 307 km → VL ≈ 96 kV (queda corto → usar siguiente escalón).") }} (cota superior, sobreestima para grandes P):
+        <span class="font-semibold text-primary">Hefner</span>{{ info_tooltip("Fórmula empírica europea que da una cota SUPERIOR del voltaje. Tiende a sobreestimar para potencias grandes. Útil para tener un techo conservador. Origen: Hefner-Alteneck, ingeniero alemán (s. XIX). Para 300 MW y 307 km → VL 96 kV (queda corto → usar siguiente escalón).") }} (cota superior, sobreestima para grandes P):
         $$V_L = 0{,}1 \cdot \sqrt{P \cdot L}$$
       </div>
       <div>
-        <span class="font-semibold text-primary">Still</span>{{ info_tooltip("Fórmula más balanceada y precisa, ampliamente usada en EE.UU. y Latinoamérica. Combina factores de longitud (en millas, de ahí el /1,609) y potencia. Suele dar la mejor estimación. Para 300 MW y 307 km → VL ≈ 87 kV (insuficiente → 500 kV).") }} (más balanceado):
+        <span class="font-semibold text-primary">Still</span>{{ info_tooltip("Fórmula más balanceada y precisa, ampliamente usada en EE.UU. y Latinoamérica. Combina factores de longitud (en millas, de ahí el /1,609) y potencia. Suele dar la mejor estimación. Para 300 MW y 307 km → VL 87 kV (insuficiente → 500 kV).") }} (más balanceado):
         $$V_L = 5{,}5 \cdot \sqrt{\frac{L}{1{,}609} + \frac{P}{100}}$$
       </div>
       <div>
@@ -122,12 +122,12 @@
     </p>
     <ul class="text-xs text-muted-foreground space-y-2 list-disc list-inside">
       <li>
-        <a href="https://www.minenergia.gov.co/es/micrositios/retie/" target="_blank" rel="noopener noreferrer"
+        <a href="https://www.minenergia.gov.co/es/misional/energia-electrica-2/reglamentos-tecnicos/reglamento-t%C3%A9cnico-de-instalaciones-el%C3%A9ctricas-retie/" target="_blank" rel="noopener noreferrer"
            class="text-primary hover:underline font-semibold inline-flex items-center gap-1">
           RETIE Capítulo 12
           <i data-lucide="external-link" class="size-3"></i>
         </a>
-        — Tensiones nominales normalizadas en Colombia: <span class="font-mono">115 / 230 / 500 kV</span>
+        Tensiones nominales normalizadas en Colombia: <span class="font-mono">115 / 230 / 500 kV</span>
       </li>
       <li>
         <a href="https://gestornormativo.creg.gov.co/gestor/entorno/docs/resolucion_creg_0097_2008.htm" target="_blank" rel="noopener noreferrer"
@@ -135,7 +135,7 @@
           CREG Resolución 097/2008
           <i data-lucide="external-link" class="size-3"></i>
         </a>
-        — Regulación del Servicio de Transmisión Nacional (STN)
+        Regulación del Servicio de Transmisión Nacional (STN)
       </li>
       <li>
         <a href="https://tienda.icontec.org/gp-tensiones-y-frecuencias-nominales-para-los-sistemas-de-suministro-de-energia-electrica-en-redes-de-servicio-publico-ntc1340-1985.html" target="_blank" rel="noopener noreferrer"
@@ -143,15 +143,15 @@
           NTC 1340
           <i data-lucide="external-link" class="size-3"></i>
         </a>
-        — Tensiones nominales normalizadas para sistemas de potencia
+        Tensiones nominales normalizadas para sistemas de potencia
       </li>
       <li>
-        <a href="https://www1.upme.gov.co/Energia_electrica/Paginas/Plan-de-Expansion-de-Referencia-Generacion-Transmision.aspx" target="_blank" rel="noopener noreferrer"
+        <a href="https://www.upme.gov.co/simec/planeacion-energetica/plan-de-expansion-de-la-generacion/" target="_blank" rel="noopener noreferrer"
            class="text-primary hover:underline font-semibold inline-flex items-center gap-1">
-          UPME — Plan de Expansión
+          UPME Plan de Expansión
           <i data-lucide="external-link" class="size-3"></i>
         </a>
-        — Define qué proyectos necesitan cada escalón
+        Define qué proyectos necesitan cada escalón
       </li>
     </ul>
     <p class="text-xs text-muted-foreground mt-3 pt-3 border-t border-border">

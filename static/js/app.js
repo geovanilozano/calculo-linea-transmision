@@ -56,7 +56,7 @@ document.addEventListener('alpine:init', () => {
   });
 });
 
-// Modal de imagen GARANTIZADO — crea overlay DOM puro, no depende de Alpine.
+// Modal de imagen GARANTIZADO crea overlay DOM puro, no depende de Alpine.
 // Funciona incluso con HTMX swaps porque es JS vanilla.
 window.openImageModal = function(src, alt) {
   console.log('[openImageModal] abriendo:', src ? src.substring(0,50) : 'sin src');
@@ -81,7 +81,7 @@ window.openImageModal = function(src, alt) {
     'animation:fadeInModal 0.2s ease-out'
   ].join(';');
 
-  // Imagen ampliada — fondo BLANCO para que las gráficas matplotlib con fondo
+  // Imagen ampliada fondo BLANCO para que las gráficas matplotlib con fondo
   // transparente se vean correctamente sobre el overlay oscuro.
   const img = document.createElement('img');
   img.src = src;
@@ -172,12 +172,12 @@ document.addEventListener('keydown', function(e) {
 // GLOSARIO TÉCNICO: definiciones de términos que aparecen en tooltips/textos.
 // El sistema busca estos términos en cualquier nodo de texto y los hace clickeables.
 window.TECHNICAL_GLOSSARY = {
-  "Hefner": "<strong>Otto Hefner-Alteneck</strong> (1845-1904), ingeniero eléctrico alemán de Siemens & Halske. Su fórmula empírica para tensión de línea data del siglo XIX y se popularizó en Europa central. Tiende a sobreestimar para potencias grandes — es una cota SUPERIOR conservadora.",
+  "Hefner": "<strong>Otto Hefner-Alteneck</strong> (1845-1904), ingeniero eléctrico alemán de Siemens & Halske. Su fórmula empírica para tensión de línea data del siglo XIX y se popularizó en Europa central. Tiende a sobreestimar para potencias grandes es una cota SUPERIOR conservadora.",
   "Still": "<strong>Alfred Still</strong>, ingeniero eléctrico estadounidense, autor del clásico 'Overhead Electric Power Transmission' (1913). Su fórmula combina factores de longitud (en millas, por eso aparece /1.609) y potencia. Ampliamente usada en Latinoamérica por su precisión balanceada.",
   "Peek": "<strong>Frank W. Peek Jr.</strong> (1881-1933), ingeniero de General Electric. Desarrolló la fórmula empírica clásica para el gradiente crítico de ionización del aire (Ec), que predice cuándo aparece el efecto Corona. Publicada en 'Dielectric Phenomena in High Voltage Engineering' (1915).",
   "ABCD": "<strong>Parámetros ABCD</strong> son los 4 coeficientes complejos del modelo de cuadripolo que representa una línea de transmisión larga. A=D=cosh(γL), B=Zc·sinh(γL), C=sinh(γL)/Zc. Permiten calcular la tensión y corriente en un extremo conociendo el otro: VG=A·VR+B·IR.",
   "Ferranti": "<strong>Efecto Ferranti</strong>: en líneas largas con poca carga (o vacío), la tensión del extremo receptor (VR) puede ser MAYOR que la del generador (VG) debido a la capacitancia distribuida. Descubierto por Sebastian Ferranti en 1890. Se controla con reactores en derivación.",
-  "Corona": "<strong>Efecto Corona</strong>: ionización del aire alrededor del conductor cuando el campo eléctrico supera el gradiente crítico (Ec ≈ 30 kV/cm a nivel del mar). Produce pérdidas, ruido audible, interferencia radio y ozono. Se evita usando haz de subconductores o conductor de mayor diámetro.",
+  "Corona": "<strong>Efecto Corona</strong>: ionización del aire alrededor del conductor cuando el campo eléctrico supera el gradiente crítico (Ec 30 kV/cm a nivel del mar). Produce pérdidas, ruido audible, interferencia radio y ozono. Se evita usando haz de subconductores o conductor de mayor diámetro.",
   "ACSR": "<strong>Aluminum Conductor Steel Reinforced</strong>. Cable con hilos de aluminio dispuestos en capas alrededor de un alma de acero galvanizado. Es el conductor más común en transmisión. Ejemplos: Drake, Bluejay, Bittern. Combina buena conductividad (aluminio) con resistencia mecánica (acero).",
   "AAAC": "<strong>All Aluminum Alloy Conductor</strong>. Cable hecho 100% con aleación de aluminio. Más liviano que ACSR, mejor resistencia a la corrosión. Ideal para zonas costeras o ambientes salinos donde el acero se oxida.",
   "ACAR": "<strong>Aluminum Conductor Alloy Reinforced</strong>. Alma de aleación de aluminio + capas de aluminio puro. Excelente compromiso entre resistencia mecánica y conductividad. Muy usado en zonas con contaminación industrial.",
@@ -191,8 +191,8 @@ window.TECHNICAL_GLOSSARY = {
   "UPME": "<strong>Unidad de Planeación Minero-Energética</strong> (Colombia). Entidad adscrita al Ministerio de Minas. Define el Plan de Expansión de Referencia: qué líneas/subestaciones deben construirse y a qué nivel de tensión.",
   "CREG": "<strong>Comisión de Regulación de Energía y Gas</strong> (Colombia). Regula tarifas, calidad del servicio y reglas del mercado eléctrico. La Resolución CREG 097/2008 regula la transmisión nacional (STN).",
   "GMD": "<strong>Geometric Mean Distance</strong> (Distancia Media Geométrica). Es la media geométrica de las distancias entre las 3 fases: GMD = ∛(D12·D23·D13). Se usa porque las fases NO están a igual distancia, y necesitamos una distancia EQUIVALENTE para inductancia y capacitancia.",
-  "GMR": "<strong>Geometric Mean Radius</strong> (Radio Medio Geométrico). Radio equivalente del conductor (o del haz de subconductores) considerando su distribución espacial. Para un conductor sólido: GMR = r·e^(-1/4). Para cables trenzados típicamente GMR ≈ 0.78·r.",
-  "SIL": "<strong>Surge Impedance Loading</strong> (potencia natural). Potencia para la cual la línea opera con factor de potencia unitario y NO hay efecto Ferranti. SIL = V²/Zc. Para 500 kV con Zc≈400 Ω: SIL ≈ 625 MW. Punto óptimo de operación.",
+  "GMR": "<strong>Geometric Mean Radius</strong> (Radio Medio Geométrico). Radio equivalente del conductor (o del haz de subconductores) considerando su distribución espacial. Para un conductor sólido: GMR = r·e^(-1/4). Para cables trenzados típicamente GMR 0.78·r.",
+  "SIL": "<strong>Surge Impedance Loading</strong> (potencia natural). Potencia para la cual la línea opera con factor de potencia unitario y NO hay efecto Ferranti. SIL = V²/Zc. Para 500 kV con Zc400 Ω: SIL 625 MW. Punto óptimo de operación.",
   "HVDC": "<strong>High Voltage Direct Current</strong>. Transmisión en corriente continua de alta tensión. Más eficiente que HVAC para distancias > 600 km o cuando se interconectan sistemas asíncronos. Ejemplos: línea Itaipú-Brasil ±600 kV.",
   "EDS": "<strong>Every Day Stress</strong> (esfuerzo diario). Condición climática promedio de operación normal (sin viento, temperatura habitual). RETIE exige FS=5 en EDS para evitar fatiga del conductor por vibración eólica.",
   "Ec": "<strong>Gradiente crítico de Peek</strong> (kV/cm): campo eléctrico mínimo que ioniza el aire en la superficie del conductor. A nivel del mar: ~30 kV/cm. Si el gradiente real Esup supera Ec → aparece efecto Corona permanente.",

@@ -1,4 +1,4 @@
-# Fase 1 — Scaffold + Repo + Deploy Inicial · Implementation Plan
+# Fase 1 Scaffold + Repo + Deploy Inicial · Implementation Plan
 
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
@@ -700,13 +700,13 @@ if __name__ == "__main__":
     app.run(host="127.0.0.1", port=5000, debug=True)
 ```
 
-- [ ] **Step 4: Correr tests de nuevo — ahora deberían fallar porque faltan templates**
+- [ ] **Step 4: Correr tests de nuevo ahora deberían fallar porque faltan templates**
 
 ```bash
 .venv/Scripts/python -m pytest tests/test_routes.py -v
 ```
 
-Expected: la mayoría FAIL con `jinja2.exceptions.TemplateNotFound: modulo_0_inicio.html`. Eso es esperado — los templates se crean en Task 7.
+Expected: la mayoría FAIL con `jinja2.exceptions.TemplateNotFound: modulo_0_inicio.html`. Eso es esperado los templates se crean en Task 7.
 
 - [ ] **Step 5: Commit parcial (NO incluye Co-Authored-By)**
 
@@ -1211,7 +1211,7 @@ Cada uno debe contener exactamente:
 {% endblock %}
 ```
 
-- [ ] **Step 6: Correr tests — ahora todos deberían pasar**
+- [ ] **Step 6: Correr tests ahora todos deberían pasar**
 
 ```bash
 .venv/Scripts/python -m pytest tests/test_routes.py -v
@@ -1287,7 +1287,7 @@ services:
 .venv/Scripts/python -m gunicorn app:app --bind 127.0.0.1:8000 --workers 1
 ```
 
-Abrir http://127.0.0.1:8000 — debe funcionar igual que con `python app.py`.
+Abrir http://127.0.0.1:8000 debe funcionar igual que con `python app.py`.
 
 Detener con `Ctrl+C`.
 
@@ -1509,10 +1509,6 @@ Pull requests bienvenidos. Para cambios mayores, abre primero un issue para disc
 ## 📜 Licencia
 
 [MIT](LICENSE) © 2026 Geovani Lozano
-
-## 🙏 Créditos
-
-Basado en el trabajo de tesis "Diseño de una Línea de Transmisión Aérea de Alta Tensión a 500 kV" (Unidades Tecnológicas de Santander, 2026), corredor Santander de Quilichao – Manizales.
 ```
 
 - [ ] **Step 4: Crear docs/manual_capacitador.md (draft inicial)**
@@ -1792,8 +1788,8 @@ Plan completo y guardado en `docs/superpowers/plans/2026-05-23-fase-1-scaffold-r
 
 **Dos opciones de ejecución:**
 
-**1. Subagent-Driven (recomendado para este plan)** — dispatcheo un subagent por task, reviso entre tasks, iteración rápida. Permite paralelizar tasks independientes (ej. Task 1 + Task 9 simultáneos).
+**1. Subagent-Driven (recomendado para este plan)** dispatcheo un subagent por task, reviso entre tasks, iteración rápida. Permite paralelizar tasks independientes (ej. Task 1 + Task 9 simultáneos).
 
-**2. Inline Execution** — ejecuto las tasks en esta sesión usando executing-plans, con checkpoints para tu revisión.
+**2. Inline Execution** ejecuto las tasks en esta sesión usando executing-plans, con checkpoints para tu revisión.
 
 ¿Cuál prefieres?

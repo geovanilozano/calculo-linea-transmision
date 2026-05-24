@@ -81,7 +81,7 @@ def calcular(
         xl_fase_ohm_km: Reactancia inductiva por fase (Ω/km)
         b_fase_s_km: Susceptancia capacitiva por fase (S/km)
         longitud_km: Longitud total de la línea (km)
-        tension_linea_kv: Tensión nominal línea-línea (kV) — en el extremo receptor
+        tension_linea_kv: Tensión nominal línea-línea (kV) en el extremo receptor
         potencia_mw: Potencia activa entregada en el extremo receptor (MW)
         factor_potencia: cos(φ) en el extremo receptor (1.0 = carga resistiva)
         reg_max_pct: Regulación máxima admisible (%)

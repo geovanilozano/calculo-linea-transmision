@@ -60,7 +60,7 @@
   {# Layout principal: sidebar fijo + content con header sticky #}
   <div class="flex h-full">
 
-    {# ===== SIDEBAR — siempre visible, alterna entre expandido (w-72) y colapsado (w-16) ===== #}
+    {# ===== SIDEBAR siempre visible, alterna entre expandido (w-72) y colapsado (w-16) ===== #}
     <aside :style="sidebarExpanded ? 'width:18rem' : 'width:4rem'"
            style="transition: width 0.2s ease;"
            class="shrink-0 border-r border-border bg-card flex flex-col overflow-hidden">
@@ -89,7 +89,7 @@
         </button>
       </div>
 
-      {# Botón expandir — solo visible cuando está colapsado #}
+      {# Botón expandir solo visible cuando está colapsado #}
       <div x-show="!sidebarExpanded" x-transition.opacity class="px-2 py-2 border-b border-border">
         <button @click="toggleSidebar()"
                 class="w-full h-10 rounded-lg grid place-items-center hover:bg-muted transition-colors"
@@ -99,7 +99,7 @@
         </button>
       </div>
 
-      {# Navegación de módulos — agrupados por sección igual que el documento #}
+      {# Navegación de módulos agrupados por sección igual que el documento #}
       <nav class="flex-1 py-2 overflow-y-auto overflow-x-hidden px-3">
         {# Agrupar módulos por sección sin perder el orden original #}
         {% set ns = namespace(seccion_actual='') %}
@@ -166,7 +166,7 @@
         </a>
       </nav>
 
-      {# Progress bar — solo visible cuando expandido Y estamos en un módulo del tour #}
+      {# Progress bar solo visible cuando expandido Y estamos en un módulo del tour #}
       {% if modulo_info %}
       <div x-show="sidebarExpanded" x-transition.opacity class="px-4 py-3 border-t border-border">
         <div class="flex items-center justify-between text-[10px] text-muted-foreground mb-1.5">
@@ -180,7 +180,7 @@
       </div>
       {% endif %}
 
-      {# Progress bar minimalista cuando está colapsado — solo en módulos del tour #}
+      {# Progress bar minimalista cuando está colapsado solo en módulos del tour #}
       {% if modulo_info %}
       <div x-show="!sidebarExpanded" x-transition.opacity class="px-2 py-3 border-t border-border">
         <div class="h-1.5 bg-muted rounded-full overflow-hidden" :title="'{{ modulo_id + 1 }}/{{ MODULOS|length }}'">

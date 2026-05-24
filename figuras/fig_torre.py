@@ -132,7 +132,7 @@ def generar(r: ResultadoTorre, dark_mode: bool = False) -> str:
         ax.add_patch(Circle((x_g, y_guarda), 0.22, color=color_punto_g,
                              ec=color_cable_g, linewidth=1.5, zorder=4))
 
-    # Etiquetas cables de guarda — JUSTO ENCIMA de la torre (no muy lejos)
+    # Etiquetas cables de guarda JUSTO ENCIMA de la torre (no muy lejos)
     y_label_g = y_top + 0.8
     ax.text(x_gi, y_label_g, "Cable de guarda\nIZQUIERDO",
             ha="center", va="bottom", fontsize=8, color=color_cable_g, fontweight="700",
@@ -247,7 +247,7 @@ def generar(r: ResultadoTorre, dark_mode: bool = False) -> str:
             bbox=dict(boxstyle="round,pad=0.2", facecolor="white",
                       edgecolor=color_cota, alpha=0.95))
 
-    # === Cotas verticales — TODAS dentro del rango del diagrama ===
+    # === Cotas verticales TODAS dentro del rango del diagrama ===
     # Cotas parciales (lado derecho cerca de la torre)
     x_col1 = max(sep + 3, ancho_base / 2 + 2)
 

@@ -58,7 +58,7 @@ def generar(r: ResultadoAisladores, dark_mode: bool = False) -> str:
     ax1.set_ylim(y_lim_bottom, n + 2.5)
     ax1.set_aspect("equal")
     ax1.axis("off")
-    ax1.set_title(f"Cadena de {n} discos\n(altura ≈ {r.longitud_cadena_m:.2f} m, peso ≈ {r.peso_cadena_kg:.0f} kg)",
+    ax1.set_title(f"Cadena de {n} discos\n(altura {r.longitud_cadena_m:.2f} m, peso {r.peso_cadena_kg:.0f} kg)",
                   fontsize=11, pad=8)
 
     # ===== Gráfico 2: comparación criterios =====

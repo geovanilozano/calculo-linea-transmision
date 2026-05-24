@@ -5,12 +5,20 @@
 3. Pie de apoyo (caliente - H_apoyo)
 4. Conductor en frío (Hip B, mín flecha)
 
-Las 4 curvas siguen una parábola: y(x) = x²/(2C) donde C = T/wa.
+Las 4 curvas siguen una parábola: y(x) = x²/(2C) donde C = T/w.
+
+Convención: w = carga resultante por unidad de longitud (Wr, incluye viento
+si la hipótesis lo tiene). Coincide con la metodología del documento
+académico (Sec 7) y con `mecanico.flecha_parabolica_m`. Si el caller no
+pasa wr explícito, se usa el peso propio (m·g) como aproximación.
 """
 from __future__ import annotations
 
 import math
 from dataclasses import dataclass, asdict
+
+
+G = 9.81  # m/s² — mismo valor que mecanico.G para consistencia
 
 
 @dataclass(frozen=True)
@@ -89,6 +97,8 @@ def calcular(
     masa_kg_m: float,
     distancia_min_terreno_m: float = 9.0,
     altura_apoyo_conductor_m: float = 29.33,
+    wr_caliente_n_m: float | None = None,
+    wr_frio_n_m: float | None = None,
 ) -> ResultadoPlantillado:
     """Genera las 4 curvas patrón del plantillado.
 
@@ -99,19 +109,27 @@ def calcular(
         masa_kg_m: Masa lineal del conductor (kg/m)
         distancia_min_terreno_m: Distancia mínima al terreno RETIE (m)
         altura_apoyo_conductor_m: Altura del punto de apoyo desde el terreno (m)
+        wr_caliente_n_m: Carga resultante (peso + viento) en hipótesis caliente.
+            Si es None, se usa sólo el peso (m·g) — método aproximado.
+            Para coincidir con el documento académico y con el resultado del
+            módulo mecánico, pasar `mecanico.hipotesis['D'].wr_n_m`.
+        wr_frio_n_m: Idem para hipótesis fría (típicamente Hip B con viento
+            moderado, no es sólo peso).
 
     Returns:
         ResultadoPlantillado con las 4 curvas
     """
-    wa_n_m = masa_kg_m * 9.8  # peso por metro (N/m)
+    peso_propio_n_m = masa_kg_m * G  # N/m
+    w_caliente = wr_caliente_n_m if wr_caliente_n_m is not None else peso_propio_n_m
+    w_frio = wr_frio_n_m if wr_frio_n_m is not None else peso_propio_n_m
 
-    # Parámetros de catenaria
-    c_caliente = tension_caliente_n / wa_n_m
-    c_frio = tension_frio_n / wa_n_m
+    # Parámetros de catenaria (c = T/w)
+    c_caliente = tension_caliente_n / w_caliente
+    c_frio = tension_frio_n / w_frio
 
-    # Flechas centrales
-    f_max = (wa_n_m * vano_m ** 2) / (8.0 * tension_caliente_n)
-    f_min = (wa_n_m * vano_m ** 2) / (8.0 * tension_frio_n)
+    # Flechas centrales (f = w·a²/(8·T))
+    f_max = (w_caliente * vano_m ** 2) / (8.0 * tension_caliente_n)
+    f_min = (w_frio * vano_m ** 2) / (8.0 * tension_frio_n)
 
     # 1. Conductor en caliente (Hip D, máx flecha)
     curva_caliente = generar_curva_parabolica(

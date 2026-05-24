@@ -36,7 +36,7 @@ def generar(
     # Para 26/7: 1 acero central + 6 acero capa 1 (radio = 2r_a) + 12 Al capa 2 + 14 Al capa 3 (exterior)
     # Si todos los hilos tienen igual diámetro d_hilo:
     # R_total = 4 * d_hilo (aproximadamente para 26/7)
-    # → d_hilo ≈ R_total / 4
+    # → d_hilo R_total / 4
     d_hilo = R_total / 3.65  # aproximación visual estándar
     r_hilo = d_hilo / 2.0
 

@@ -126,7 +126,3 @@ Pull requests bienvenidos. Para cambios mayores, abre primero un issue para disc
 ## 📜 Licencia
 
 [MIT](LICENSE) © 2026 Geovani Lozano
-
-## 🙏 Créditos
-
-Basado en el trabajo de tesis "Diseño de una Línea de Transmisión Aérea de Alta Tensión a 500 kV" (Unidades Tecnológicas de Santander, 2026), corredor Santander de Quilichao – Manizales.

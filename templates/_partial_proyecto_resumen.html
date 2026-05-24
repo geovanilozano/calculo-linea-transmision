@@ -53,7 +53,7 @@
     if (existing) existing.remove();
     var toast = document.createElement('div');
     toast.id = '__save_toast';
-    toast.textContent = '✓ Parámetros guardados — afectan todos los módulos';
+    toast.textContent = '✓ Parámetros guardados afectan todos los módulos';
     toast.style.cssText = 'position:fixed; bottom:24px; right:24px; z-index:99999; padding:12px 18px; border-radius:8px; background:var(--success); color:white; font-size:13px; font-weight:600; box-shadow:0 10px 30px rgba(0,0,0,0.3); animation: fadeInToast 0.25s ease-out;';
     document.body.appendChild(toast);
     if (!document.getElementById('__toast_kf')) {
