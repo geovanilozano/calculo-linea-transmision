@@ -43,89 +43,205 @@
 {% endblock %}
 
 {% block panel_explicacion %}
+{% from "_macros.html" import info_tooltip %}
 <div class="space-y-5">
   <div>
     <h3 class="text-base font-semibold mb-2">¿Qué se calcula aquí?</h3>
     <p class="text-sm text-muted-foreground leading-relaxed">
-      El comportamiento mecánico del conductor en <strong class="text-foreground">4 hipótesis climáticas</strong>:
-      cargas de peso y viento, esfuerzo en el conductor, vano crítico, hipótesis gobernante,
-      y flecha en cada caso.
+      Cubre las secciones <strong class="text-foreground">3.1 a 3.6</strong> del trabajo:
+      datos mecánicos del conductor, cálculo de constantes, ecuación de cambio de estado,
+      comprobación de hipótesis, flechas máximas y análisis de terreno (llano/quebrado).
     </p>
   </div>
 
-  {% from "_macros.html" import info_tooltip %}
-
+  {# ===== 3.1 DATOS MECÁNICOS DEL CONDUCTOR ===== #}
   <div>
-    <h3 class="text-base font-semibold mb-2">Cargas verticales y de viento</h3>
-    <div class="space-y-3 text-sm bg-muted/50 rounded-lg p-4">
-      <div>
-        <span class="font-semibold text-primary">Peso propio Wc</span>{{ info_tooltip("Peso del conductor por unidad de longitud (kgf/m o N/m). Es vertical hacia abajo. Para ACSR Drake: m≈1,628 kg/m → Wc≈1,597 kgf/m. Es la carga permanente que el cable soporta siempre.") }}:
-        $$W_c = m \cdot g$$
-      </div>
-      <div>
-        <span class="font-semibold text-primary">Carga de viento Wv (presión dinámica)</span>{{ info_tooltip("Fuerza horizontal del viento sobre el conductor por unidad de longitud (kgf/m). Depende del cuadrado de la velocidad y del diámetro expuesto. La constante 0,613 corresponde a aire estándar (Pa·s²/m²). SF=1 es el coeficiente de forma para conductores cilíndricos.") }}:
-        $$W_v = \frac{0{,}613 \cdot (V/3{,}6)^2 \cdot SF \cdot \Phi}{1000}$$
-        <p class="text-xs text-muted-foreground mt-1">V en km/h, Φ en mm, SF=1 (expuesto)</p>
-      </div>
-      <div>
-        <span class="font-semibold text-primary">Carga resultante Wr</span>{{ info_tooltip("Suma vectorial del peso propio (vertical) y la carga de viento (horizontal). Es la carga total que dimensiona el conductor en cada hipótesis climática. La flecha real sigue la dirección de Wr, no la vertical pura.") }}:
-        $$W_r = \sqrt{W_c^2 + W_v^2}$$
-      </div>
-    </div>
-  </div>
-
-  <div>
-    <h3 class="text-base font-semibold mb-2">Esfuerzos y vano crítico</h3>
-    <div class="space-y-3 text-sm bg-muted/50 rounded-lg p-4">
-      <div>
-        <span class="font-semibold text-primary">Esfuerzo máximo admisible σmáx</span>{{ info_tooltip("Tensión mecánica máxima permitida en el conductor (kgf/mm² o MPa). Se obtiene dividiendo la carga de rotura del conductor entre el factor de seguridad (FS). RETIE exige FS≥2,5 en hipótesis normales y FS≥5 en condición diaria (EDS) para evitar fatiga por vibración eólica.") }}:
-        $$\sigma_{máx} = \frac{\sigma_{rot}}{FS}$$
-      </div>
-      <div>
-        <span class="font-semibold text-primary">Vano crítico ac</span>{{ info_tooltip("Vano límite (m) en el que dos hipótesis climáticas producen el mismo esfuerzo. Si el vano real es mayor que ac, gobierna la hipótesis con más carga (A: viento máx). Si es menor, gobierna la de menor temperatura (B: mín temp). Permite saber qué condición debe usarse como base.") }}:
-        $$a_c = \sqrt{\frac{24 \cdot A^2 \cdot \sigma_{máx}^2 \cdot \alpha \cdot (\theta_A - \theta_B)}{W_{rA}^2 - W_{rB}^2}}$$
-        <p class="text-xs text-muted-foreground mt-1">Si vano de diseño > $a_c$: la hipótesis A gobierna entre A y B</p>
-      </div>
-    </div>
-  </div>
-
-  <div>
-    <h3 class="text-base font-semibold mb-2">Ecuación de cambio de estado</h3>
+    <h3 class="text-base font-semibold mb-2 flex items-center gap-2">
+      <span class="text-xs font-mono font-bold px-1.5 py-0.5 rounded" style="background: var(--primary); color: var(--primary-foreground);">3.1</span>
+      Datos mecánicos del conductor seleccionado
+    </h3>
     <div class="space-y-2 text-sm bg-muted/50 rounded-lg p-4">
-      <div>
-        <span class="font-semibold text-primary">Cambio de estado</span>{{ info_tooltip("Ecuación fundamental del cálculo mecánico de líneas. Relaciona el tensado σ y la carga Wr de DOS estados climáticos distintos. Conociendo el estado 1 (gobernante, donde σ=σmáx) se puede calcular σ en cualquier otro estado 2. Considera dilatación térmica α y módulo de Young E. Es una ecuación cúbica en σ₂ que se resuelve por iteración (Newton-Raphson).") }}:
-        $$\sigma_2 - \frac{(W_{r2} \cdot a)^2 \cdot E}{24 \cdot A^2 \cdot \sigma_2^2} = \sigma_1 - \frac{(W_{r1} \cdot a)^2 \cdot E}{24 \cdot A^2 \cdot \sigma_1^2} - \alpha \cdot E \cdot (\theta_2 - \theta_1)$$
-      </div>
-      <p class="text-xs text-muted-foreground mt-2">
-        Es una <strong class="text-foreground">cúbica en σ₂</strong> que se resuelve iterativamente.
-        Permite pasar del estado 1 (conocido) al estado 2 (incógnita) considerando cambios
-        de carga y temperatura.
+      <p class="text-muted-foreground leading-relaxed">
+        Se toman del catálogo del <a href="{{ url_for('modulo', modulo_id=3) }}" class="text-primary hover:underline">conductor activo</a>:
+        diámetro Φ (mm), sección A (mm²), masa m (kg/m), carga de rotura σ_rot (kgf),
+        módulo de elasticidad E (kgf/mm²) y coeficiente de dilatación α (1/°C).
       </p>
     </div>
   </div>
 
+  {# ===== 3.2 CÁLCULO DE LAS CONSTANTES ===== #}
   <div>
-    <h3 class="text-base font-semibold mb-2">Flecha (parábola)</h3>
+    <h3 class="text-base font-semibold mb-2 flex items-center gap-2">
+      <span class="text-xs font-mono font-bold px-1.5 py-0.5 rounded" style="background: var(--primary); color: var(--primary-foreground);">3.2</span>
+      Cálculo de las constantes
+    </h3>
     <div class="space-y-3 text-sm bg-muted/50 rounded-lg p-4">
-      <div>
-        <span class="font-semibold text-primary">Flecha f (terreno llano)</span>{{ info_tooltip("Distancia vertical (m) entre la cuerda recta apoyo-apoyo y el punto más bajo del conductor. Es la curva natural por gravedad (catenaria, aproximada como parábola). Determina la altura mínima de los apoyos para garantizar distancia segura al suelo (RETIE). f máxima ocurre en Hip D (máx temperatura).") }}:
-        $$f = \frac{W_r \cdot a^2}{8 \cdot T}$$
+
+      <div class="border-l-2 border-primary/40 pl-3">
+        <div class="text-[11px] font-mono font-bold text-primary mb-1">3.2.1 · Módulo de Elasticidad E</div>
+        <div class="text-xs text-muted-foreground">
+          Característica del material conductor (kgf/mm²). Para ACSR ≈ 7.500 kgf/mm².
+          {{ info_tooltip("El módulo de Young (E) mide la rigidez elástica del conductor: cuánto se alarga por unidad de fuerza aplicada. A mayor E, menor alargamiento bajo el mismo esfuerzo. ACSR: ~7500 kgf/mm². AAAC: ~6300 kgf/mm². Es un dato del fabricante.") }}
+        </div>
       </div>
-      <div>
-        <span class="font-semibold text-primary">Flecha inclinada (terreno quebrado)</span>{{ info_tooltip("Corrección de la flecha cuando los apoyos están a alturas diferentes (desnivel h). El conductor sigue siendo una catenaria, pero el punto más bajo se desplaza hacia el apoyo más bajo. Para desniveles pequeños (ψ≤5,7°) la corrección es despreciable.") }}:
-        $$f_{incl} = \frac{f_{llano}}{\cos^2 \psi}, \quad \tan\psi = \frac{h}{a}$$
-        <p class="text-xs text-muted-foreground mt-1">Para $\psi \le 5{,}7°$ la corrección es menor al 2%</p>
+
+      <div class="border-l-2 border-primary/40 pl-3">
+        <div class="text-[11px] font-mono font-bold text-primary mb-1">3.2.2 · Coeficiente de Dilatación α</div>
+        <div class="text-xs text-muted-foreground">
+          Alargamiento del cable por cada °C de incremento (1/°C). Para ACSR ≈ 18,9 × 10⁻⁶ /°C.
+          {{ info_tooltip("Coeficiente de dilatación lineal: el cable se alarga ΔL = α·L·Δθ cuando aumenta su temperatura. Cobre: 17e-6. Aluminio puro: 23e-6. ACSR: 18,9e-6 (compromiso aluminio+acero). Acero: 11,5e-6 (cables de guarda).") }}
+        </div>
+      </div>
+
+      <div class="border-l-2 border-primary/40 pl-3">
+        <div class="text-[11px] font-mono font-bold text-primary mb-1">3.2.3 · Carga de Rotura σ_rot</div>
+        <div class="text-xs text-muted-foreground">
+          Fuerza máxima de tracción que resiste el cable antes de romper (kgf). ACSR Drake: ~14.000 kgf.
+          {{ info_tooltip("Tracción de rotura nominal del conductor (RTS = Rated Tensile Strength). El esfuerzo de diseño NUNCA debe exceder σ_rot/FS, donde FS es el factor de seguridad (2,5 normal, 5 EDS).") }}
+        </div>
+      </div>
+
+      <div class="border-l-2 border-primary/40 pl-3">
+        <div class="text-[11px] font-mono font-bold text-primary mb-1">3.2.4 · Peso Aparente Wc</div>
+        $$W_c = m \cdot g$$
+        <p class="text-xs text-muted-foreground mt-1">
+          Peso por unidad de longitud (kgf/m).
+          {{ info_tooltip("Peso aparente del conductor con g=9,81 m/s². Para ACSR Drake (m=1,628 kg/m): Wc=1,597 kgf/m. Es la carga vertical permanente.") }}
+        </p>
+      </div>
+
+      <div class="border-l-2 border-primary/40 pl-3">
+        <div class="text-[11px] font-mono font-bold text-primary mb-1">3.2.5 · Presión del Viento Wv</div>
+        $$W_v = \frac{0{,}613 \cdot (V/3{,}6)^2 \cdot SF \cdot \Phi}{1000}$$
+        <p class="text-xs text-muted-foreground mt-1">V en km/h, Φ en mm, SF=1
+          {{ info_tooltip("Fuerza horizontal del viento sobre el conductor (kgf/m). Depende del cuadrado de la velocidad. Constante 0,613 = ½ρ (densidad del aire estándar). SF (Shape Factor) = 1 para conductores cilíndricos lisos, 1,2 para superficies rugosas.") }}
+        </p>
+      </div>
+
+      <div class="border-l-2 border-primary/40 pl-3">
+        <div class="text-[11px] font-mono font-bold text-primary mb-1">3.2.6 · Factor de Corrección Wr (carga resultante)</div>
+        $$W_r = \sqrt{W_c^2 + W_v^2}$$
+        <p class="text-xs text-muted-foreground mt-1">
+          Suma vectorial del peso propio y la fuerza de viento.
+          {{ info_tooltip("Carga total que actúa sobre el conductor en cada hipótesis. Es la suma VECTORIAL (no escalar) porque Wc es vertical y Wv es horizontal. Se usa para todos los cálculos posteriores (esfuerzos, flechas, ecuación de cambio de estado).") }}
+        </p>
+      </div>
+
+      <div class="border-l-2 border-primary/40 pl-3">
+        <div class="text-[11px] font-mono font-bold text-primary mb-1">3.2.7 · Tensión Máxima σ_máx</div>
+        $$\sigma_{máx} = \frac{\sigma_{rot}}{FS}$$
+        <p class="text-xs text-muted-foreground mt-1">FS = 2,5 (normal) ó 5 (EDS diaria).
+          {{ info_tooltip("Tensión admisible: nunca debe superarse en ninguna hipótesis. RETIE exige FS≥2,5 para hipótesis A,B,D; y FS≥5 para hipótesis C (Every Day Stress, condición diaria) para evitar fatiga por vibración eólica.") }}
+        </p>
+      </div>
+
+      <div class="border-l-2 border-primary/40 pl-3">
+        <div class="text-[11px] font-mono font-bold text-primary mb-1">3.2.8 · Vano Crítico ac</div>
+        $$a_c = \sqrt{\frac{24 \cdot A^2 \cdot \sigma_{máx}^2 \cdot \alpha \cdot (\theta_A - \theta_B)}{W_{rA}^2 - W_{rB}^2}}$$
+        <p class="text-xs text-muted-foreground mt-1">Si vano real &gt; ac → gobierna Hip A; si &lt; ac → gobierna Hip B.
+          {{ info_tooltip("Vano límite donde dos hipótesis (A y B) producen el mismo esfuerzo. Permite saber cuál de las dos condiciones extremas DOMINA el dimensionamiento mecánico.") }}
+        </p>
       </div>
     </div>
   </div>
 
+  {# ===== 3.3 ECUACIÓN DE CAMBIO DE ESTADO ===== #}
   <div>
-    <h3 class="text-base font-semibold mb-2">Hipótesis gobernante</h3>
-    <p class="text-sm text-muted-foreground leading-relaxed">
-      Normalmente la <strong class="text-foreground">Hip C (FS=5)</strong> gobierna por su factor de
-      seguridad más exigente. La <strong class="text-foreground">flecha máxima</strong> aparece en
-      Hip D (máx temperatura → más dilatación → mayor flecha).
-    </p>
+    <h3 class="text-base font-semibold mb-2 flex items-center gap-2">
+      <span class="text-xs font-mono font-bold px-1.5 py-0.5 rounded" style="background: var(--primary); color: var(--primary-foreground);">3.3</span>
+      Ecuación de cambio de estado
+    </h3>
+    <div class="space-y-2 text-sm bg-muted/50 rounded-lg p-4">
+      $$\sigma_2 - \frac{(W_{r2} \cdot a)^2 \cdot E}{24 \cdot A^2 \cdot \sigma_2^2} = \sigma_1 - \frac{(W_{r1} \cdot a)^2 \cdot E}{24 \cdot A^2 \cdot \sigma_1^2} - \alpha \cdot E \cdot (\theta_2 - \theta_1)$$
+      <p class="text-xs text-muted-foreground">
+        Ecuación CÚBICA en σ₂ que se resuelve iterativamente (Newton-Raphson).
+        Conocido el estado 1 gobernante (donde σ₁=σ_máx), permite calcular el tensado σ en
+        cualquier otra hipótesis de carga/temperatura.
+        {{ info_tooltip("Es el TEOREMA FUNDAMENTAL de la mecánica de líneas: liga el esfuerzo, la carga y la temperatura entre dos estados climáticos. Sin esta ecuación no se pueden calcular las flechas en hipótesis distintas a la gobernante.") }}
+      </p>
+    </div>
+  </div>
+
+  {# ===== 3.4 COMPROBACIÓN DE HIPÓTESIS ===== #}
+  <div>
+    <h3 class="text-base font-semibold mb-2 flex items-center gap-2">
+      <span class="text-xs font-mono font-bold px-1.5 py-0.5 rounded" style="background: var(--primary); color: var(--primary-foreground);">3.4</span>
+      Comprobación de hipótesis
+    </h3>
+    <div class="space-y-3 text-sm bg-muted/50 rounded-lg p-4">
+      <div class="border-l-2 border-primary/40 pl-3">
+        <div class="text-[11px] font-mono font-bold text-primary mb-1">3.4.1 · Condición extrema Hipótesis A (viento máx)</div>
+        <p class="text-xs text-muted-foreground">
+          Verifica que σ_A ≤ σ_máx con viento de 140 km/h a 15°C y FS=2,5.
+          Si vano de diseño &gt; ac → A gobierna y se toma σ₁=σ_máx en A.
+        </p>
+      </div>
+      <div class="border-l-2 border-primary/40 pl-3">
+        <div class="text-[11px] font-mono font-bold text-primary mb-1">3.4.2 · Condición extrema Hipótesis B (mín temp)</div>
+        <p class="text-xs text-muted-foreground">
+          Verifica que σ_B ≤ σ_máx con viento 35 km/h a 5°C y FS=2,5.
+          Si vano de diseño &lt; ac → B gobierna y se toma σ₁=σ_máx en B.
+        </p>
+      </div>
+    </div>
+  </div>
+
+  {# ===== 3.5 CÁLCULO DE LAS FLECHAS MÁXIMAS ===== #}
+  <div>
+    <h3 class="text-base font-semibold mb-2 flex items-center gap-2">
+      <span class="text-xs font-mono font-bold px-1.5 py-0.5 rounded" style="background: var(--primary); color: var(--primary-foreground);">3.5</span>
+      Cálculo de las flechas máximas (4 hipótesis)
+    </h3>
+    <div class="space-y-2 text-sm bg-muted/50 rounded-lg p-4">
+      $$f_i = \frac{W_{ri} \cdot a^2}{8 \cdot T_i}  \quad \text{para } i = A, B, C, D$$
+      <p class="text-xs text-muted-foreground mt-1">
+        Una flecha por cada hipótesis, usando la ecuación de cambio de estado para obtener T_i.
+        {{ info_tooltip("La flecha f es la distancia vertical entre la cuerda recta apoyo-apoyo y el punto más bajo del conductor. Es la curva natural por gravedad (catenaria, aproximada como parábola).") }}
+      </p>
+      <div class="grid grid-cols-2 gap-2 mt-3 text-[11px]">
+        <div class="flex items-center gap-1.5"><span class="size-2 rounded-full" style="background: #dc2626"></span><span class="text-muted-foreground">3.5.1 · Hip A (viento máx)</span></div>
+        <div class="flex items-center gap-1.5"><span class="size-2 rounded-full" style="background: #2563eb"></span><span class="text-muted-foreground">3.5.2 · Hip B (mín temp)</span></div>
+        <div class="flex items-center gap-1.5"><span class="size-2 rounded-full" style="background: #059669"></span><span class="text-muted-foreground">3.5.3 · Hip C (EDS diaria)</span></div>
+        <div class="flex items-center gap-1.5"><span class="size-2 rounded-full" style="background: #f59e0b"></span><span class="text-muted-foreground">3.5.4 · Hip D (máx temp) ← f_máx</span></div>
+      </div>
+    </div>
+  </div>
+
+  {# ===== 3.6 TERRENO LLANO Y QUEBRADO ===== #}
+  <div>
+    <h3 class="text-base font-semibold mb-2 flex items-center gap-2">
+      <span class="text-xs font-mono font-bold px-1.5 py-0.5 rounded" style="background: var(--primary); color: var(--primary-foreground);">3.6</span>
+      Análisis de terreno llano y quebrado
+    </h3>
+    <div class="space-y-3 text-sm bg-muted/50 rounded-lg p-4">
+      <div class="border-l-2 border-primary/40 pl-3">
+        <div class="text-[11px] font-mono font-bold text-primary mb-1">3.6.1 · Flecha máxima — terreno llano</div>
+        $$f_{llano} = \frac{W_r \cdot a^2}{8 \cdot T}$$
+        <p class="text-xs text-muted-foreground mt-1">Apoyos a la misma altura. Fórmula clásica de catenaria.</p>
+      </div>
+      <div class="border-l-2 border-primary/40 pl-3">
+        <div class="text-[11px] font-mono font-bold text-primary mb-1">3.6.2 · Flecha máxima — terreno quebrado</div>
+        $$f_{incl} = \frac{f_{llano}}{\cos^2 \psi}, \quad \tan\psi = \frac{h}{a}$$
+        <p class="text-xs text-muted-foreground mt-1">
+          Apoyos a diferente altura (desnivel h). Para ψ ≤ 5,7° la corrección es menor al 2%.
+          {{ info_tooltip("En terreno quebrado los apoyos están a diferentes altitudes. La catenaria se inclina y el punto más bajo se desplaza hacia el apoyo más bajo. La fórmula corrige por el ángulo ψ de la cuerda apoyo-apoyo.") }}
+        </p>
+      </div>
+    </div>
+  </div>
+
+  {# Resumen final #}
+  <div class="rounded-lg p-4 border" style="border-color: var(--accent); background: color-mix(in oklch, var(--accent) 6%, transparent);">
+    <h3 class="text-sm font-semibold mb-2 flex items-center gap-2">
+      <i data-lucide="lightbulb" class="size-4" style="color: var(--accent);"></i>
+      Hipótesis gobernante (resultado típico)
+    </h3>
+    <ul class="text-xs text-muted-foreground space-y-1">
+      <li>• <strong class="text-foreground">Hip C (FS=5)</strong> generalmente domina el dimensionamiento mecánico</li>
+      <li>• <strong class="text-foreground">Hip D (máx temp)</strong> produce la FLECHA MÁXIMA → define altura de torres</li>
+      <li>• <strong class="text-foreground">Hip B (frío)</strong> produce la flecha mínima → define altura de cable de guarda</li>
+      <li>• <strong class="text-foreground">Hip A (viento)</strong> produce el máximo esfuerzo horizontal sobre la torre</li>
+    </ul>
   </div>
 </div>
 {% endblock %}
