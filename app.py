@@ -517,10 +517,20 @@ def create_app() -> Flask:
         cadena = _f(request.form.get("longitud_cadena_m"), 6.39)
         long_km = _f(request.form.get("longitud_km"), 307)
         vano = _f(request.form.get("vano_m"), 400)
+        # Datos adicionales para diagrama detallado (tomados de sesión/proyecto)
+        proy = _get_proyecto(app)
+        n_subc = int(proy.get("haz_subconductores", 3))
+        db = float(proy.get("haz_separacion_m", 0.40))
+        n_discos = int(proy.get("n_discos_aislador", 41))
         r = torre.calcular(
             tension_linea_kv=v_kv, altitud_msnm=alt,
             flecha_max_m=flecha, longitud_cadena_m=cadena,
             longitud_linea_km=long_km, vano_diseno_m=vano,
+            n_subconductores=n_subc,
+            haz_separacion_m=db,
+            n_discos_aislador=n_discos,
+            cadena_doble=True,  # estándar en 500 kV
+            n_cables_guarda=2,
         )
         return render_template(
             "_partial_modulo_9_resultado.html",
@@ -672,10 +682,14 @@ def create_app() -> Flask:
             r_torre = torre.calcular(
                 tension_linea_kv=float(proy["tension_nominal_kv"]),
                 altitud_msnm=float(proy["altitud_msnm"]),
-                flecha_max_conductor_m=resumen["mecanico"].flecha_maxima_m if resumen["mecanico"] else 12.0,
+                flecha_max_m=resumen["mecanico"].flecha_maxima_m if resumen["mecanico"] else 12.0,
                 longitud_cadena_m=resumen["aisladores"].longitud_cadena_m if resumen["aisladores"] else 6.0,
                 longitud_linea_km=float(proy["longitud_km"]),
                 vano_diseno_m=float(proy["vano_diseno_m"]),
+                n_subconductores=int(proy.get("haz_subconductores", 3)),
+                haz_separacion_m=float(proy.get("haz_separacion_m", 0.40)),
+                n_discos_aislador=resumen["aisladores"].n_discos_adoptado if resumen["aisladores"] else 41,
+                cadena_doble=resumen["aisladores"].cadena_doble_requerida if resumen["aisladores"] else True,
             )
             resumen["torre"] = r_torre
         except Exception:

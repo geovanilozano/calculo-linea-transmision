@@ -36,12 +36,23 @@ class ResultadoTorre:
     # Cable de guarda
     angulo_proteccion_grados: float
     cumple_blindaje: bool
+    cable_guarda_dh_m: float  # separación horizontal guarda-fase exterior
+    cable_guarda_dv_m: float  # separación vertical guarda-fase
+    altura_remate_m: float
+    d_entre_cables_guarda_m: float  # distancia entre los 2 cables de guarda
+    n_cables_guarda: int
 
     # Altura
     flecha_max_m: float
     longitud_cadena_m: float
     h_apoyo_conductor_m: float
     h_total_torre_m: float
+
+    # Configuración del haz y aisladores (para mostrar en diagrama)
+    n_subconductores: int
+    haz_separacion_m: float
+    n_discos_aislador: int
+    cadena_doble: bool
 
     # Número de estructuras
     longitud_linea_km: float
@@ -90,6 +101,11 @@ def calcular(
     cable_guarda_dh_m: float = 3.0,
     cable_guarda_dv_m: float = 5.5,
     altura_remate_m: float = 5.0,
+    n_subconductores: int = 3,
+    haz_separacion_m: float = 0.40,
+    n_discos_aislador: int = 41,
+    cadena_doble: bool = True,
+    n_cables_guarda: int = 2,
 ) -> ResultadoTorre:
     """Calcula distancias RETIE, altura de torre y número de estructuras.
 
@@ -130,6 +146,13 @@ def calcular(
     # Número de estructuras
     n_estructuras = math.ceil((longitud_linea_km * 1000.0) / vano_diseno_m)
 
+    # Distancia entre los 2 cables de guarda = 2 * (x_fase_externa - dh)
+    # Fase externa está a separacion_fases_adoptada (9 m) del centro.
+    # Los cables de guarda están a separacion_fases - dh respecto al centro
+    d_entre_cables_guarda = 2.0 * (separacion_fases_adoptada_m - cable_guarda_dh_m)
+    if d_entre_cables_guarda < 0:
+        d_entre_cables_guarda = abs(d_entre_cables_guarda)
+
     return ResultadoTorre(
         tension_linea_kv=tension_linea_kv,
         altitud_msnm=altitud_msnm,
@@ -139,10 +162,19 @@ def calcular(
         separacion_fases_adoptada_m=separacion_fases_adoptada_m,
         angulo_proteccion_grados=angulo_proteccion,
         cumple_blindaje=cumple_blindaje,
+        cable_guarda_dh_m=cable_guarda_dh_m,
+        cable_guarda_dv_m=cable_guarda_dv_m,
+        altura_remate_m=altura_remate_m,
+        d_entre_cables_guarda_m=d_entre_cables_guarda,
+        n_cables_guarda=n_cables_guarda,
         flecha_max_m=flecha_max_m,
         longitud_cadena_m=longitud_cadena_m,
         h_apoyo_conductor_m=h_apoyo,
         h_total_torre_m=h_total,
+        n_subconductores=n_subconductores,
+        haz_separacion_m=haz_separacion_m,
+        n_discos_aislador=n_discos_aislador,
+        cadena_doble=cadena_doble,
         longitud_linea_km=longitud_linea_km,
         vano_diseno_m=vano_diseno_m,
         n_estructuras=n_estructuras,
