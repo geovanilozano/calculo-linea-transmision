@@ -255,6 +255,11 @@ def create_app() -> Flask:
             r = tension.calcular(p, l_)
         except ValueError as e:
             return (f"<div class='text-danger'>{e}</div>", 400)
+        # CRÍTICO: guardar la tensión recomendada en sesión para que
+        # los módulos 2-10 usen el valor calculado, no el anterior.
+        proy = session.get("proyecto", {})
+        proy["tension_nominal_kv"] = float(r.tension_recomendada_kv)
+        session["proyecto"] = proy
         return render_template(
             "_partial_modulo_1_resultado.html",
             r=r, figura_b64=fig_tension.generar(r),
