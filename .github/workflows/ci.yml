@@ -22,8 +22,21 @@ jobs:
           python-version: '3.11'
           cache: pip
 
-      - name: Instalar dependencias
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: npm
+
+      - name: Instalar dependencias de Python
         run: pip install -r requirements.txt
+
+      - name: Instalar dependencias de Node
+        run: npm install
+
+      # styles.css es un artefacto de build (esta en .gitignore), pero
+      # test_static_css_disponible lo exige. Se compila igual que en Render.
+      - name: Compilar CSS
+        run: npm run build:css
 
       - name: Pruebas
         run: pytest -q
