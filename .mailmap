@@ -1,0 +1,5 @@
+# Identidad canonica del autor. Unifica los alias historicos en
+# git log/shortlog sin reescribir la historia.
+# Formato: Nombre correcto <correo correcto> Nombre commit <correo commit>
+
+Geovani Lozano <108663164+geovanilozano@users.noreply.github.com> Geovani Lozano <geovanilozano@users.noreply.github.com>

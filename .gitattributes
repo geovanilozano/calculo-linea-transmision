@@ -1,0 +1,33 @@
+# Normaliza los finales de linea: LF en el repositorio, nativo al trabajar.
+# Evita diffs falsos entre Windows, Linux y macOS.
+* text=auto eol=lf
+
+# Scripts que dependen del final de linea
+*.sh        text eol=lf
+*.bat       text eol=crlf
+*.cmd       text eol=crlf
+*.ps1       text eol=crlf
+
+# Binarios: nunca convertir ni intentar diff textual
+*.png       binary
+*.jpg       binary
+*.jpeg      binary
+*.gif       binary
+*.webp      binary
+*.ico       binary
+*.pdf       binary
+*.docx      binary
+*.xlsx      binary
+*.zip       binary
+*.woff      binary
+*.woff2     binary
+*.ttf       binary
+
+# Lockfiles: colapsados en los diffs y fuera de las estadisticas de lenguaje
+package-lock.json   linguist-generated=true -diff
+pnpm-lock.yaml      linguist-generated=true -diff
+yarn.lock           linguist-generated=true -diff
+poetry.lock         linguist-generated=true -diff
+
+# Fuera de las estadisticas de lenguaje de GitHub
+docs/**             linguist-documentation=true
