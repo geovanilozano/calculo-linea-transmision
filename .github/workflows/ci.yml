@@ -1,0 +1,29 @@
+name: CI
+
+# Puerta de calidad: corre en cada push a main y en cada Pull Request.
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+# Si se empuja varias veces seguidas, cancela las corridas viejas del mismo ref.
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  calidad:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: pip
+
+      - name: Instalar dependencias
+        run: pip install -r requirements.txt
+
+      - name: Pruebas
+        run: pytest -q
